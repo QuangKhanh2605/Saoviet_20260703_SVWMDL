@@ -392,7 +392,7 @@ static uint8_t _Cb_Event_Sim_Send_Mess (uint8_t event)
                 //kiem tra neu gui xong roi va k co lenh at nao nua -> chuyen mode
                 if ( ( ( (sMemVar.Status_u8 == ERROR) && (sMemVar.cQueueSwapp_u8 > MEM_MAX_QWRITE_ITEM) )
                             || ( (sMemVar.Status_u8 == true) && ( sRecGPS.iSend_u16 == sRecGPS.iSave_u16 ) ) ) // 
-                    && (sSimVar.Pending_u8 == false) && (AppSS_iPending() == false) ) {
+                    && (sSimVar.Pending_u8 == false) && (AppWm_iPending() == false) ) {
                         
                     AppComm_Finish_FTP();
                     return 1;
@@ -1217,7 +1217,7 @@ uint8_t AppSim_GPS_Check_Moving (void)
             {
                 continue;
             }
-            //Tinh khoang câ¤¨ voi gia tri trung binh
+            //Tinh khoang cách voi gia tri trung binh
             if (DistAverage > Distance[i])
             {
                 TempDist = DistAverage - Distance[i];
@@ -1652,6 +1652,15 @@ void AppSim_Test_FTP_Init (void)
         UTIL_MEM_cpy(sModemVar.sFwUpdate.sServer.aPASS, "admin", strlen("admin") );
         
         UTIL_MEM_cpy(sModemVar.sFwUpdate.aPATH, "chien/test_tn", strlen("chien/test_tn") );
+        
+        if (UTIL_Convert_IP_To_Buff(sModemVar.sFwUpdate.sServer.aIP, sModemVar.sFwUpdate.sServer.IPnum) == true) {
+            sModemVar.sFwUpdate.sServer.DomainOrIp_u8 = __SERVER_IP;
+        } else {
+            sModemVar.sFwUpdate.sServer.DomainOrIp_u8 = __SERVER_DOMAIN;
+        }
+        sModemVar.sFwUpdate.sServer.Port_u16 = (uint16_t) UtilStringToInt(sModemVar.sFwUpdate.sServer.aPORT);
+        
+        UTIL_MEM_cpy(&sModemInfor.sServerTn.sServer, &sModemVar.sFwUpdate.sServer, sizeof(sModemVar.sFwUpdate.sServer) );
     } else {
         
         UTIL_MEM_cpy(&sModemVar.sFwUpdate.sServer, &sModemInfor.sServerTn.sServer, sizeof(sModemInfor.sServerTn.sServer) );
@@ -1673,10 +1682,10 @@ uint8_t AppSim_Set_FileName_FTP (void)
     int8_t chann = 0;
     uint32_t length = 0;
 
-//    if ( (sAppSimVar.rTimeServer_u8 == false) 
-//          && (strlen(sModemVar.sFwUpdate.aFILE_NAME) != 0) ) {
-//        return true;
-//    }
+    if ( (sAppSimVar.rTimeServer_u8 == false) 
+          && (strlen(sModemVar.sFwUpdate.aFILE_NAME) != 0) ) {
+        return true;
+    }
     
     sAppSimVar.rTimeServer_u8 = false;
     

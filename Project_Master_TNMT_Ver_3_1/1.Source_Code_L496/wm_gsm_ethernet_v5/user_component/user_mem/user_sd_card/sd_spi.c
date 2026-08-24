@@ -25,11 +25,6 @@
 
 #define USE_DMA 1
 
-extern SPI_HandleTypeDef hspi1;
-#define SD_SPI_HANDLE hspi1
-
-
-
 /***************************************************************
  * 🚫 DO NOT MODIFY BELOW THIS LINE
  * Auto-generated/system-managed code. Changes may be lost.

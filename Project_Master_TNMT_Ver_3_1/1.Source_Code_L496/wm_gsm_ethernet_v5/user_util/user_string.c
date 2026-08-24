@@ -112,9 +112,9 @@ int16_t Find_String_V2 (sData *sTemp_Receiv, sData *sResponding)
 
 
 
-int16_t RC(int16_t Result,uint8_t Off_Set)
+int16_t RC(int16_t Result,uint8_t Off_set)
 {
-	if (Off_Set == 0) 
+	if (Off_set == 0) 
         return Result;
     
 	if (Result >= 0) 
@@ -232,23 +232,23 @@ uint8_t Cut_String(sData *str_in,int *Pos_find,sData *Path)
 
 uint8_t Cut_Value(sData *str_in, int *Pos_find, uint32_t *Value)
 {	
-    int Pos_Copy;
-    int Length_Copy;
+    int Pos_copy;
+    int Length_copy;
 	// Find PATH
-	Pos_Copy = *Pos_find;
-	Pos_Copy++;
+	Pos_copy = *Pos_find;
+	Pos_copy++;
 	*Value = 0;
-	Length_Copy = *(str_in->Data_a8 + Pos_Copy);
-	if (Length_Copy > 4) 
+	Length_copy = *(str_in->Data_a8 + Pos_copy);
+	if (Length_copy > 4) 
         return 0;
-	while (Length_Copy > 0) 
+	while (Length_copy > 0) 
     {
-		Length_Copy--;
-		Pos_Copy++;
+		Length_copy--;
+		Pos_copy++;
 		*Value = *Value << 8;
-		*Value |= *(str_in->Data_a8 + Pos_Copy);
+		*Value |= *(str_in->Data_a8 + Pos_copy);
 	}
-	*Pos_find = Pos_Copy;
+	*Pos_find = Pos_copy;
 	return 1;
 }
 
@@ -431,7 +431,39 @@ uint8_t Cut_String_2 (sData *pdata, uint16_t *pos, uint8_t Check,
 }
 
 
+int16_t Find_String_V3(sData *source, const char *pattern) {
+    const char *subPattern = pattern;
+    const char *nextPattern;
 
+    while (subPattern != NULL) {
+        // Tìm chuỗi con tiếp theo trong pattern (phân tách bởi '|')
+        nextPattern = strchr(subPattern, '|');
+        uint16_t subPatternLen = nextPattern ? (nextPattern - subPattern) : strlen(subPattern);
+
+        // Kiểm tra xem chuỗi con có tồn tại trong source không
+        for (int16_t i = 0; i < source->Length_u16; i++) {
+            // Thêm điều kiện kiểm tra trước khi so sánh toàn bộ chuỗi
+            if (*(source->Data_a8 + i) == *subPattern) {
+                uint8_t match = 1;
+                for (int16_t j = 0; j < subPatternLen; j++) {
+                    if (*(source->Data_a8 + i + j) != *(subPattern + j)) {
+                        match = 0;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    return i; // Trả về vị trí đầu tiên tìm thấy
+                }
+            }
+        }
+
+        // Chuyển sang chuỗi con tiếp theo
+        subPattern = nextPattern ? (nextPattern + 1) : NULL;
+    }
+
+    return -1; // Không tìm thấy
+}
 
 
 

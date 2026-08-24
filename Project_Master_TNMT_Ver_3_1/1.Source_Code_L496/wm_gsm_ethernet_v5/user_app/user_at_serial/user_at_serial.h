@@ -126,6 +126,21 @@ typedef enum
     _SET_TNMT_PACK_M,
     _QUERY_TNMT_PACK_M,
     
+    _SET_OUT_BLOCK_T,
+    _QUERY_OUT_BLOCK_T,
+    
+    _SET_OUT_DUTY_T,
+    _QUERY_OUT_DUTY_T,
+    
+    _SET_OUT_MODE,
+    _QUERY_OUT_MODE,
+    
+    _SET_OUT_VAL,
+    _QUERY_OUT_VAL,
+    
+    _SET_PRESS_THRESH,
+    _QUERY_PRESS_THRESH,
+    
     _SET_FTP_SER_MAIN,
     _QUERY_FTP_SER_MAIN,
     
@@ -150,6 +165,8 @@ typedef enum
 
     _GET_PASSWORD,
     _SET_PASSWORD,
+    
+    _QUERY_STATUS,
     
     _END_AT_CMD,
 }Type_Command_AT_PC;

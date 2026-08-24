@@ -49,8 +49,13 @@
 #define W5500_SCS_LOW  		HAL_GPIO_WritePin(ETH_SCSn_GPIO_Port, ETH_SCSn_Pin, GPIO_PIN_RESET)
 #define W5500_SCS_HIGH 		HAL_GPIO_WritePin(ETH_SCSn_GPIO_Port, ETH_SCSn_Pin, GPIO_PIN_SET)
 
+#ifdef BOARD_QN_V5_0
 #define W5500_ON  		    HAL_GPIO_WritePin(ETH_ON_OFF_GPIO_Port, ETH_ON_OFF_Pin, GPIO_PIN_RESET)
 #define W5500_OFF 		    //HAL_GPIO_WritePin(ETH_ON_OFF_GPIO_Port, ETH_ON_OFF_Pin, GPIO_PIN_SET)
+#else
+#define W5500_ON  		    HAL_GPIO_WritePin(ETH_ON_OFF_GPIO_Port, ETH_ON_OFF_Pin, GPIO_PIN_SET)
+#define W5500_OFF 		    HAL_GPIO_WritePin(ETH_ON_OFF_GPIO_Port, ETH_ON_OFF_Pin, GPIO_PIN_RESET)
+#endif
 
 
 #define ETH_MAX_RETRY_BUS   10  

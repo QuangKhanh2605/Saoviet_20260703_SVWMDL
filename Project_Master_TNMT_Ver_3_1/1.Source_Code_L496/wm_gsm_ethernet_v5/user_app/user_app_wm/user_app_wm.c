@@ -42,7 +42,7 @@ static uint8_t     _Cb_Get_Contact_Input(uint8_t event);
 static uint8_t     _Cb_Rs485_1_Recv (uint8_t event);
 static uint8_t     _Cb_Rs485_2_Recv (uint8_t event);
 
-
+static uint8_t _Cb_Ctrl_Output(uint8_t event);
 /*================ Struct =================*/
 sEvent_struct sEventAppWM [] =
 {
@@ -53,7 +53,7 @@ sEvent_struct sEventAppWM [] =
     { _EVENT_DIR_CHANGE,		0, 0, 0, 	    _Cb_Dir_Change },            //Chong nhieu 100ms -> Ton PIN    
     
     { _EVENT_CHECK_MODE,		1, 0, 1000,     _Cb_Check_Mode },           
-    { _EVENT_MEAS_PRESSURE,		0, 0, 3000,     _Cb_Meas_Pressure }, 
+    { _EVENT_MEAS_PRESSURE,		1, 0, 3000,     _Cb_Meas_Pressure }, 
     { _EVENT_SCAN_ALARM,	    1, 0, 50,       _Cb_Scan_Alarm }, 
     { _EVENT_CONTROL_LED1,		1, 0, 200,      _Cb_Control_Led1 }, 
     
@@ -66,6 +66,8 @@ sEvent_struct sEventAppWM [] =
     
     { _EVENT_RS485_1_RECV,		0, 0, 20,       _Cb_Rs485_1_Recv   }, 
     { _EVENT_RS485_2_RECV,		0, 0, 20,       _Cb_Rs485_2_Recv }, 
+    
+    { _EVENT_CTRL_OUT_PUT,      1, 0, 100,      _Cb_Ctrl_Output },
 };
             
     
@@ -97,6 +99,17 @@ sAppWmVariable sWmVar =
 {
     .nChannel_u8 = MAX_CHANNEL,
     .rPressCalib_u8 = false,
+    
+    .rIntan_u8 = true,
+
+    .sOutVar = {
+        [0] = {
+            .pCtrFunc = _cb_OUT1_Set,
+        },
+        [1] = {
+            .pCtrFunc = _cb_OUT2_Set,
+        },
+    },
 };
 
 
@@ -134,6 +147,11 @@ char AppWm_TN_PARAM[2][10] =
     "LUULUONG", 
     "MUCNUOC"
 };
+char aUnitLevel[3][8] =  
+{
+    {" (cm)"},
+    {" (m)"},
+};
 
 
 /*================ Struct =================*/
@@ -142,12 +160,15 @@ char AppWm_TN_PARAM[2][10] =
 void AppWm_Init (void)
 {
     //Init xung trong flash
+    AppWm_Default_Sett_Pulse();
     AppWm_Init_Pulse_Infor();
     AppWm_Button_Default_Device();    
     AppWm_Init_Default_Pressure();
     AppWm_Init_Thresh_Measure();
     AppWm_Init_WM_Dig_Infor();
     AppWm_Init_TNMT_Infor();
+    
+    AppWm_Init_OutCtrl_Infor();
     
     //Set timer power on level power
     UTIL_TIMER_Create(&TimerLevel, 0xFFFFFFFFU, UTIL_TIMER_ONESHOT, OnTimerLevelPowerOn, NULL);
@@ -206,7 +227,20 @@ void AppWm_Init (void)
     sATCmdList[_SET_TNMT_PACK_M].CallBack = AppWm_SER_Set_TNMT_Pack_M;
     sATCmdList[_QUERY_TNMT_PACK_M].CallBack = AppWm_SER_Get_TNMT_Pack_M;
      
-      
+    sATCmdList[_SET_OUT_BLOCK_T].CallBack = AppWm_SER_Set_Out_Block;  
+    sATCmdList[_QUERY_OUT_BLOCK_T].CallBack = AppWm_SER_Get_Out_Block; 
+    
+    sATCmdList[_SET_OUT_DUTY_T].CallBack = AppWm_SER_Set_Out_Duty;  
+    sATCmdList[_QUERY_OUT_DUTY_T].CallBack = AppWm_SER_Get_Out_Duty; 
+    
+    sATCmdList[_SET_OUT_MODE].CallBack = AppWm_SER_Set_Out_Mode;  
+    sATCmdList[_QUERY_OUT_MODE].CallBack = AppWm_SER_Get_Out_Mode; 
+    
+    sATCmdList[_SET_OUT_VAL].CallBack = AppWm_SER_Set_Out_Val;  
+    sATCmdList[_QUERY_OUT_VAL].CallBack = AppWm_SER_Get_Out_Val;   
+    
+    sATCmdList[_SET_PRESS_THRESH].CallBack = AppWm_SER_Set_Press_Thresh;  
+    sATCmdList[_QUERY_PRESS_THRESH].CallBack = AppWm_SER_Get_Press_Thresh; 
 #endif
     
 //    UTIL_TIMER_Create(&TimerAlarm, 0xFFFFFFFFU, UTIL_TIMER_PERIODIC, OnTimerAlarm, NULL);
@@ -260,8 +294,10 @@ static uint8_t _Cb_Entry_Wm (uint8_t event)
     fevent_active(sEventAppWM, _EVENT_RS485_MODBUS);
     fevent_active(sEventAppWM, _EVENT_RS485_2_MODBUS);
     fevent_active(sEventAppWM, _EVENT_GET_CONTACT_IN); 
+    fevent_active(sEventAppWM, _EVENT_SCAN_ALARM); 
     
     iMarkTSVH = 0x01;
+    sWmVar.LandMark_u32 = RtCountSystick_u32;
     
 	return 1;
 }
@@ -280,10 +316,11 @@ static uint8_t _Cb_Log_TSVH (uint8_t event)
     APP_LOG(TS_OFF, DBLEVEL_M, "u_app_wm: Vpin in: %d mV \r\n", sBattery.mVol_u32);
     APP_LOG(TS_OFF, DBLEVEL_M, "u_app_wm: Vpin out: %d mV \r\n", sVout.mVol_u32);
     
-    AppWm_Save_Pulse();
+    AppWm_Get_Pulse();
+
 #ifdef ENABLE_TEST_HARDWARE
     APP_LOG(TS_OFF, DBLEVEL_M, "u_app_wm: pulse: %d, %d, %d, %d \r\n", 
-                                    sPulse.Number_i64, sPulse[1].Number_i64, sPulse[2].Number_i64, sPulse[3].Number_i64 );
+            sPulse.Number_i64, sPulse[1].Number_i64, sPulse[2].Number_i64, sPulse[3].Number_i64 );
 #endif
     
 //    if (sWmVar.rIntan_u8 == true) {
@@ -297,7 +334,10 @@ static uint8_t _Cb_Log_TSVH (uint8_t event)
 //    }
 //    
 //    AppWm_Packet_Modbus();
+//    
 //    AppWm_Packet_TNMT();
+    
+    sWmVar.LandMark_u32 = RtCountSystick_u32;
     
 	return 1;
 }
@@ -379,13 +419,12 @@ static uint8_t _Cb_Check_Mode(uint8_t event)
 static uint8_t _Cb_Meas_Pressure(uint8_t event)
 {       
     uint8_t Status = AppWm_Meas_Pressure_Process(&sEventAppWM[event].e_period);
-               
+    uint8_t stop_sim = false;
+    
     if (Status == true)
     {       
         if (iMarkTSVH & 0x01) {
-            for (uint8_t i = 0; i < MAX_CHANNEL; i++)
-            {
-              
+            for (uint8_t i = 0; i < MAX_CHANNEL; i++) {
             #ifdef PRESSURE_DECODE
                 APP_LOG(TS_OFF, DBLEVEL_M, "u_app_wm: pressure chan.%d: %d mbar \r\n", i, sWmVar.aPRESSURE[i].Val_i32);
             #else
@@ -398,30 +437,37 @@ static uint8_t _Cb_Meas_Pressure(uint8_t event)
         
         if ( (UTIL_var.ModePower_u8 == _POWER_MODE_SAVE) && (iMarkTSVH == 0x0F) ){
             V_PIN_OFF;  
-        } else {
-            sEventAppWM[event].e_period = PERIOD_READ_MODBUS;
-            fevent_enable(sEventAppWM, event);
         }
         
         if (iMarkTSVH == 0x0F) {
             iMarkTSVH = 0;
             fevent_active(sEventAppWM, _EVENT_LOG_TSVH);
         }
-
-    #ifdef USING_APP_SIM
-        if (sWmVar.pCtrl_Sim != NULL)
-            sWmVar.pCtrl_Sim(false);
-    #endif
-
+        
+        if ( (UTIL_var.ModePower_u8 == _POWER_MODE_ONLINE)
+            && ( ( UTIL_var.ModeConnNow_u8 == _CONNECT_DATA_MAIN)
+                || ( UTIL_var.ModeConnNow_u8 == _CONNECT_DATA_BACKUP)
+                || ( UTIL_var.ModeConnNow_u8 == _CONNECT_FTP_UPLOAD) ) ) {
+            sEventAppWM[event].e_period = PERIOD_READ_PRESS;
+            fevent_enable(sEventAppWM, event);
+        }
+        
+        stop_sim = false;
     } else
     {     
-    #ifdef USING_APP_SIM
-        if (sWmVar.pCtrl_Sim != NULL)
-            sWmVar.pCtrl_Sim(true);
-    #endif
+        if (sEventAppWM[event].e_period < 500) {
+            stop_sim = true;
+        } else {
+            stop_sim = false;
+        }
         
         fevent_enable(sEventAppWM, event);
     }
+
+#ifdef USING_APP_SIM
+    if (sWmVar.pCtrl_Sim != NULL)
+        sWmVar.pCtrl_Sim(stop_sim);
+#endif
 
     return 1;
 }
@@ -432,28 +478,28 @@ static uint8_t _Cb_Meas_Pressure(uint8_t event)
 static uint8_t _Cb_Scan_Alarm(uint8_t event)
 {   
     static uint16_t cCheck = 0;
-
+   
+    AppWm_Get_VBat();
+    AppWm_Get_VOut();
+    AppWm_Get_Pulse();
+    AppWm_Cacul_Param();
+    
     if ( cCheck++ >= (TIME_CHECK_ALARM / sEventAppWM[event].e_period) )
     {
         cCheck = 0;
-        
         if (sRTC.year > 20) {
             Get_RTC();
-        
-            AppWm_Get_VBat();
-            AppWm_Get_VOut();
-            AppWm_Get_Pulse();
-            
-            AppWm_Cacul_Param();
             if (AppWm_Scan_Alarm() == true) {
-//            #ifdef USING_APP_SIM
-//                AppSim_Restart_If_PSM();
-//            #endif
+            #ifdef USING_APP_SIM
+                AppSim_Restart_If_PSM();
+            #endif
             }
         }
     }
-            
-    fevent_enable(sEventAppWM, event);
+           
+    if (UTIL_var.ModePower_u8 == _POWER_MODE_ONLINE) {
+        fevent_enable(sEventAppWM, event);
+    }
         
 	return 1;
 }
@@ -599,7 +645,8 @@ uint8_t AppWm_Cacul_Flow_1 (uint8_t chann)
         
         if (duratime > 0) {
             //tinh ra luu luong
-            TempDouble = pulse * sPulse[chann].FactorInt_i16 * 3600 * Convert_Scale(sPulse[chann].FactorDec_u8 + 2) * SecondToTick / duratime;  
+            TempDouble = pulse * sPulse[chann].FactorInt_i16 * 3600 \
+                                * Convert_Scale(sPulse[chann].FactorDec_u8) * SecondToTick / duratime;  
             sPulse[chann].Flow_f = (float) (TempDouble) ;
         }  
     }
@@ -801,6 +848,10 @@ uint8_t AppWm_Digital_Decode (uint8_t chann, sData *pdata)
             result = sListWmDigital[type].fDecode(sWmDigVar.sModbDevData[chann].inReg, pdata, \
                                                   &target->sMag8000);
             break;
+        case __MET_SI_MAG6000: 
+            result = sListWmDigital[type].fDecode(sWmDigVar.sModbDevData[chann].inReg, pdata, \
+                                                  &target->sMag6000);
+            break;
         default:
             break;
     }
@@ -816,14 +867,14 @@ uint8_t AppWm_Digital_Decode (uint8_t chann, sData *pdata)
 
 uint8_t AppWm_RS485_1_Process (uint8_t chann)
 {
-//    uint8_t result = pending;
+    uint8_t result = pending;
 //    static uint8_t step = 0;
 //    uint8_t nreg = 0, func = FUN_READ_BYTE, type = sWmDigVar.sModbInfor[chann].MType_u8;
 //    static uint32_t landmark = 0; 
 //    sData  pData;
 //    uint16_t addr = 0;
 //    
-//    if (type == __MET_UNKNOWN) {
+//    if (type >= __MET_UNKNOWN) {
 //        return false;
 //    }
 //    
@@ -849,10 +900,10 @@ uint8_t AppWm_RS485_1_Process (uint8_t chann)
 //            } else {
 //                if (Rs485Status_u8 == true)
 //                {       
+//                    Rs485Status_u8 = false;
 //                    UTIL_Printf_Hex( DBLEVEL_L, sUart485.Data_a8, sUart485.Length_u16);
 //                    UTIL_Printf_Str( DBLEVEL_L,"\r\n");
 //                    
-//                    step = 0;
 //                    result = ModRTU_Check_Format(sUart485.Data_a8, sUart485.Length_u16);
 //                    
 //                    if (result == true) {
@@ -876,9 +927,8 @@ uint8_t AppWm_RS485_1_Process (uint8_t chann)
 //            step = 0;
 //            break;
 //    }
-//    
-//    return result;
-    return 0;
+    
+    return result;
 }
 
 
@@ -962,7 +1012,7 @@ static uint8_t _Cb_Read_RS485_Modbus (uint8_t event)
 //            fevent_disable(sEventAppWM, event);
 //        }
 //    }
-//    
+    
     return true;
 }
 
@@ -975,14 +1025,14 @@ static uint8_t _Cb_Read_RS485_Modbus (uint8_t event)
 
 uint8_t AppWm_RS485_2_Process (uint8_t chann)
 {
-//    uint8_t result = pending;
+    uint8_t result = pending;
 //    static uint8_t step = 0;
 //    uint8_t nreg = 0, func = FUN_READ_BYTE, type = sWmDigVar.sModbInfor[chann].MType_u8;
 //    static uint32_t landmark = 0; 
 //    sData  pData;
 //    uint16_t addr = 0;
 //    
-//    if (type == __MET_UNKNOWN) {
+//    if (type >= __MET_UNKNOWN) {
 //        return false;
 //    }
 //    
@@ -1008,10 +1058,10 @@ uint8_t AppWm_RS485_2_Process (uint8_t chann)
 //            } else {
 //                if (Rs485_2Status_u8 == true)
 //                {       
+//                    Rs485_2Status_u8 = false;
 //                    UTIL_Printf_Hex( DBLEVEL_L, sUart485_2.Data_a8, sUart485_2.Length_u16);
 //                    UTIL_Printf_Str( DBLEVEL_L,"\r\n");
-//                    
-//                    step = 0;
+// 
 //                    result = ModRTU_Check_Format(sUart485_2.Data_a8, sUart485_2.Length_u16);
 //                    
 //                    if (result == true) {
@@ -1031,9 +1081,8 @@ uint8_t AppWm_RS485_2_Process (uint8_t chann)
 //            step = 0;
 //            break;
 //    }
-//    
-//    return result;
-    return 0;
+    
+    return result;
 }
 
 
@@ -1192,7 +1241,166 @@ static uint8_t _Cb_Rs485_2_Recv (uint8_t event)
     return 1;
 }
 
+/*
+    ctrl output theo blocktime
+    
+*/
 
+
+int8_t AppWm_Check_BlockTime (uint8_t Motor)
+{
+    uint8_t i, nBlock = 0, reVal = 0;
+    uint16_t Now, start_t, stop_t;
+    
+    /* Check input parameters */
+    nBlock = sWmVar.sOutputContrl.nBlockTime[Motor];
+    if ((0U == nBlock) || (NUMBER_BLOCK_MAX < nBlock) || (Motor >= NUMBER_MOTOR)) {
+        return reVal;
+    }
+    
+    Now = sRTC.hour * 60 + sRTC.min;
+
+    for (i = 0; i < nBlock; i++) {
+        start_t = sWmVar.sOutputContrl.aBlockTime[Motor][i].start_u16;
+        stop_t = sWmVar.sOutputContrl.aBlockTime[Motor][i].end_u16;
+        
+        if ((Now >= start_t) && (Now < stop_t)) {
+            reVal = 1;
+            i = nBlock;
+        }
+    }
+    
+    return reVal;
+}
+
+
+/* Check timer run cycle */
+uint8_t AppWm_Check_CycleTime(uint8_t Motor)
+{
+    uint8_t  reVal = 0U;
+    uint16_t i = 0U;
+    uint16_t Now = 0U, TempT = 0, Period = 0, start_t, stop_t, nCycle, Run_t;
+    uint16_t count = 0;
+    uint16_t Delta = 0;
+    
+    /* Check input parameters */
+    nCycle = sWmVar.sOutputContrl.nCycle[Motor];
+    if ((0U == nCycle) || (6 < nCycle) || (Motor >= NUMBER_MOTOR)){
+        return reVal;
+    }
+
+    Now = sRTC.hour * 60 + sRTC.min;
+
+    for (i = 0; i < nCycle; i++) {
+        start_t = sWmVar.sOutputContrl.aCycleBlockTime[Motor][i].start_u16;
+        stop_t = sWmVar.sOutputContrl.aCycleBlockTime[Motor][i].end_u16;
+        Run_t = sWmVar.sOutputContrl.RunTimeInCycle[Motor][i];
+        Period = sWmVar.sOutputContrl.CycleTime[Motor][i];
+        
+        //tinh xem co bao nhieu chu ki dk trong block
+        if (stop_t < start_t) {
+            Delta = stop_t + MAX_OUT_BLOCK_START_MAX - start_t;
+        } else {
+            Delta = stop_t - start_t;
+        }
+        
+        count = Delta / Period;
+
+        for (uint16_t k = 0; k <= count; k++) {
+            TempT = (uint16_t) (k * Period + start_t);
+            
+            if (TempT > MAX_OUT_BLOCK_START_MAX) {
+                TempT = (uint16_t)(TempT - MAX_OUT_BLOCK_START_MAX);
+            }
+            
+            if ( (TempT <= Now) && (Now < (TempT + Run_t)) ) {
+                reVal = 1U;
+                k = count + 1U;
+            }
+        }
+
+        if (1U == reVal) {
+            i = nCycle;
+        }
+    }
+    
+    return reVal;
+}
+
+float press_now[NUMBER_MOTOR] = {0};
+static uint8_t _Cb_Ctrl_Output(uint8_t event)
+{
+    double InMin = 0, InMax = 0, HeSo = 0; 
+    uint8_t on_off = false;
+
+    for (uint8_t motor = 0; motor < NUMBER_MOTOR; motor++) {
+        //tinh ra ap suat thuc te
+        if (motor >= MAX_CHANNEL) {
+            press_now[motor] = sWmVar.aThreshPress_f[motor][1] + 1; //k check dk ap suat 
+        } else {
+            
+        #ifdef PRESSURE_DECODE
+            press_now[motor] = sWmVar.aPRESSURE[motor].Val_i32 / 1000;
+        #else
+            HeSo = sWmVar.aPRESSURE[motor].sLinearInter.Factor_u16 * Convert_Scale(sWmVar.aPRESSURE[motor].sLinearInter.FactorDec_u8);        
+            InMin = sWmVar.aPRESSURE[motor].sLinearInter.InMin_u16 * HeSo;                    
+            InMax = sWmVar.aPRESSURE[motor].sLinearInter.InMax_u16 * HeSo;
+            
+            if (sWmVar.aPRESSURE[motor].sLinearInter.InUnit_u8 == _UNIT_VOL) {
+                InMin *= 1000;
+                InMax *= 1000;
+            }
+      
+            press_now[motor] = (int32_t) AppWm_Linear_Interpolation(sWmVar.aPRESSURE[motor].Val_i32, InMin, InMax,
+                                                                     sWmVar.aPRESSURE[motor].sLinearInter.OutMin_u16 * 1000, 
+                                                                     sWmVar.aPRESSURE[motor].sLinearInter.OutMax_u16 * 1000 );
+            
+            press_now[motor] /= 1000;
+        #endif
+        }
+        
+        //kiem tra mode, blocktime, chu ki
+        switch (sWmVar.sOutputContrl.OutMode[motor])
+        {
+            case 0:
+                sWmVar.sOutVar[motor].control = AppWm_Check_BlockTime(motor);
+                break;
+            case 2:
+                sWmVar.sOutVar[motor].control = AppWm_Check_CycleTime(motor);
+                break;
+            default:
+                sWmVar.sOutVar[motor].control = sWmVar.sOutputContrl.OutOnOff[motor];
+                break;
+        }
+        
+        //kiem tra nguong dk
+        if (sWmVar.sOutVar[motor].control == 1) {
+            on_off = true;
+            if (sWmVar.aPressDir_u8[motor] == false) {
+                if (sWmVar.aThreshPress_f[motor][1] < press_now[motor]) {
+                    sWmVar.aPressDir_u8[motor] = true;  //doi chieu sang nguoc
+                    on_off = false;  
+                }
+            } else {
+                if (sWmVar.aThreshPress_f[motor][0] < press_now[motor]) {
+                    on_off = false;  
+                } else {
+                    sWmVar.aPressDir_u8[motor] = false;  //doi chieu sang thuan
+                }
+            }
+        } else {
+            on_off = false;
+        }
+        
+        if (sWmVar.sOutVar[motor].pCtrFunc != NULL) {
+            sWmVar.sOutVar[motor].pCtrFunc(on_off);
+        }
+    }
+    
+    fevent_enable(sEventAppWM, event);
+
+    return 1;
+}
 
 /*================ Function Handler =================*/
 
@@ -1681,13 +1889,13 @@ uint8_t AppWm_Packet_Param (char *pdata, uint8_t chann, uint8_t param)
     {
         case 0:  //luu luong
             if (chann < MAX_CHANNEL) {
-                sprintf(pdata, "%.3lf %s", sPulse[chann].Flow_f, "m3/h");
+                sprintf(pdata, "%.3lf\t%s", sPulse[chann].Flow_f, "m3/h");
                 result = true;
             } else {
                 chann -= MAX_CHANNEL;
                 if (sWmDigVar.sModbDevData[chann].Status_u8 == true) {
                     temp_f = sWmDigVar.sModbDevData[chann].Flow_i32 * Convert_Scale(sWmDigVar.sModbDevData[chann].Factor);
-                    sprintf(pdata, "%.3lf %s", temp_f, "m3/h");
+                    sprintf(pdata, "%.3lf\t%s", temp_f, "m3/h");
                     result = true;
                 }
             }
@@ -1696,8 +1904,11 @@ uint8_t AppWm_Packet_Param (char *pdata, uint8_t chann, uint8_t param)
             if (chann >= MAX_CHANNEL) {
                 chann -= MAX_CHANNEL;
                 if (sWmDigVar.sModbDevData[chann].Status_u8 == true) {
-                    temp_f = sWmDigVar.sModbDevData[chann].LVal_i16 * Convert_Scale(0 - sWmDigVar.sModbDevData[chann].LDecimal_u16 - 2);
-                    sprintf(pdata, "%.3lf %s", temp_f, "m");
+                    temp_f = sWmDigVar.sModbDevData[chann].LVal_i16  \
+                        * Convert_Scale(0 - sWmDigVar.sModbDevData[chann].LDecimal_u16 - 2)
+                        * WM_DIG_cm_To_cUnit(sWmDigVar.sModbDevData[chann].LUnit_u16);  //tinh theo unit
+                    
+                    sprintf(pdata, "%.3lf\t%s", temp_f, "m");
                     result = true;
                 }
             }
@@ -1715,9 +1926,8 @@ void AppWm_Packet_TNMT (void)
     int8_t chann = 0, i = 0, cPack = 0, mPack = false;
     char aTEMP[48] = {0};
     
-    char pathtest[40] = "SV";
-    char aName[40] = {0};
-//    static uint32_t cFile = 0;
+    static char File_Name[40] = {0};
+    static uint8_t last_d = 0xFF;
     
     switch (sWmVar.ModePacket_u8) 
     {
@@ -1736,13 +1946,13 @@ void AppWm_Packet_TNMT (void)
                 if (mPack == true) {
                     Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_GPS, 0, 
                                         (uint8_t *) aPAY_LOAD, strlen(aPAY_LOAD), sRecGPS.Size_u16);
+                    if ( (last_d != sRTC.date) || (strlen(File_Name) == 0) ) {
+                        last_d = sRTC.date;
+                        UTIL_MEM_set(File_Name, 0, sizeof(File_Name));
+                        sprintf (File_Name, "log_%04d%02d%02d.txt", sRTC.year + 2000, sRTC.month, sRTC.date);
+                    }
                     
-//                    cFile++;
-//                    sprintf (aName, "%s_%d.txt", pathtest, cFile);
-                    sprintf (aName, "%s_%04d%02d%02d%02d%02d%02d.txt", pathtest, sRTC.year + 2000, sRTC.month, sRTC.date,
-                                                sRTC.hour, sRTC.min, sRTC.sec);
-                    UTIL_Printf_Str(DBLEVEL_M, "begin...\r\n");
-                    sd_write_file(aName, aPAY_LOAD);
+//                    Write_Mem_SDCard(File_Name, aPAY_LOAD);
                 }
                 
             }
@@ -1766,10 +1976,13 @@ void AppWm_Packet_TNMT (void)
                             Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_GPS, 0, 
                                     (uint8_t *) aPAY_LOAD, strlen(aPAY_LOAD), sRecGPS.Size_u16);
                             
-                            sprintf (aName, "%s_%04d%02d%02d%02d%02d%02d.txt", pathtest, sRTC.year + 2000, sRTC.month, sRTC.date,
-                                                sRTC.hour, sRTC.min, sRTC.sec);
-                            UTIL_Printf_Str(DBLEVEL_M, "begin...\r\n");
-                            sd_write_file(aName, aPAY_LOAD);
+                            if ( (last_d != sRTC.date) || (strlen(File_Name) == 0) ) {
+                                last_d = sRTC.date;
+                                UTIL_MEM_set(File_Name, 0, sizeof(File_Name));
+                                sprintf (File_Name, "log_%04d%02d%02d.txt", sRTC.year + 2000, sRTC.month, sRTC.date);
+                            }
+                            
+//                            Write_Mem_SDCard(File_Name, aPAY_LOAD);
                             
                             UTIL_MEM_set(aPAY_LOAD, 0, sizeof(aPAY_LOAD));
                         }
@@ -1780,11 +1993,13 @@ void AppWm_Packet_TNMT (void)
                     Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_GPS, 0, 
                                         (uint8_t *) aPAY_LOAD, strlen(aPAY_LOAD), sRecGPS.Size_u16);
                     
-                    sprintf (aName, "%s_%04d%02d%02d%02d%02d%02d.txt", pathtest, sRTC.year + 2000, sRTC.month, sRTC.date,
-                                                sRTC.hour, sRTC.min, sRTC.sec);
+                    if ( (last_d != sRTC.date) || (strlen(File_Name) == 0) ) {
+                        last_d = sRTC.date;
+                        UTIL_MEM_set(File_Name, 0, sizeof(File_Name));
+                        sprintf (File_Name, "log_%04d%02d%02d.txt", sRTC.year + 2000, sRTC.month, sRTC.date);
+                    }
                     
-                    UTIL_Printf_Str(DBLEVEL_M, "begin...\r\n");
-                    sd_write_file(aName, aPAY_LOAD);
+//                    Write_Mem_SDCard(File_Name, aPAY_LOAD);
                 }
             }
             break;
@@ -1810,11 +2025,13 @@ void AppWm_Packet_TNMT (void)
                                 Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_GPS, 0, 
                                         (uint8_t *) aPAY_LOAD, strlen(aPAY_LOAD), sRecGPS.Size_u16);
                                 
-                                sprintf (aName, "%s_%04d%02d%02d%02d%02d%02d.txt", pathtest, sRTC.year + 2000, sRTC.month, sRTC.date,
-                                                sRTC.hour, sRTC.min, sRTC.sec);
+                                if ( (last_d != sRTC.date) || (strlen(File_Name) == 0) ) {
+                                    last_d = sRTC.date;
+                                    UTIL_MEM_set(File_Name, 0, sizeof(File_Name));
+                                    sprintf (File_Name, "log_%04d%02d%02d.txt", sRTC.year + 2000, sRTC.month, sRTC.date);
+                                }
                                 
-                                UTIL_Printf_Str(DBLEVEL_M, "begin...\r\n");
-                                sd_write_file(aName, aPAY_LOAD);
+//                                Write_Mem_SDCard(File_Name, aPAY_LOAD);
                                 
                                 UTIL_MEM_set(aPAY_LOAD, 0, sizeof(aPAY_LOAD));
                             }
@@ -1896,16 +2113,34 @@ uint8_t AppWm_Packet_TSVH_Channel (sData *pData, uint8_t channel)
     
     //----------Ap suat--------------------
 #ifdef PRESSURE_DECODE
-    if (sWmVar.aPRESSURE[channel].sLinearInter.Type_u8 == __AN_PRESS) {
-        SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_PRESSURE, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0xFD);    
-    } else {
-        SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_SENSOR, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0xFD);    
-    } 
+    switch (sWmVar.aPRESSURE[channel].sLinearInter.Type_u8)
+    {
+        case __AN_PRESS:
+        case __AN_ULTRA:
+        case __AN_LEVEL_2:
+            SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_PRESSURE, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0xFD);    
+            break;
+        case __AN_LEVEL:
+            SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_SENSOR, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0xFD);
+            break;
+        default:
+            SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_V_ANALOG, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0xFD);
+            break;
+    }
 #else
-    if (sWmVar.aPRESSURE[channel].sLinearInter.Type_u8 == __AN_PRESS) {
-        SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_PRESSURE, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0);    
-    } else {
-        SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_SENSOR, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0);    
+    switch (sWmVar.aPRESSURE[channel].sLinearInter.Type_u8)
+    {
+        case __AN_PRESS:
+        case __AN_ULTRA:
+        case __AN_LEVEL_2:
+            SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_PRESSURE, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0);        
+            break;
+        case __AN_LEVEL:
+            SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_SENSOR, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0); 
+            break;
+        default:
+            SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_V_ANALOG, &sWmVar.aPRESSURE[channel].Val_i32, 2, 0);
+            break;
     }
 #endif
     //----------Dien ap Pin--------------------
@@ -1947,17 +2182,17 @@ uint8_t AppWm_Packet_TSVH_Channel (sData *pData, uint8_t channel)
 
 void AppWm_Log_Data_Event (uint8_t chann)
 {
-//    uint8_t     aMessData[64] = {0};
-//    uint8_t     Length = 0;
-//    
-//    if (sRTC.year <= 20)
-//        return;
-//    
-//    Length = AppWm_Packet_Event (&aMessData[0], chann);
-//
-//
-//    Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_EVENT, 0, 
-//                      &aMessData[0], Length, sRecEvent.Size_u16);
+    uint8_t     aMessData[64] = {0};
+    uint8_t     Length = 0;
+    
+    if (sRTC.year <= 20)
+        return;
+    
+    Length = AppWm_Packet_Event (&aMessData[0], chann);
+
+
+    Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_EVENT, 0, 
+                      &aMessData[0], Length, sRecEvent.Size_u16);
 }
              
                     
@@ -2051,7 +2286,7 @@ int32_t AppWm_Cacul_Quantity (uint32_t PulseCur, uint32_t PulseOld)
 
 void AppWm_Init_Thresh_Measure (void)
 {
-#ifdef BOARD_QN_V5_0
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     uint8_t     temp = 0;
     uint8_t 	aBuff[1600] = {0};
 
@@ -2084,14 +2319,26 @@ void AppWm_Init_Thresh_Measure (void)
         }
     }
 #endif
+    
+    for (uint8_t i = 0; i < (MAX_CHANNEL + MAX_SLAVE_MODBUS); i++) {
+        if (sWmVar.aPRESSURE[i].sLinearInter.Type_u8 >= __AN_END) {
+            sWmVar.aPRESSURE[i].sLinearInter.Type_u8 = __AN_PRESS;
+        }
+    }
 }
 
 
 void AppWm_Save_Thresh_Measure (void)
 {
-#ifdef BOARD_QN_V5_0
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     uint8_t aBuff[1600] = {0};
 
+    for (uint8_t i = 0; i < (MAX_CHANNEL + MAX_SLAVE_MODBUS); i++) {
+        if (sWmVar.aPRESSURE[i].sLinearInter.Type_u8 >= __AN_END) {
+            sWmVar.aPRESSURE[i].sLinearInter.Type_u8 = __AN_PRESS;
+        }
+    }
+    
     aBuff[0] = BYTE_WRITEN;
     UTIL_MEM_cpy(&aBuff[1], &sWmVar.aPRESSURE, sizeof(sWmVar.aPRESSURE));  
     UTIL_MEM_cpy(&aBuff[512], &sMeterThreshold, sizeof(sMeterThreshold)); 
@@ -2104,6 +2351,12 @@ void AppWm_Save_Thresh_Measure (void)
 #ifdef BOARD_LC_V1_1
     uint8_t aBuff[1600] = {0};
 
+    for (uint8_t i = 0; i < (MAX_CHANNEL + MAX_SLAVE_MODBUS); i++) {
+        if (sWmVar.aPRESSURE[i].sLinearInter.Type_u8 >= __AN_END) {
+            sWmVar.aPRESSURE[i].sLinearInter.Type_u8 = __AN_PRESS;
+        }
+    }
+    
     aBuff[0] = BYTE_WRITEN;
     UTIL_MEM_cpy(&aBuff[1], &sWmVar.aPRESSURE, sizeof(sWmVar.aPRESSURE));  
     UTIL_MEM_cpy(&aBuff[512], &sMeterThreshold, sizeof(sMeterThreshold)); 
@@ -2158,7 +2411,7 @@ void AppWm_Init_Pulse_Infor (void)
     uint8_t temp = 0;
     uint8_t  aBuff[512] = {0};
     
-#ifdef BOARD_QN_V5_0
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     temp = *(__IO uint8_t*) (ADDR_METER_NUMBER);
     //Check Byte EMPTY
     if (temp != FLASH_BYTE_EMPTY) {
@@ -2194,7 +2447,7 @@ uint8_t AppWm_Save_Pulse (void)
     aBuff[0] = BYTE_WRITEN;
     UTIL_MEM_cpy(&aBuff[1], &sPulse, sizeof(sPulse));   
     
-#ifdef BOARD_QN_V5_0
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     OnchipFlashPageErase(ADDR_METER_NUMBER);
     OnchipFlashWriteData(ADDR_METER_NUMBER, &aBuff[0], 512);
     OnchipFlashReadData(ADDR_METER_NUMBER, &aBuff_read[0], 512);
@@ -2866,7 +3119,7 @@ void AppWm_SER_Get_Pressure_Val(sData *str_Receiv, uint16_t Pos)
 
     for (uint8_t i = 0; i < MAX_CHANNEL; i++)
     {
-        if  ( (sWmVar.aPRESSURE[i].sLinearInter.Type_u8 <= 2) && 
+        if  ( (sWmVar.aPRESSURE[i].sLinearInter.Type_u8 <= __AN_END) && 
             (sWmVar.aPRESSURE[i].sLinearInter.OutUnit_u8 < 5) ) {
                     
             sprintf(aData + strlen(aData), "%d: %s: %d (%s)\r\n", i + 1, 
@@ -2901,6 +3154,7 @@ void AppWm_SER_Get_Pressure_Calib(sData *str_Receiv, uint16_t Pos)
 }
 
 
+
 /*
 Func: Set level infor //at+level=1,3000,2860
     + channel
@@ -2910,13 +3164,57 @@ Func: Set level infor //at+level=1,3000,2860
 
 void AppWm_SER_Set_Level_Infor(sData *str_Receiv, uint16_t Pos)
 {
-
+    uint16_t Posfix = Pos, i = 0;
+    
+    uint8_t chann = (uint8_t ) UTIL_Get_Num_From_Str(str_Receiv, &Posfix);
+    uint32_t Lwire = (uint32_t ) UTIL_Get_Num_From_Str(str_Receiv, &Posfix);
+    uint32_t Lstatic = (uint32_t ) UTIL_Get_Num_From_Str(str_Receiv, &Posfix);
+     
+    if (chann <= MAX_SLAVE_MODBUS) {
+        if (chann == 0) {
+            if (Lwire != 0xFFFFFFFF) {   
+                for (i = 0; i < MAX_SLAVE_MODBUS; i++) {
+                    sWmDigVar.sModbDevData[i].Lwire_u16 = Lwire;
+                }
+            }
+            
+            //set Lstatic
+            if (Lstatic != 0xFFFFFFFF) {   
+                for (i = 0; i < MAX_SLAVE_MODBUS; i++) {
+                    sWmDigVar.sModbDevData[i].Lstatic_u16 = Lstatic;
+                }
+            }
+        } else {
+            if (Lwire != 0xFFFFFFFF) {   
+                sWmDigVar.sModbDevData[chann - 1].Lwire_u16 = Lwire;
+            }
+            
+            //set Lstatic
+            if (Lstatic != 0xFFFFFFFF) {   
+                sWmDigVar.sModbDevData[chann - 1].Lstatic_u16 = Lstatic;
+            }
+        }
+        
+        AppWm_Save_WM_Dig_Infor();
+        sWmVar.pRespond_Str(PortConfig, "OK", 0);
+        return;
+    }
+    
+    sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
 }
 
 
 void AppWm_SER_Get_Level_Infor(sData *str_Receiv, uint16_t Pos)
 {
+    char aData[512] = {0};
 
+    for (uint8_t i = 0; i < sWmDigVar.nModbus_u8; i++) {
+        sprintf(aData + strlen(aData), "CH%d: %d, %d, %d\r\n", i, sWmDigVar.sModbDevData[i].Lwire_u16,
+                                                            sWmDigVar.sModbDevData[i].LVal_i16,
+                                                            sWmDigVar.sModbDevData[i].Lstatic_u16);
+    }
+    
+    sWmVar.pRespond_Str(PortConfig, aData, 0); 
 }
 
 
@@ -2998,7 +3296,7 @@ void AppWm_SER_Get_TNMT_Infor(sData *pData, uint16_t Pos)
     char aData[256] = {0};
 
     for (uint8_t i = 0; i < (MAX_CHANNEL + MAX_SLAVE_MODBUS); i++) {
-        sprintf(aData + strlen(aData), "%d,%s|%s|%s|%d", i, sWmVar.sChannInfor[i].MA_TINH, sWmVar.sChannInfor[i].MA_CTRINH, 
+        sprintf(aData + strlen(aData), "%d,%s,%s,%s,%d", i + 1, sWmVar.sChannInfor[i].MA_TINH, sWmVar.sChannInfor[i].MA_CTRINH, 
                                                  sWmVar.sChannInfor[i].MA_TRAM, sWmVar.sChannInfor[i].nParam_u8);
         
         for (uint8_t count = 0; count < sWmVar.sChannInfor[i].nParam_u8; count++) {
@@ -3035,8 +3333,461 @@ void AppWm_SER_Get_TNMT_Pack_M(sData *pData, uint16_t Pos)
     
     sWmVar.pRespond_Str(PortConfig, aData, 0);
 }
-  
 
+static uint8_t AppWm_Read_Hex_Byte(sData *sSource, uint16_t *Pos, uint8_t *value)
+{
+    int8_t high = -1;
+    int8_t low = -1;
+    uint16_t pos = *Pos;
+    
+    if ((pos + 1) >= sSource->Length_u16) {
+        return false;
+    }
+    
+    high = UTIL_Hex_To_Val(*(sSource->Data_a8 + pos++));
+    low = UTIL_Hex_To_Val(*(sSource->Data_a8 + pos++));
+    
+    if ((high < 0) || (low < 0)) {
+        return false;
+    }
+    
+    *value = (uint8_t)((high << 4) | low);
+    *Pos = pos;
+    
+    return true;
+}
+  
+void AppWm_SER_Set_Out_Block(sData *str_Receiv, uint16_t Pos)
+{
+    uint8_t motor = 0;
+    uint8_t block = 0;
+    uint8_t value = 0;
+    uint16_t start = 0;
+    uint16_t stop = 0;
+    uint8_t count[NUMBER_MOTOR] = {0}, mark = false;
+        
+    while (Pos < str_Receiv->Length_u16)
+    {
+        if ( (*(str_Receiv->Data_a8 + Pos) == '\r') &&
+             (*(str_Receiv->Data_a8 + Pos + 1) == '\n') ) {
+            break;
+        }
+        
+        if (Pos >= str_Receiv->Length_u16) {
+            break;
+        }
+        
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &motor) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &block) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        start = ((uint16_t)value) << 8;
+        
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        start |= value;
+        
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        stop = ((uint16_t)value) << 8;
+        
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        stop |= value;
+        
+        motor -= 3;
+        block -= 1;
+        
+        if ( (motor >= NUMBER_MOTOR) ||
+             (block >= NUMBER_BLOCK_MAX) ||
+             (start > MAX_OUT_BLOCK_START_MAX) ||
+             (stop > MAX_OUT_BLOCK_END_MAX) )
+        {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        
+        sWmVar.sOutputContrl.aBlockTime[motor][block].start_u16 = start;
+        sWmVar.sOutputContrl.aBlockTime[motor][block].end_u16 = stop;
+          
+        if ( (block == count[motor]) && (count[motor] < NUMBER_BLOCK_MAX) ) {
+            count[motor]++;
+        }
+        mark = true;
+    }
+    
+    if (mark == true) {
+        for (uint8_t i = 0; i < NUMBER_MOTOR;i++) {
+            if (count[i] > 0) {
+                sWmVar.sOutputContrl.nBlockTime[i] = count[i];
+            }
+        }
+                
+        sWmVar.pRespond_Str(PortConfig, "OK", 0);
+        AppWm_Save_OutCtrl_Infor();
+    } else {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+    }
+}
+
+void AppWm_SER_Get_Out_Block(sData *str_Receiv, uint16_t Pos)
+{
+    char aData[512] = {0};
+    uint8_t motorIndex = 0;
+    uint8_t blockCount = 0;
+    uint16_t start = 0;
+    uint16_t stop = 0;
+
+    for (motorIndex = 0; motorIndex < NUMBER_MOTOR; motorIndex++) {
+        blockCount = sWmVar.sOutputContrl.nBlockTime[motorIndex];
+
+        if ( (blockCount == 0) || (blockCount > NUMBER_BLOCK_MAX) ) {
+            continue;
+        }
+
+        for (uint8_t block = 0; block < blockCount; block++) {
+            start = sWmVar.sOutputContrl.aBlockTime[motorIndex][block].start_u16;
+            stop  = sWmVar.sOutputContrl.aBlockTime[motorIndex][block].end_u16;
+
+            sprintf(aData + strlen(aData), "%02X%02X%04X%04X", motorIndex + 3, block + 1, start, stop);
+        }
+    }
+    
+    if (strlen(aData) == 0) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+    } else {
+        aData[strlen(aData)] = '\r';
+        aData[strlen(aData)] = '\n';
+        sWmVar.pRespond_Str(PortConfig, aData, 0);
+    }
+}
+
+void AppWm_SER_Set_Out_Duty(sData *str_Receiv, uint16_t Pos)
+{
+    uint8_t length = 0, cycleIndex = 0;
+    uint8_t value = 0;
+    uint16_t start = 0, stop = 0, cycle = 0, runTime = 0;
+    uint8_t motor = 0, count[NUMBER_MOTOR] = {0}, mark = false;;
+
+
+    while (Pos < str_Receiv->Length_u16) {
+        if ((*(str_Receiv->Data_a8 + Pos) == '\r') &&
+            (*(str_Receiv->Data_a8 + Pos + 1) == '\n')) {
+            break;
+        }
+
+        if (Pos >= str_Receiv->Length_u16) {
+            break;
+        }
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &motor) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &length) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &cycleIndex) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        start = ((uint16_t)value) << 8;
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        start |= value;
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        stop = ((uint16_t)value) << 8;
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        stop |= value;
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        cycle = ((uint16_t)value) << 8;
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        cycle |= value;
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        runTime = ((uint16_t)value) << 8;
+
+        if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &value) == false) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        runTime |= value;
+
+        motor -= 0x14;
+        cycleIndex -= 1;
+        
+        if ( (cycleIndex >= NUMBER_CYCLE_MAX) ||
+             (motor >= NUMBER_MOTOR) ||
+             (start > MAX_OUT_BLOCK_START_MAX) ||
+             (stop > MAX_OUT_BLOCK_END_MAX) )
+        {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+        
+        if (length != 0x09) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+            return;
+        }
+
+        sWmVar.sOutputContrl.aCycleBlockTime[motor][cycleIndex].start_u16 = start;
+        sWmVar.sOutputContrl.aCycleBlockTime[motor][cycleIndex].end_u16 = stop;
+        sWmVar.sOutputContrl.CycleTime[motor][cycleIndex] = cycle;
+        sWmVar.sOutputContrl.RunTimeInCycle[motor][cycleIndex] = runTime;
+        
+        if ( (cycleIndex == count[motor]) && (count[motor] < NUMBER_CYCLE_MAX) ) {
+            count[motor]++;
+        }
+        mark = true;
+    }
+    
+    if (mark == true) {
+        for (uint8_t i = 0; i < NUMBER_CYCLE_MAX;i++) {
+            if (count[i] > 0) {
+                sWmVar.sOutputContrl.nCycle[i] = count[i];
+            }
+        }
+        sWmVar.pRespond_Str(PortConfig, "OK", 0);
+        AppWm_Save_OutCtrl_Infor();
+    } else {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+    }
+}
+
+void AppWm_SER_Get_Out_Duty(sData *str_Receiv, uint16_t Pos)
+{
+    char aData[1024] = {0};
+    uint8_t motorIndex = 0;
+    uint8_t cycleCount = 0;
+    uint16_t start = 0;
+    uint16_t stop = 0;
+    uint16_t cycle = 0;
+    uint16_t runTime = 0;
+
+    for (motorIndex = 0; motorIndex < NUMBER_MOTOR; motorIndex++) {
+        cycleCount = sWmVar.sOutputContrl.nCycle[motorIndex];
+
+        if ( (cycleCount == 0) || (cycleCount > NUMBER_CYCLE_MAX) ) {
+            continue;
+        }
+
+        for (uint8_t cycleIdx = 0; cycleIdx < cycleCount; cycleIdx++) {
+            start = sWmVar.sOutputContrl.aCycleBlockTime[motorIndex][cycleIdx].start_u16;
+            stop = sWmVar.sOutputContrl.aCycleBlockTime[motorIndex][cycleIdx].end_u16;
+            cycle = sWmVar.sOutputContrl.CycleTime[motorIndex][cycleIdx];
+            runTime = sWmVar.sOutputContrl.RunTimeInCycle[motorIndex][cycleIdx];
+
+            sprintf(aData + strlen(aData), "%02X09%02X%04X%04X%04X%04X",
+                    motorIndex + 0x14, cycleIdx + 1, start, stop, cycle, runTime);
+        }
+    }
+
+    if (strlen(aData) == 0) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+    } else {
+        aData[strlen(aData)] = '\r';
+        aData[strlen(aData)] = '\n';
+        sWmVar.pRespond_Str(PortConfig, aData, 0);
+    }
+}
+
+void AppWm_SER_Set_Out_Mode(sData *str_Receiv, uint16_t Pos)
+{
+    uint8_t obit = 0;
+    uint8_t motor = 0;
+    uint8_t mode = 0;
+
+    if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &obit) == false) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+        return;
+    }
+
+    if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &motor) == false) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+        return;
+    }
+
+    if (AppWm_Read_Hex_Byte(str_Receiv, &Pos, &mode) == false) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+        return;
+    }
+
+    motor -= 3;
+    if ((obit != 0x13) || (motor >= NUMBER_MOTOR) || (mode > 2)) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+        return;
+    }
+
+    sWmVar.sOutputContrl.OutMode[motor] = mode;
+    sWmVar.pRespond_Str(PortConfig, "OK", 0);
+    AppWm_Save_OutCtrl_Infor();
+}
+
+void AppWm_SER_Get_Out_Mode(sData *str_Receiv, uint16_t Pos)
+{
+    char aData[128] = {0};
+    uint8_t motorIndex = 0;
+    uint8_t mode = 0;
+
+    for (motorIndex = 0; motorIndex < NUMBER_MOTOR; motorIndex++) {
+        mode = sWmVar.sOutputContrl.OutMode[motorIndex];
+
+        if (mode > 2) {
+            continue;
+        }
+
+        sprintf(aData + strlen(aData), "13%02X%02X", motorIndex + 3, mode);
+    }
+
+    if (strlen(aData) == 0) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+    } else {
+        aData[strlen(aData)] = '\r';
+        aData[strlen(aData)] = '\n';
+        sWmVar.pRespond_Str(PortConfig, aData, 0);
+    }
+}
+
+void AppWm_SER_Set_Out_Val(sData *str_Receiv, uint16_t Pos)
+{
+    uint16_t Posfix = Pos;
+    uint8_t chann = (uint8_t) UTIL_Get_Num_From_Str(str_Receiv, &Posfix);
+    uint8_t val = (uint8_t) UTIL_Get_Num_From_Str(str_Receiv, &Posfix);
+    
+    if ( (val < 2) && (chann <= NUMBER_MOTOR) ) {
+        if (chann == 0) {
+            for (uint8_t i = 0; i < NUMBER_MOTOR; i++) {
+                sWmVar.sOutputContrl.OutMode[i] = val;
+                sWmVar.sOutputContrl.OutMode[i] = 1;
+            }
+        } else {
+            sWmVar.sOutputContrl.OutMode[chann - 1] = 1;
+            sWmVar.sOutputContrl.OutOnOff[chann - 1] = val;
+        }
+        
+        AppWm_Save_OutCtrl_Infor();
+        sWmVar.pRespond_Str(PortConfig, "OK", 0);
+        return;
+    }
+    
+    sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+}
+
+void AppWm_SER_Get_Out_Val(sData *str_Receiv, uint16_t Pos)
+{
+    char aData[128] = {0};
+    
+    for (uint8_t i = 0; i < NUMBER_MOTOR; i++) {
+        sprintf(aData + strlen(aData), "%d,%d,", i + 1, sWmVar.sOutputContrl.OutOnOff[i]);
+    }
+
+    if (strlen(aData) == 0) {
+        sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+    } else {
+        aData[strlen(aData)] = '\r';
+        aData[strlen(aData)] = '\n';
+        sWmVar.pRespond_Str(PortConfig, aData, 0);
+    }
+}
+ 
+
+
+void AppWm_SER_Set_Press_Thresh(sData *str_Receiv, uint16_t Pos)
+{
+    char temp[32] = {0};
+    uint16_t Posfix = Pos;
+    uint8_t chann = (uint8_t) UTIL_Get_Num_From_Str(str_Receiv, &Posfix);
+    float pressure[2] = {0.0f};
+
+    for (uint8_t i = 0; i < 2; i++) {
+        UTIL_MEM_set(temp, 0, sizeof(temp));
+        int16_t len = UTIL_Cut_String((char *)(str_Receiv->Data_a8 + Posfix), temp, ',', sizeof(temp) - 1);
+        if (len <= 0) {
+            sWmVar.pRespond_Str(PortConfig, "ERROR\r\n", 0);
+            return;
+        }
+        
+        Posfix += len + 1;
+        pressure[i] = (float) UtilStringToFloat(temp);
+    }
+    
+    if (chann <= NUMBER_MOTOR) {
+        if (chann == 0) { 
+            for (uint8_t i = 0; i < NUMBER_MOTOR; i++) {
+                sWmVar.aThreshPress_f[i][0] = pressure[0];
+                sWmVar.aThreshPress_f[i][1] = pressure[1];
+            }
+        } else {
+            sWmVar.aThreshPress_f[chann - 1][0] = pressure[0];
+            sWmVar.aThreshPress_f[chann - 1][1] = pressure[1];
+        }
+        
+        sWmVar.pRespond_Str(PortConfig, "OK", 0);
+        AppWm_Save_OutCtrl_Infor();
+        return;
+    }
+
+    sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+}
+
+void AppWm_SER_Get_Press_Thresh(sData *str_Receiv, uint16_t Pos)
+{
+    char aData[128] = {0};
+
+    for (uint8_t i = 0; i < NUMBER_MOTOR; i++) {
+        sprintf(aData + strlen(aData), "%d,%.10g,%.10g,", i + 1, sWmVar.aThreshPress_f[i][0],sWmVar.aThreshPress_f[i][1] );
+    }
+    
+    aData[strlen(aData)] = '\r';
+    aData[strlen(aData)] = '\n';
+    sWmVar.pRespond_Str(PortConfig, aData, 0);
+}
 
 
 
@@ -3135,16 +3886,35 @@ uint8_t AppWm_Packet_Mod_Channel (sData *pData, uint8_t chann)
 void AppWm_Init_WM_Dig_Infor (void)
 {
     uint8_t temp = 0;
-    uint8_t  aBuff[64] = {0};
+    uint8_t  aBuff[128] = {0};
     
-#ifdef BOARD_QN_V5_0
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     temp = *(__IO uint8_t*) (ADDR_MODBUS_INFOR);
     //Check Byte EMPTY
     if (temp != FLASH_BYTE_EMPTY) {
-        OnchipFlashReadData(ADDR_MODBUS_INFOR, &aBuff[0], 64);
+        OnchipFlashReadData(ADDR_MODBUS_INFOR, &aBuff[0], 128);
         UTIL_MEM_cpy(&sWmDigVar.sModbInfor, &aBuff[1], sizeof(sWmDigVar.sModbInfor)); 
         UTIL_MEM_cpy(&sWmDigVar.nModbus_u8, &aBuff[48], sizeof(sWmDigVar.nModbus_u8)); 
+        
+        if (sWmDigVar.nModbus_u8 > MAX_SLAVE_MODBUS) {
+            sWmDigVar.nModbus_u8 = MAX_SLAVE_MODBUS;
+        }
+        
+        uint8_t i = 0;
+        temp = 64;
+        while (i < sWmDigVar.nModbus_u8) {
+            sWmDigVar.sModbDevData[i].Lwire_u16 = (int16_t) (aBuff[temp] << 8 | aBuff[temp + 1]); 
+            temp+= 2;
+            sWmDigVar.sModbDevData[i].Lstatic_u16 = (int16_t) (aBuff[temp] << 8 | aBuff[temp + 1]); 
+            temp+= 2;
+            i++;
+        }
+        
+        for (i = 0; i < sWmDigVar.nModbus_u8; i++) {
+            sWmDigVar.sModbDevData[i].TypeSett_u8 = sWmVar.aPRESSURE[i + MAX_CHANNEL].sLinearInter.Type_u8;
+        }
     }
+ 
 #endif
   
 #ifdef BOARD_LC_V1_1
@@ -3165,15 +3935,28 @@ void AppWm_Init_WM_Dig_Infor (void)
 
 void AppWm_Save_WM_Dig_Infor (void)
 {
-    uint8_t aBuff[64] = {0};
-
+    uint8_t aBuff[128] = {0};
+    uint16_t count = 0;
+    
     aBuff[0] = BYTE_WRITEN;
     UTIL_MEM_cpy(&aBuff[1], &sWmDigVar.sModbInfor, sizeof(sWmDigVar.sModbInfor));  
     UTIL_MEM_cpy(&aBuff[48], &sWmDigVar.nModbus_u8, sizeof(sWmDigVar.nModbus_u8)); 
     
-#ifdef BOARD_QN_V5_0
+    if (sWmDigVar.nModbus_u8 > MAX_SLAVE_MODBUS) {
+        sWmDigVar.nModbus_u8 = MAX_SLAVE_MODBUS;
+    }
+    
+    count = 64;
+    for (uint8_t i = 0; i < sWmDigVar.nModbus_u8; i++) {
+        aBuff[count++] = sWmDigVar.sModbDevData[i].Lwire_u16 >> 8;
+        aBuff[count++] = sWmDigVar.sModbDevData[i].Lwire_u16 & 0xFF;
+        aBuff[count++] = sWmDigVar.sModbDevData[i].Lstatic_u16 >> 8;
+        aBuff[count++] = sWmDigVar.sModbDevData[i].Lstatic_u16 & 0xFF;
+    }
+    
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     OnchipFlashPageErase(ADDR_MODBUS_INFOR);
-    OnchipFlashWriteData(ADDR_MODBUS_INFOR, aBuff, 64);
+    OnchipFlashWriteData(ADDR_MODBUS_INFOR, aBuff, 128);
 #endif
     
 #ifdef BOARD_LC_V1_1
@@ -3187,7 +3970,7 @@ void AppWm_Init_TNMT_Infor (void)
 {    
     uint8_t temp = 0;
     uint8_t  aBuff[1664] = {0};
-#ifdef BOARD_QN_V5_0
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     temp = *(__IO uint8_t*) (ADDR_TNMT_CONFIG);
     //Check Byte EMPTY
     if (temp != FLASH_BYTE_EMPTY) {
@@ -3238,7 +4021,7 @@ void AppWm_Save_TNMT_Infor (void)
     
     UTIL_MEM_cpy(&aBuff[2], &sWmVar.sChannInfor, sizeof(sWmVar.sChannInfor)); 
     
-#ifdef BOARD_QN_V5_0
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     OnchipFlashPageErase(ADDR_TNMT_CONFIG);
     OnchipFlashWriteData(ADDR_TNMT_CONFIG, aBuff, 1664);
 #endif
@@ -3248,12 +4031,52 @@ void AppWm_Save_TNMT_Infor (void)
 #endif
 }
 
+void AppWm_Init_OutCtrl_Infor (void)
+{
+    uint8_t temp = 0;
+    uint8_t aBuff[1024] = {0};
+      
+#if defined BOARD_QN_V3_2_2 || defined BOARD_QN_V5_1
+    temp = *(__IO uint8_t*) (ADDR_OUT_CONFIG);
+    //Check Byte EMPTY
+    if (temp != FLASH_BYTE_EMPTY) {
+        OnchipFlashReadData(ADDR_OUT_CONFIG, &aBuff[0], 1024);
+        UTIL_MEM_cpy(&sWmVar.sOutputContrl, &aBuff[1], sizeof(sWmVar.sOutputContrl)); 
+        UTIL_MEM_cpy(&sWmVar.aThreshPress_f, &aBuff[896], sizeof(sWmVar.aThreshPress_f)); 
+        
+        for (uint8_t  i = 0; i < NUMBER_MOTOR; i++) {
+            if (sWmVar.sOutputContrl.nBlockTime[i] > NUMBER_BLOCK_MAX) {
+                sWmVar.sOutputContrl.nBlockTime[i] = NUMBER_BLOCK_MAX;
+            }
+            
+            if (sWmVar.sOutputContrl.nCycle[i] > NUMBER_CYCLE_MAX) {
+                sWmVar.sOutputContrl.nCycle[i] = NUMBER_CYCLE_MAX;
+            }
+        }
+    }
+#endif
+}
+
+
+void AppWm_Save_OutCtrl_Infor (void)
+{
+    uint8_t aBuff[1024] = {0};
+    
+    aBuff[0] = BYTE_WRITEN;
+    UTIL_MEM_cpy(&aBuff[1], &sWmVar.sOutputContrl, sizeof(sWmVar.sOutputContrl));  
+    UTIL_MEM_cpy(&aBuff[896], &sWmVar.aThreshPress_f, sizeof(sWmVar.aThreshPress_f)); 
+        
+#if defined BOARD_QN_V3_2_2 || defined BOARD_QN_V5_1
+    OnchipFlashPageErase(ADDR_OUT_CONFIG);
+    OnchipFlashWriteData(ADDR_OUT_CONFIG, aBuff, 1024);
+#endif
+}
 
 void AppWm_Init_Default_Pressure (void)
 {
     for (uint8_t i = 0; i < MAX_CHANNEL; i++)
     {
-        sWmVar.aPRESSURE[i].sLinearInter.Factor_u16 = 100;
+        sWmVar.aPRESSURE[i].sLinearInter.Factor_u16 = 120;
         sWmVar.aPRESSURE[i].sLinearInter.InMin_u16 = 4;
         sWmVar.aPRESSURE[i].sLinearInter.InMax_u16 = 20;
         sWmVar.aPRESSURE[i].sLinearInter.InUnit_u8 = _UNIT_MILIAM;
@@ -3329,7 +4152,7 @@ uint8_t AppWm_Meas_Pressure_Process (uint32_t *delaynext)
                                                                                          sWmVar.aPRESSURE[Index].sLinearInter.OutMin_u16 * 1000, 
                                                                                          sWmVar.aPRESSURE[Index].sLinearInter.OutMax_u16 * 1000 );
                 #else
-                    sWmVar.aPRESSURE[Index].Val_i32 = sWmVar.aPRESSURE[Index].mVol_u32;
+                    sWmVar.aPRESSURE[Index].Val_i32 = sWmVar.aPRESSURE[Index].mVol_i32;
                 #endif
                     
                     Index++;
@@ -3410,6 +4233,8 @@ uint16_t AppWm_Packet_Setting (uint8_t *aData, uint8_t chann)
     switch (sWmVar.aPRESSURE[chann].sLinearInter.Type_u8)
     {
         case __AN_PRESS:
+        case __AN_ULTRA:
+        case __AN_LEVEL_2:
             aBuff[cObis++] = OBIS_WM_PRESSURE;    
             break;
         case __AN_LEVEL:
@@ -3504,5 +4329,23 @@ static void OnTimerPressure(void *context)
 }
 
 
+uint8_t AppWm_iPending (void)
+{
+    if (Check_Time_Out(sWmVar.LandMark_u32, 5000) == true) {
+        return false;
+    }
+    
+    return true;
+}
 
+void _cb_OUT1_Set (uint8_t on_off)
+{
+//    HAL_GPIO_WritePin(RELAY_1_GPIO_Port, RELAY_1_Pin, (GPIO_PinState) on_off); 
+    HAL_GPIO_WritePin(DEV_DO_1_GPIO_Port, DEV_DO_1_Pin, (GPIO_PinState) on_off);
+}
 
+void _cb_OUT2_Set (uint8_t on_off)
+{
+//    HAL_GPIO_WritePin(RELAY_2_GPIO_Port, RELAY_2_Pin,(GPIO_PinState) on_off); 
+    HAL_GPIO_WritePin(DEV_DO_2_GPIO_Port, DEV_DO_2_Pin, (GPIO_PinState) on_off);
+}

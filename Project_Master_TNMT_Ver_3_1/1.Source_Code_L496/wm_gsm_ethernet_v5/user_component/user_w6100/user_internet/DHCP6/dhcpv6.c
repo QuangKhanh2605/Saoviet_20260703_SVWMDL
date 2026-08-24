@@ -47,9 +47,9 @@
 
 /* If you want to display debug & procssing message, Define _DHCP_DEBUG_ in dhcp.h */
 //#define _DHCP6_DEBUG_
-//#ifdef _DHCP6_DEBUG_
-//#include <stdio.h>
-//#endif
+#ifdef _DHCP6_DEBUG_
+#include <stdio.h>
+#endif
 
 /* DHCP6 state machine. */
 #define STATE_DHCP6_INIT 0      ///< Initialize
@@ -217,13 +217,15 @@ void AppendDhcpOption(uint8_t value)
  */
 void DumpDhcpOption(char *sMark)
 {
+#ifdef _DHCP6_DEBUG_
     unsigned i;
-//    printf("%20s => size=%02d,num=%02d : ", sMark, size, num);
+    printf("%20s => size=%02d,num=%02d : ", sMark, size, num);
     for (i = num2; i < num; i++)
     {
-//        printf("%.2x ", pDHCPMSG.OPT[i]);
+        printf("%.2x ", pDHCPMSG.OPT[i]);
     }
-//    printf("\r\n");
+    printf("\r\n");
+#endif
     num2 = num;
 }
 
@@ -405,7 +407,7 @@ uint8_t send_DHCP_REQUEST(void)
     {
         return 9;
     }
-#ifdef _DHCP_DEBUG_
+#ifdef _DHCP6_DEBUG_
     printf("req : %x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x:%x%x \r\n", recv_IP[0], recv_IP[1], recv_IP[2], recv_IP[3], recv_IP[4], recv_IP[5], recv_IP[6], recv_IP[7], recv_IP[8], recv_IP[9], recv_IP[10], recv_IP[11], recv_IP[12], recv_IP[13], recv_IP[14], recv_IP[15]);
 #endif
     InitDhcpOption(60, 1);
@@ -831,10 +833,10 @@ int8_t parseDHCPMSG(void)
                         ValidLifeTime += (*p++ << 16);
                         ValidLifeTime += (*p++ << 8);
                         ValidLifeTime += (*p++);
-#ifdef _DHCP_DEBUG_
+#ifdef _DHCP6_DEBUG_
                         printf("IANA : %.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x:%.2x%.2x \r\n", recv_IP[0], recv_IP[1], recv_IP[2], recv_IP[3], recv_IP[4], recv_IP[5], recv_IP[6], recv_IP[7], recv_IP[8], recv_IP[9], recv_IP[10], recv_IP[11], recv_IP[12], recv_IP[13], recv_IP[14], recv_IP[15]);
 #endif
-                        break;
+                    break;
                     }
 
                     case OPT_STATUS_CODE:
@@ -1090,7 +1092,7 @@ uint8_t DHCP_run(wiz_NetInfo *netinfo)
 
     ret = DHCP_RUNNING;
     type = parseDHCPMSG();
-#ifdef _DHCP_DEBUG_
+#ifdef _DHCP6_DEBUG_
     printf("type:%d, dhcp_state :%d\r\n", type, dhcp_state);
 #endif
     switch (dhcp_state)

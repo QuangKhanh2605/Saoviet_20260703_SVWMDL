@@ -12,7 +12,12 @@
 #define SOCK_UDP6			 (Sn_MR_UDP6)
 #define SOCK_UDPD			 (Sn_MR_UDPD)
 
+//#define AS_IPV4 2
+//#define AS_IPV6 23
+
 #define AS_IPV4 1
 #define AS_IPV6 28
 #define AS_IPDUAL 11
+
+
 #endif

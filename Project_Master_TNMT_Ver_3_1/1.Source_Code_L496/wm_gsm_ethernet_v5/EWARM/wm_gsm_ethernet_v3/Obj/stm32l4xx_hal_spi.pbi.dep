@@ -38,7 +38,8 @@ stm32l4xx_hal_spi.pbi: \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc\stm32l4xx_hal_i2c.h \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_i2c_ex.h \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc\stm32l4xx_hal_iwdg.h \
-  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc\stm32l4xx_hal_lptim.h \
+  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\HAL_Driver_LPTIM_Counter\stm32l4xx_hal_lptim.h \
+  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc\stm32l4xx_hal_def.h \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc\stm32l4xx_hal_pwr.h \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr_ex.h \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM/../Drivers/STM32L4xx_HAL_Driver/Inc\stm32l4xx_hal_rtc.h \

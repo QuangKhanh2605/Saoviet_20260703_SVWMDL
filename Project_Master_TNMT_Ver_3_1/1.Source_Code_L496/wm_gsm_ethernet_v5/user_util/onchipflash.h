@@ -19,8 +19,6 @@ extern HAL_StatusTypeDef    FLASH_WaitForLastOperation(uint32_t Timeout);
     extern void  FLASH_PageErase(uint32_t Page);
 #endif
 
-#define BYTE_TEMP_FIRST    0xA5
-    
 /*------------------------------Function-----------------------------*/
 HAL_StatusTypeDef	OnchipFlashWriteData (uint32_t Addr, uint8_t *dataAddr, uint32_t dataLen);
 

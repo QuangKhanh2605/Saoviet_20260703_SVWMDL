@@ -119,6 +119,21 @@ sATCommandList sATCmdList[] =
     {_SET_TNMT_PACK_M, 	    NULL,           {(uint8_t*)"at+mpacket=",11}},   //at+mpacket=1
     {_QUERY_TNMT_PACK_M,    NULL,           {(uint8_t*)"at+mpacket?",11}},
     
+    {_SET_OUT_BLOCK_T, 	    NULL,           {(uint8_t*)"at+outblock=",12}},
+    {_QUERY_OUT_BLOCK_T,    NULL,           {(uint8_t*)"at+outblock?",12}},
+    
+    {_SET_OUT_DUTY_T, 	    NULL,           {(uint8_t*)"at+outduty=",11}},
+    {_QUERY_OUT_DUTY_T,     NULL,           {(uint8_t*)"at+outduty?",11}},
+    
+    {_SET_OUT_MODE, 	    NULL,           {(uint8_t*)"at+outmode=",11}},
+    {_QUERY_OUT_MODE,       NULL,           {(uint8_t*)"at+outmode?",11}},
+    
+    {_SET_OUT_VAL, 	        NULL,           {(uint8_t*)"at+outval=",10}},
+    {_QUERY_OUT_VAL,        NULL,           {(uint8_t*)"at+outval?",10}},
+    
+    {_SET_PRESS_THRESH, 	NULL,           {(uint8_t*)"at+pressthresh=",15}},
+    {_QUERY_PRESS_THRESH,   NULL,           {(uint8_t*)"at+pressthresh?",15}},
+    
     {_SET_FTP_SER_MAIN, 	NULL,	        {(uint8_t*)"at+ftpmain=",11}},   //Ex: at+ftpmain=124.158.5.154,21,admin,admin,chien/test_tn
     {_QUERY_FTP_SER_MAIN,   NULL,	        {(uint8_t*)"at+ftpmain?",11}},
     
@@ -143,6 +158,8 @@ sATCommandList sATCmdList[] =
     
     {_GET_PASSWORD,         NULL,           {(uint8_t*)"at+password?",12}},
     {_SET_PASSWORD,         NULL,           {(uint8_t*)"at+password=",12}},
+    
+    {_QUERY_STATUS, 	    NULL,           {(uint8_t*)"at+mstatus?",11}},
     
     {_END_AT_CMD,	        NULL,           {(uint8_t*)"at+end",6}},
 };

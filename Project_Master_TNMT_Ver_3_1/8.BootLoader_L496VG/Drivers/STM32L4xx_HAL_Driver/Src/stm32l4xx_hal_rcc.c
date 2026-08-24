@@ -379,8 +379,8 @@ HAL_StatusTypeDef HAL_RCC_DeInit(void)
   /* Clear all interrupt flags */
   WRITE_REG(RCC->CICR, 0xFFFFFFFFU);
 
-  /* Clear all reset flags */
-  SET_BIT(RCC->CSR, RCC_CSR_RMVF);
+//  /* Clear all reset flags */
+//  SET_BIT(RCC->CSR, RCC_CSR_RMVF);
 
   return HAL_OK;
 }

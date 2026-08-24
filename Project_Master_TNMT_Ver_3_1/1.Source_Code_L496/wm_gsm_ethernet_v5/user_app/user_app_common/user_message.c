@@ -94,9 +94,6 @@ MQTTPacket_connectData 	Connect_Packet = MQTTPacket_connectData_initializer;
 MQTTString 				topicString = MQTTString_initializer;
 #endif
 
-uint8_t	aSubcribe_Header[SUB_HEADER_LENGTH];
-uint8_t	aPublish_Header[SUB_HEADER_LENGTH];
-
 uint8_t	aDATA_MQTT[MAX_LENGTH_MQTT];        //Buffer chưa data da duoc dong goi MQTT: Bao gom Payload + Header MQTT
 
 /*======================== Function ======================*/
@@ -339,9 +336,9 @@ uint8_t _mDATA_PING(int Kind_Send)
     return 1;
 }
 
-///*
-// * 		PUBLISH MESSAGE
-// */
+/*
+ * 		PUBLISH MESSAGE
+ */
 //uint8_t _mDATA_PING(int Kind_Send)
 //{   
 //    mSet_default_MQTT(); 
@@ -863,7 +860,7 @@ uint8_t mGet_Data_From_Mem (uint8_t type, uint8_t tdata, uint8_t *pData, uint16_
         last_tdata = 0xFF;
     } else {
         // Check if tdata is different from last_tdata and reset if necessary
-        if (last_tdata != tdata) {
+        if (last_tdata != tdata && sMemVar.nSending_u16 != 0) {
             mReset_Raw_Data();
             sMemVar.nSending_u16 = 0;
         } 
@@ -871,7 +868,6 @@ uint8_t mGet_Data_From_Mem (uint8_t type, uint8_t tdata, uint8_t *pData, uint16_
         last_tdata = tdata;
 
         //neu qua 6 ban tin. hoac qua buff RAW thi se cho gui luon. con khong thi ket thuc doi doc tiep
-        
         if ( (sMemVar.nSending_u16 < Max_Packet_In_Mess) 
             && (Length != 0)
             && (Length + sMessage.pRawData.Length_u16 < sizeof (aDATA_RAW)) ) {  
@@ -896,7 +892,7 @@ uint8_t mGet_Data_From_Mem (uint8_t type, uint8_t tdata, uint8_t *pData, uint16_
         sMessage.pRawData.Data_a8[sMessage.pRawData.Length_u16-1] = TempCrc;
     }
     //mark mess to send
-    sMessage.aMESS_PENDING[tmess] = TRUE;  
+    sMessage.aMESS_PENDING[tmess] = TRUE; 
     
     return true;
 }
@@ -927,5 +923,7 @@ uint8_t mIs_Sending_Message (void)
     
     return false;
 }
+
+
 
 

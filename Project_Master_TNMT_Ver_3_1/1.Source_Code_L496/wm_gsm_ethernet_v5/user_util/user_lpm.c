@@ -54,7 +54,7 @@ StructpFuncLPM    *sLPMFeatureHandler = NULL;
 void UTIL_LPM_Init(void)
 {
 	StopModeDisable = LPM_TRUE;
-	UTIL_LPM_Dis_Debug_STlink();
+//	UTIL_LPM_Dis_Debug_STlink();
 }
 
 void UTIL_LPM_DeInit(void)
@@ -156,7 +156,7 @@ void PWR_ExitStopMode(void)
     HAL_PWREx_DisableFastWakeUp();
 #endif
   
-#if defined (BOARD_QN_V3_2) || defined (BOARD_QN_V5_0)
+#if defined (BOARD_QN_V3_2) || defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
 	/* After wake-up from STOP reconfigure the system clock */
 	/* Enable HSI */
 	__HAL_RCC_HSI_ENABLE();

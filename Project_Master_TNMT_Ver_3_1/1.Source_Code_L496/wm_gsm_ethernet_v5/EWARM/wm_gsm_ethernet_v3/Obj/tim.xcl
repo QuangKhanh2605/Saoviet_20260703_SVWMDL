@@ -82,9 +82,9 @@ D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code
 -I
 D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_mem\user_sd_card
 -I
-D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_convert_variable
+D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\HAL_Driver_LPTIM_Counter
 -I
-D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_modb_tcp
+D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_convert_variable
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\arm\inc
 -I
@@ -162,9 +162,9 @@ D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code
 -I
 D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\user_component\user_mem\user_sd_card
 -I
-D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\user_component\user_convert_variable
+D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\HAL_Driver_LPTIM_Counter
 -I
-D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\user_component\user_modb_tcp
+D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\user_component\user_convert_variable
 -D__CHAR_BITS__=8
 -D__CHAR_MAX__=0xff
 -D__CHAR_MIN__=0

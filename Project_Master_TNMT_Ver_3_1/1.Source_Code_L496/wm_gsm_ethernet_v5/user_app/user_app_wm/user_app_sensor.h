@@ -56,18 +56,18 @@ typedef enum
 
 typedef enum
 {
-    _SS_TEMP = 0,           // hoac SS_TEMP
-    _SS_PH,                 // SS pH
-    _SS_CLO,                // SS Clo
-    _SS_EC,                 // SS EC
-    _SS_TURB,               // SS TURB
-    _SS_COD,                // SS COD
-    _SS_TSS,                // SS TSS
-    _SS_NH4,                // SS NH4
-    _SS_DO,                 // SS DO
-    _SS_SALT,               // SS SALT
-    _SS_TDS,                // SS TDS
-    _SS_NO3,                // SS NO3
+    _SS_TEMP = 0,           // 0  hoac SS_TEMP
+    _SS_PH,                 // 1  SS pH
+    _SS_CLO,                // 2  SS Clo
+    _SS_EC,                 // 3  SS EC
+    _SS_TURB,               // 4  SS TURB
+    _SS_COD,                // 5  SS COD
+    _SS_TSS,                // 6  SS TSS
+    _SS_NH4,                // 7  SS NH4
+    _SS_DO,                 // 8  SS DO
+    _SS_SALT,               // 9  SS SALT
+    _SS_TDS,                // 10 SS TDS
+    _SS_NO3,                // 11 SS NO3
     
     _END_SENSOR,
 }eKind_Sensor;
@@ -115,7 +115,7 @@ typedef struct
     float   ParaScale;              // Measure>=ParaScale-> Scale_1, Measure<ParaScale-> Scale_2
     uint8_t Scale_2;                //Scale 2
     
-    uint8_t sUser;                  //Trang thai su dung hay khong
+    uint8_t sUser;                  //Trang thai su dung hay khong (hoac kenh nao)
     
     Struct_SS_Value sVal;           //Gia tri hien thi
     uint8_t State;                  //Trang thai du lieu (dang do/hieu chuan/error)

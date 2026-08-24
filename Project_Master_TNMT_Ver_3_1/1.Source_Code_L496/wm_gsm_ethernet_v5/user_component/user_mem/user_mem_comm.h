@@ -7,7 +7,6 @@
 
 #define MAX_PACKET_SAVE        2
 #define MAX_MEM_DATA           256
-#define BYTE_WRITEN            0xA5     
 
 #define MEM_CACUL_INDEX(Addr, AddrStart, SizeRec)   (Addr - AddrStart) / SizeRec 
 /*======== Struct var ===========*/

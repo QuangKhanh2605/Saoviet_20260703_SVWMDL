@@ -47,7 +47,9 @@ extern UART_HandleTypeDef huart1;
 
 void Send_Uart (char *string)
 {
-    UTIL_Printf_Str(DBLEVEL_M, string);
+    if (VLevelDebug >= DBLEVEL_M) {
+        HAL_UART_Transmit(UART, (uint8_t *)string, strlen (string), HAL_MAX_DELAY);
+    }
 }
 
 int sd_get_space_kb(void) {
@@ -163,7 +165,7 @@ int sd_write_file(const char *filename, const char *text) {
 	res = f_write(&file, text, strlen(text), &bw);
 	f_close(&file);
 
-    char *buf = calloc(200, sizeof(char));
+    char *buf = calloc(100, sizeof(char));
     sprintf (buf, "Write %u bytes to %s\r\n", bw, filename);
     Send_Uart(buf);
     free(buf);
@@ -186,7 +188,7 @@ int sd_append_file(const char *filename, const char *text) {
 	res = f_write(&file, text, strlen(text), &bw);
 	f_close(&file);
 
-    char *buf = calloc(200, sizeof(char));
+    char *buf = calloc(300, sizeof(char));
     sprintf (buf, "Appended %u bytes to %s\r\n", bw, filename);
     Send_Uart(buf);
     free(buf);

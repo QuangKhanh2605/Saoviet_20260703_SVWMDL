@@ -136,7 +136,9 @@ void Modem_Init(void)
     sATCmdList[_QUERY_TIME_ALARM].CallBack = Modem_SER_Get_Time_Alarm; 
     
     sATCmdList[_SET_FTP_SER_MAIN].CallBack = Modem_SER_Set_FTP_Main;
-    sATCmdList[_QUERY_FTP_SER_MAIN].CallBack = Modem_SER_Get_FTP_Main;     
+    sATCmdList[_QUERY_FTP_SER_MAIN].CallBack = Modem_SER_Get_FTP_Main;   
+    
+    sATCmdList[_QUERY_STATUS].CallBack = Modem_SER_Get_Status;  
 #endif
     
 #ifdef USING_APP_SIM
@@ -221,6 +223,7 @@ void Modem_Init(void)
     sMemVar.pForward_Mess = mGet_Data_From_Mem;
     sMemVar.pReset_Buff_Sim = mReset_Raw_Data;
     sMemVar.pMessage_Pending = mIs_Sending_Message;
+    sMemVar.pModem_Connected = Modem_iConn_Internet;
 #endif
 }
 
@@ -249,7 +252,7 @@ void Modem_Save_Var (void)
 #ifdef USING_INTERNAL_MEM
     uint8_t aBuff[2048] = {0};
 
-    aBuff[0] = BYTE_TEMP_FIRST;
+    aBuff[0] = BYTE_WRITEN;
     UTIL_MEM_cpy(&aBuff[1], &sModemInfor, sizeof(sModemInfor));   
     
     Erase_Firmware(ADDR_MODEM_INFOR, 1);
@@ -267,7 +270,7 @@ uint8_t Modem_Reset_MCU (void)
 #endif
     	Modem_Packet_Alarm_String("u_modem: soft reset mcu\r\n");
         Mem_Save_Index_Rec();
-
+        
     #ifdef BOARD_READ_PULSE
     #ifdef USING_APP_WM
         if (AppWm_Save_Pulse() == true)
@@ -307,7 +310,7 @@ uint8_t Modem_Reset_MCU_Immediately (void)
 {
 	Modem_Packet_Alarm_String("u_modem: soft reset mcu imediately\r\n");
     Mem_Save_Index_Rec();
-    
+        
 #ifdef BOARD_READ_PULSE
 #ifdef USING_APP_WM
     if (AppWm_Save_Pulse() == true)
@@ -356,20 +359,20 @@ void Modem_Packet_Alarm_String (const char *str)
 {
     UTIL_Log_Str (DBLEVEL_M, str);
     
-//    if (UTIL_var.ModePower_u8 == _POWER_MODE_ONLINE) {
-//        uint16_t len = strlen(str);
-//
-//        if ( (strlen(sModemVar.aALARM) + len + 1) > MAX_LENGTH_ALARM ) {
-//            UTIL_MEM_set(sModemVar.aALARM, 0, MAX_LENGTH_ALARM);
-//        }
-//        
-//        UTIL_MEM_cpy (sModemVar.aALARM + strlen(sModemVar.aALARM), (char *) '#', 1);
-//        UTIL_MEM_cpy (sModemVar.aALARM + strlen(sModemVar.aALARM), str, len);
-//
-//    #ifdef USING_APP_MESS
-//        sMessage.aMESS_PENDING[SEND_ALARM] = TRUE;
-//    #endif
-//    }
+    if (UTIL_var.ModePower_u8 == _POWER_MODE_ONLINE) {
+        uint16_t len = strlen(str);
+
+        if ( (strlen(sModemVar.aALARM) + len + 1) > MAX_LENGTH_ALARM ) {
+            UTIL_MEM_set(sModemVar.aALARM, 0, MAX_LENGTH_ALARM);
+        }
+        
+        UTIL_MEM_cpy (sModemVar.aALARM + strlen(sModemVar.aALARM), (char *) '#', 1);
+        UTIL_MEM_cpy (sModemVar.aALARM + strlen(sModemVar.aALARM), str, len);
+
+    #ifdef USING_APP_MESS
+        sMessage.aMESS_PENDING[SEND_ALARM] = TRUE;
+    #endif
+    }
 }
 
                         
@@ -409,7 +412,11 @@ void Modem_Deinit_Peripheral (void)
 {
 #ifdef USING_LCD_DISPLAY
     sLCD.Ready_u8 = false;
-    HAL_GPIO_WritePin (LCD_ON_OFF_GPIO_Port, LCD_ON_OFF_Pin, GPIO_PIN_RESET);  
+#ifdef BOARD_QN_V5_0
+    HAL_GPIO_WritePin (LCD_ON_OFF_GPIO_Port, LCD_ON_OFF_Pin, GPIO_PIN_RESET);   
+#else
+    HAL_GPIO_WritePin (LCD_ON_OFF_GPIO_Port, LCD_ON_OFF_Pin, GPIO_PIN_SET); 
+#endif 
 #endif    
     
 #ifdef USING_APP_TEMH
@@ -425,7 +432,7 @@ void Modem_Deinit_Peripheral (void)
     
     MX_GPIO_DeInit();
 
-#ifdef BOARD_QN_V5_0 
+#if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     ADC_Desequence_Powerhungry_Channels();
     
     HAL_ADC_DeInit(&hadc1);
@@ -662,9 +669,11 @@ void Modem_SER_Get_Time_Alarm (sData *strRecei, uint16_t Pos)
 
 void Modem_SER_Set_cReset (sData *strRecei, uint16_t Pos)
 {
-    char aTEMP[5] = {0};
-    if (UTIL_Get_strNum((char *) (strRecei->Data_a8 + Pos), aTEMP, sizeof(aTEMP)) != NULL) {
-        sModemInfor.cReset_u16 = UtilStringToInt(aTEMP);
+    int64_t temp = UTIL_Get_Num_From_Str (strRecei, &Pos);
+    
+    if (temp != -1) {
+        sModemInfor.cReset_u16 = (uint16_t) temp;
+        UTIL_MEM_set(sModemInfor.aRS_RESOURCE, 0, sizeof(sModemInfor.aRS_RESOURCE));
         Modem_Save_Var ();
         Modem_Respond_Str(PortConfig, "\r\nOK",  1);
     } else {
@@ -674,10 +683,14 @@ void Modem_SER_Set_cReset (sData *strRecei, uint16_t Pos)
 
 void Modem_SER_Get_cReset (sData *strRecei, uint16_t Pos)
 {
-    char aData[32] = {0};
+    char aData[256] = {0};
 
-    sprintf(aData, "%d\r\n", sModemInfor.cReset_u16);
+    sprintf(aData, "%d/%d/%d %d:%d:%d: count = %d\r\n", sModemInfor.sTimeReset.year, sModemInfor.sTimeReset.month, sModemInfor.sTimeReset.date, 
+                                                        sModemInfor.sTimeReset.hour, sModemInfor.sTimeReset.min, sModemInfor.sTimeReset.sec, 
+                                                        sModemInfor.cReset_u16);
     
+    sprintf(aData + strlen(aData), "RS source: %s", sModemInfor.aRS_RESOURCE);
+                
     Modem_Respond_Str(PortConfig, aData, 0);
 }
 
@@ -759,7 +772,7 @@ void Modem_SER_Set_Level_Debug (sData *str_Receiv, uint16_t Pos)
     if ( (temp >= DBLEVEL_MESS) && (temp <= DBLEVEL_H) )
     {
         VLevelDebug = temp;
-        UTIL_ADV_TRACE_SetVerboseLevel(DBLEVEL_M);
+        UTIL_ADV_TRACE_SetVerboseLevel(VLevelDebug);
         
         Modem_Respond_Str(PortConfig, "OK", 0);
     } else
@@ -1079,11 +1092,25 @@ void Modem_SER_Get_FTP_Main (sData *strRecei, uint16_t Pos)
 {
     char aData[128] = {0};
     
-    sprintf((char*) aData, "%s,%s,%s,%s,%s\r\n", sModemInfor.sServerTn.sServer.aIP,
+    sprintf((char*) aData, "%s:%s,%s,%s,%s\r\n", sModemInfor.sServerTn.sServer.aIP,
                                         sModemInfor.sServerTn.sServer.aPORT,
                                         sModemInfor.sServerTn.sServer.aUSER,
                                         sModemInfor.sServerTn.sServer.aPASS,
                                         sModemInfor.sServerTn.aPATH);  
+    
+    Modem_Respond_Str(PortConfig, aData, 0);
+}
+
+
+void Modem_SER_Get_Status (sData *strRecei, uint16_t Pos)
+{
+    char aData[128] = {0}; 
+    
+    sprintf(aData + strlen(aData), "sim\r\ncsq : %d\r\nerr : %d\r\n", 
+                            sSimCommInfor.RSSI_u8, sSimCommVar.sErrorCode.Code_u8);
+    
+    sprintf(aData + strlen(aData), "mem\r\ntype : %d\r\nsize : %d\r\nstatus : %d\r\nerr: %d\r\n", 
+                            sMemVar.Type_u8, sMemVar.Size_u16, sMemVar.Status_u8, sMemVar.Error_u8);
     
     Modem_Respond_Str(PortConfig, aData, 0);
 }
@@ -1141,7 +1168,6 @@ void Modem_Set_Server_Infor_To_App(void)
     }
 }
 
-
 //Func cb for message
 void Modem_Packet_MePDV (sData *pData)
 {
@@ -1178,22 +1204,22 @@ void Modem_Packet_MePDV (sData *pData)
 #endif
     
 #ifdef USING_APP_SENSOR
-    uint8_t NumChannel = 0;
-    for(uint8_t j = 0; j < MAX_CHANNEL_SS; j++)
-    {
-      for(uint8_t i = 0; i < _END_SENSOR; i++)
-      {
-        if(sMeasureMain[j][i].sUser == 1)
-        {
-            NumChannel++;
-            break;
-        }
-      }
-    }
+//    uint8_t NumChannel = 0;
+//    for(uint8_t j = 0; j < MAX_CHANNEL_SS; j++)
+//    {
+//      for(uint8_t i = 0; i < _END_SENSOR; i++)
+//      {
+//        if(sMeasureMain[j][i].sUser != 0)
+//        {
+//            NumChannel++;
+//            break;
+//        }
+//      }
+//    }
     
     *(pData->Data_a8 + pData->Length_u16++) = OBIS_NUM_CHANNEL_WM;  
     *(pData->Data_a8 + pData->Length_u16++) = 0x01;   
-    *(pData->Data_a8 + pData->Length_u16++) = NumChannel;  
+    *(pData->Data_a8 + pData->Length_u16++) = MAX_CHANNEL_SS;  
 #endif
 //    //Firmware version
 //    SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_FW_VERSION, sFirmVersion, strlen(sFirmVersion), 0xAA);
@@ -1269,6 +1295,8 @@ void Modem_Packet_MePDV (sData *pData)
     *(pData->Data_a8 + pData->Length_u16 - 1) = TempCrc;    
 }
 
+////Func cb for message
+//
 //void Modem_Packet_MePDV (sData *pData)
 //{
 //    uint16_t i = 0;
@@ -1514,11 +1542,12 @@ void Modem_SER_Config (sData *strRecv, uint16_t pos)
     }
 }
 
+
 uint8_t Modem_SER_Setting (sData *strRecv, uint16_t Pos)
 {
 #ifdef USING_APP_WM
     uint8_t   Obis, Len, scale, chann = 0xFF;
-    uint8_t   Result = true, mPulseSett = false, mPressSett = false;
+    uint8_t   Result = true;
     uint16_t  i = 0;
     uint64_t  TempU64 = 0;
         
@@ -1545,79 +1574,116 @@ uint8_t Modem_SER_Setting (sData *strRecv, uint16_t Pos)
         {
             case OBIS_SERI_SENSOR: //lay byte cuoi cung
                 chann = (uint8_t) TempU64 - 0x30;
-                if ((chann == 0) || (chann > MAX_CHANNEL)) {
+                if ((chann == 0) || (chann > (MAX_CHANNEL + MAX_SLAVE_MODBUS))) { 
                     Result = false;
                 }
                 break;
             case OBIS_SETT_PULSE_FACTOR:                 
                 //lay scale vao he so xung
-                sPulse[chann - 1].FactorInt_i16 = TempU64;
-                sPulse[chann - 1].FactorDec_u8 = *(strRecv->Data_a8 + Pos++);
-                mPulseSett = true;
+                if (chann <= MAX_CHANNEL) {
+                    sPulse[chann - 1].FactorInt_i16 = TempU64;
+                    sPulse[chann - 1].FactorDec_u8 = *(strRecv->Data_a8 + Pos++);
+                } else {
+                    Pos++;
+                }
                 break;
             case OBIS_SETT_PULSE_START:   
-                scale = *(strRecv->Data_a8 + Pos++);
-                sPulse[chann - 1].Start_lf = ((double) TempU64) * Convert_Scale(scale);
-                mPulseSett = true;
+                if (chann <= MAX_CHANNEL) {
+                    scale = *(strRecv->Data_a8 + Pos++);
+                    sPulse[chann - 1].Start_lf = ((double) TempU64) * Convert_Scale(scale);
+                } else {
+                    Pos++;
+                }
                 break;
             case OBIS_SETT_LI_IN_MIN:                
                 Pos++; // scale
-                sWmVar.aPRESSURE[chann - 1].sLinearInter.InMin_u16 = ( uint16_t ) TempU64;    
-                
-                mPressSett = true;
+                sWmVar.aPRESSURE[chann - 1].sLinearInter.InMin_u16 = ( uint16_t ) TempU64;   
                 break;
             case OBIS_SETT_LI_IN_MAX:
                 Pos++; // scale
                 sWmVar.aPRESSURE[chann - 1].sLinearInter.InMax_u16 = ( uint16_t ) TempU64;
-                
-                mPressSett = true;
                 break;
             case OBIS_SETT_LI_IN_UNIT:
                 if (TempU64 <= _UNIT_BAR)
                     sWmVar.aPRESSURE[chann - 1].sLinearInter.InUnit_u8 = (uint8_t) TempU64;
-                
-                mPressSett = true;
                 break;
             case OBIS_SETT_LI_OUT_MIN:
                 Pos++; // scale
                 sWmVar.aPRESSURE[chann - 1].sLinearInter.OutMin_u16 = ( uint16_t ) TempU64; 
-                
-                mPressSett = true;
                 break;
             case OBIS_SETT_LI_OUT_MAX:
                 Pos++; // scale
                 sWmVar.aPRESSURE[chann - 1].sLinearInter.OutMax_u16 = ( uint16_t ) TempU64;  
-                
-                mPressSett = true;
                 break;
             case OBIS_SETT_LI_OUT_UNIT:
                 if (TempU64 <= _UNIT_BAR)
                     sWmVar.aPRESSURE[chann - 1].sLinearInter.OutUnit_u8 = (uint8_t) TempU64;
-                
-                mPressSett = true;
                 break;
-            case OBIS_SETT_PRESS_FACTOR:                
+            case OBIS_SETT_PRESS_FACTOR:  
                 sWmVar.aPRESSURE[chann - 1].sLinearInter.FactorDec_u8 = *(strRecv->Data_a8 + Pos++);
                 sWmVar.aPRESSURE[chann - 1].sLinearInter.Factor_u16 = (uint16_t) TempU64;
 
                 if ( (sWmVar.aPRESSURE[chann - 1].sLinearInter.FactorDec_u8 < 0xFC) && (sWmVar.aPRESSURE[chann - 1].sLinearInter.FactorDec_u8 >= 2)) {
                     sWmVar.aPRESSURE[chann - 1].sLinearInter.FactorDec_u8 = 0;
                 }
-                mPressSett = true;
                 break;
             case OBIS_SETT_PRESS_TYPE:
-                if (TempU64 <= 1)
+                if (TempU64 < __AN_END)
                     sWmVar.aPRESSURE[chann - 1].sLinearInter.Type_u8 = (uint8_t) TempU64;
+                    
+                if (chann > MAX_CHANNEL) {
+                    sWmDigVar.sModbDevData[chann - MAX_CHANNEL - 1].TypeSett_u8 = (uint8_t) TempU64;
+                }
                 break;
-            case OBIS_VAL_HI_QUAN:  
+            case OBIS_VAL_HI_QUAN:                 
+                scale = *(strRecv->Data_a8 + Pos++);
+                if (chann <= MAX_CHANNEL) {
+                    sMeterThreshold[chann - 1].Quan[0].ValMax_f = TempU64 * Convert_Scale(scale);
+                }
+                break;
             case OBIS_VAL_LOW_QUAN:
+                scale = *(strRecv->Data_a8 + Pos++);
+                if (chann <= MAX_CHANNEL) {
+                    sMeterThreshold[chann - 1].Quan[0].ValMin_f = TempU64 * Convert_Scale(scale);
+                }
+                break;
             case OBIS_VAL_HI_FLOW:
+                scale = *(strRecv->Data_a8 + Pos++);
+                if (chann <= MAX_CHANNEL) {
+                    sMeterThreshold[chann - 1].Flow[0].ValMax_f = TempU64 * Convert_Scale(scale);
+                }
+                break;
             case OBIS_VAL_LOW_FLOW:
+                scale = *(strRecv->Data_a8 + Pos++);
+                if (chann <= MAX_CHANNEL) {
+                    sMeterThreshold[chann - 1].Flow[0].ValMin_f = TempU64 * Convert_Scale(scale);
+                }
+                break;
             case OBIS_VAL_LOW_PIN:
-                Pos++;
+                scale = *(strRecv->Data_a8 + Pos++);
+                if (chann <= MAX_CHANNEL) {
+                    sMeterThreshold[chann - 1].LowBatery = (uint16_t) MIN( (TempU64 * Convert_Scale(scale)), 100 );
+                }
+                break;
+            case OBIS_WM_LEVEL_WIRE:
+                if (chann > MAX_CHANNEL) {
+                    scale = *(strRecv->Data_a8 + Pos++);
+                    sWmDigVar.sModbDevData[chann - MAX_CHANNEL - 1].Lwire_u16 = (uint16_t) (TempU64 * Convert_Scale(scale + 2));
+                } else {
+                    Pos++;
+                }
+                break;
+            case OBIS_WM_LEVEL_VAL_STA:
+                if (chann > MAX_CHANNEL) {
+                    scale = *(strRecv->Data_a8 + Pos++);
+                    sWmDigVar.sModbDevData[chann - MAX_CHANNEL - 1].Lstatic_u16 = (uint16_t) (TempU64 * Convert_Scale(scale + 2));
+                } else {
+                    Pos++;
+                }
                 break;
             default:
                 if ( (Obis == 0x0D) && (Len == 0x0A) ) {
+                    Pos = strRecv->Length_u16;  //ket thuc
                 } else {
                     Result = false;
                 }
@@ -1628,14 +1694,9 @@ uint8_t Modem_SER_Setting (sData *strRecv, uint16_t Pos)
             break;
     }
     
-    if (Result == true){
-        //luu lai gia tri config
-        if (mPressSett == true)
-            AppWm_Save_Press_Infor();
-        
-        if (mPulseSett == true)
-            AppWm_Save_Pulse();
-    }
+    AppWm_Save_WM_Dig_Infor();
+    AppWm_Save_Press_Infor();
+    AppWm_Save_Pulse();
 
     return Result;
 #else
@@ -1662,7 +1723,7 @@ uint8_t Modem_SER_Setting_2 (sData *strRecv, uint16_t Pos)
     while ( (Pos + 4) <= strRecv->Length_u16 )   
     {
         Len = 0; TempU64 = 0;
-        UTIL_MEM_set (&sThreshConfig, 0, sizeof(sThreshConfig)); 
+        UTIL_MEM_set (&sThreshConfig, 0, sizeof(sThreshold)); 
          
         Obis = *(strRecv->Data_a8 + Pos++);
         Len = *(strRecv->Data_a8 + Pos++);
@@ -1701,16 +1762,16 @@ uint8_t Modem_SER_Setting_2 (sData *strRecv, uint16_t Pos)
                     switch (Obis) 
                     {
                         case OBIS_THRESH_QUAN:  
-                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Quan[block], &sThreshConfig, sizeof(sThreshConfig)); 
+                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Quan[block], &sThreshConfig, sizeof(sThreshold)); 
                             break;
                         case OBIS_THRESH_FLOW:
-                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Flow[block], &sThreshConfig, sizeof(sThreshConfig)); 
+                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Flow[block], &sThreshConfig, sizeof(sThreshold)); 
                             break;
                         case OBIS_THRESH_PRESS:
-                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Press[block], &sThreshConfig, sizeof(sThreshConfig)); 
+                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Press[block], &sThreshConfig, sizeof(sThreshold)); 
                             break;
                         case OBIS_THRESH_LEVEL:
-                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Level[block], &sThreshConfig, sizeof(sThreshConfig)); 
+                            UTIL_MEM_cpy (&sMeterThreshold[chann - 1].Level[block], &sThreshConfig, sizeof(sThreshold)); 
                             break;
                             break;
                         default:
@@ -1726,6 +1787,7 @@ uint8_t Modem_SER_Setting_2 (sData *strRecv, uint16_t Pos)
                 break;
             default:
                 if ( (Obis == 0x0D) && (Len == 0x0A) ) {
+                    Pos = strRecv->Length_u16;  //ket thuc
                 } else {
                     Result = false;
                 }
@@ -1737,16 +1799,13 @@ uint8_t Modem_SER_Setting_2 (sData *strRecv, uint16_t Pos)
             break;
     }
     
-    if (Result == true){
-        AppWm_Save_Press_Infor();
-    }
+    AppWm_Save_Press_Infor();
 
     return Result;
 #else
     return true;
 #endif
 }
-
 
 void Modem_SER_Set_Time (sData *strRecv, uint16_t Pos)
 {
@@ -1903,6 +1962,7 @@ void Modem_Monitor_Connect_Server (void)
                 sMessage.aMESS_PENDING[SEND_SERVER_FTP_FAIL] = TRUE;  //bao len FTP fail
                 UTIL_var.ModeConnNow_u8 = UTIL_var.ModeConnLast_u8;
                 AppSim_Restart_Imediate();
+                fevent_active(sEventAppEth, _EVENT_ETH_HARD_RESET);
                 break;
             default:
                 break;
@@ -2005,8 +2065,10 @@ uint8_t Modem_Change_Server (void)
 void Modem_PowOn_Mem (void)
 {
     FLASH_RESET_OFF;
+#ifdef BOARD_QN_V5_1
     FLASH_POWER_OFF;
     HAL_Delay(200);
+#endif
     FLASH_POWER_ON;
 }
 
@@ -2048,13 +2110,43 @@ uint16_t AppWm_DIG_Packet_Setting (uint8_t *aData, uint8_t chann)
     SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SERI_SENSOR, &aSERI_SENSOR, 4, 0xAA);
 
     SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_TYPE, &DcuType, 1, 0xAA);
-    
-    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_WM_LEVEL_UNIT, &sWmDigVar.sModbDevData[chann].LUnit_u16, 1, 0xAA);
-    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_WM_LEVEL_WIRE, &sWmDigVar.sModbDevData[chann].Lwire_u16, 2, 0 - (uint8_t)sWmDigVar.sModbDevData[chann].LDecimal_u16);
 
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_LI_IN_MIN, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.InMin_u16, 2, 0);
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_LI_IN_MAX, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.InMax_u16, 2, 0);
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_LI_IN_UNIT, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.InUnit_u8, 1, 0xAA);
+    
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_LI_OUT_MIN, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.OutMin_u16, 2, 0);
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_LI_OUT_MAX, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.OutMax_u16, 2, 0);
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_LI_OUT_UNIT, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.OutUnit_u8, 1, 0xAA);
+    
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_PRESS_FACTOR, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.Factor_u16, 2, 
+                                                                                        sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.FactorDec_u8);
+    
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_SETT_PRESS_TYPE, &sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.Type_u8, 1, 0xAA);
+    
+    //level
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_WM_LEVEL_WIRE, &sWmDigVar.sModbDevData[chann].Lwire_u16, 2, 0xFE);
+    SV_Protocol_Packet_Data(pData.Data_a8, &pData.Length_u16, OBIS_WM_LEVEL_VAL_STA, &sWmDigVar.sModbDevData[chann].Lstatic_u16, 2, 0xFE);
+    //
+    
     aLIST_OBIS[cObis++] = OBIS_TIME_DEVICE;
     aLIST_OBIS[cObis++] = OBIS_SERI_SENSOR;
         
+    switch (sWmVar.aPRESSURE[chann + MAX_CHANNEL].sLinearInter.Type_u8)
+    {
+        case __AN_PRESS:
+        case __AN_ULTRA:
+        case __AN_LEVEL_2:
+            aLIST_OBIS[cObis++] = OBIS_WM_PRESSURE;    
+            break;
+        case __AN_LEVEL:
+            aLIST_OBIS[cObis++] = OBIS_WM_LEVEL_VAL_SENSOR;
+            break;
+        default:
+            aLIST_OBIS[cObis++] = OBIS_WM_V_ANALOG;
+            break;
+    }
+    
     aLIST_OBIS[cObis++] = OBIS_DEV_VOL1;
 #ifdef USING_APP_SIM
     aLIST_OBIS[cObis++] = OBIS_RSSI_1;
@@ -2071,6 +2163,7 @@ uint16_t AppWm_DIG_Packet_Setting (uint8_t *aData, uint8_t chann)
         case __MET_WOTECK_ULTRA:
         case __MET_WM_MONG_CAI: 
         case __MET_SI_MAG8000:
+        case __MET_SI_MAG6000:
             aLIST_OBIS[cObis++] = OBIS_WM_PULSE_FORWARD;
             aLIST_OBIS[cObis++] = OBIS_WM_PULSE_REVERSE;
             aLIST_OBIS[cObis++] = OBIS_WM_PULSE;
@@ -2100,6 +2193,8 @@ uint16_t AppWm_DIG_Packet_Setting (uint8_t *aData, uint8_t chann)
 }
 
 
+
+
 uint8_t Modem_iConn_Internet(void)
 {
     if ( (sSimCommVar.State_u8 == _SIM_CONN_MQTT) 
@@ -2109,5 +2204,9 @@ uint8_t Modem_iConn_Internet(void)
     
     return false;
 }
+
+
+
+
 
 

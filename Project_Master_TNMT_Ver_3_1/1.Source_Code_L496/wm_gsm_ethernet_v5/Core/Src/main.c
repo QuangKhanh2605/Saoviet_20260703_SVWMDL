@@ -114,19 +114,6 @@ int main(void)
   
   Main_Task();
    
-//    HAL_UART_Transmit(&uart_debug, "TEST: EX FLASH...\r\n" , strlen("TEST: EX FLASH...\r\n"), 1000);  
-//    
-//    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET);   
-//    FLASH_RESET_OFF;
-//    FLASH_POWER_ON;
-//    
-//    if (eFlash_Test() == true) {
-//        HAL_UART_Transmit(&uart_debug, "TEST: EX FLASH OK!!!!\r\n" , strlen("TEST: EX FLASH OK!!!!\r\n"), 1000);  
-//    } else {
-//        HAL_UART_Transmit(&uart_debug, "TEST: EX FLASH ERROR!!!!\r\n" , strlen("TEST: EX FLASH ERROR!!!!\r\n"), 1000);
-//    }
-    
-  
   /* USER CODE END 2 */
 
   /* Infinite loop */

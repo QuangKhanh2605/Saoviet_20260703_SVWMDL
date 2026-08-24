@@ -14,7 +14,6 @@
 #include "gpio.h"
 #include "adc.h"
 #include "iwdg.h"
-     
 
 /*==========Static func====================*/
 static uint8_t _Cb_Timer_IRQ(uint8_t event);
@@ -68,7 +67,7 @@ char aSaoVietCom[15][71] =
 };
 
 
-char sFirmVersion[] = {"SVTH_SVM_DLS_V2_2_2"};  //19 byte
+char sFirmVersion[] = {"SVTH_SVM_DLS_V5_1_1"};  //19 byte
 
 static UTIL_TIMER_Object_t TimerTx;
 
@@ -221,6 +220,7 @@ static uint8_t _Cb_HandLer_IDLE(uint8_t event)
         mGetStime_u8 = true;
         sSimCommVar.iGetClock_u8 = false;
         sMessage.aMESS_PENDING[SEND_SERVER_TIME_PENDING] = TRUE;
+        AppWm_Save_Pulse();
     } else if (sRTC.hour != 9) {
         mGetStime_u8 = false;
     }
@@ -324,7 +324,8 @@ static uint8_t _Cb_Tx_Timer(uint8_t event)
                 UTIL_var.ModeConnLast_u8 = UTIL_var.ModeConnNow_u8;
             }
                         
-            UTIL_var.ModeConnNow_u8 = _CONNECT_FTP_UPLOAD;    
+            UTIL_var.ModeConnNow_u8 = _CONNECT_FTP_UPLOAD;   
+            sAppSimVar.rTimeServer_u8 = true;
             AppSim_Test_FTP_Init();
         } else {
         #ifdef USING_APP_ETHERNET    
@@ -384,7 +385,6 @@ static uint8_t _Cb_RST_IWDG (uint8_t event)
 }
 
 
-
 /*=========================== Func App Main ========================*/
 void SysApp_Init (void)
 {       
@@ -429,10 +429,6 @@ void SysApp_Setting (void)
     
 #ifdef USING_APP_SENSOR
     Init_AppSensor();
-#endif
-    
-#ifdef USING_APP_SD_CARD
-    Init_AppSDcard();
 #endif
     
 #ifdef USING_APP_TEMH
@@ -509,7 +505,7 @@ void Main_Task (void)
     #ifdef USING_APP_SENSOR
         TaskStatus_u8 |= AppSensor_Task(); 
     #endif
-        
+           
     #ifdef USING_APP_ETHERNET
         TaskStatus_u8 |= AppEth_Task();
     #endif
@@ -518,32 +514,32 @@ void Main_Task (void)
         Display_Task();
     #endif
         
-//        if ( (TaskStatus_u8 == 0)  \
-//            && (UTIL_var.ModePower_u8 == _POWER_MODE_SAVE)
-//        #ifdef USING_APP_WM
-//            && (sWmVar.IrqPowUp_u8 == FALSE)
-//        #endif
-//            )
-//        {
-//        #ifdef USING_APP_SIM
-//            if ( (sSimCommVar.State_u8 == _SIM_POWER_OFF)
-//        #ifdef USING_APP_ETHERNET
-//                && (sAppEthVar.Status_u8 == _ETH_POWER_OFF) 
-//        #endif
-//                )
-//            {
-//                UTIL_LPM_SetStopMode((UTIL_LPM_State_t) LPM_FALSE);
-//                APP_LOG(TS_OFF, DBLEVEL_M, "u_app_com: go to stopmode: %d\r\n" , SourceWakeup_u8);
-//            } else
-//                UTIL_LPM_SetStopMode((UTIL_LPM_State_t) LPM_TRUE);
-//        #else
-//            UTIL_LPM_SetStopMode((UTIL_LPM_State_t) LPM_FALSE);
-//            APP_LOG(TS_OFF, DBLEVEL_M, "u_app_com: go to stopmode: %d\r\n" , SourceWakeup_u8);
-//        #endif
-//            
-//            //Func Lowpower
-//            UTIL_LPM_EnterLowPower();
-//        }
+        if ( (TaskStatus_u8 == 0)  \
+            && (UTIL_var.ModePower_u8 == _POWER_MODE_SAVE)
+        #ifdef USING_APP_WM
+            && (sWmVar.IrqPowUp_u8 == FALSE)
+        #endif
+            )
+        {
+        #ifdef USING_APP_SIM
+            if ( (sSimCommVar.State_u8 == _SIM_POWER_OFF)
+        #ifdef USING_APP_ETHERNET
+                && (sAppEthVar.Status_u8 == _ETH_POWER_OFF) 
+        #endif
+                )
+            {
+                UTIL_LPM_SetStopMode((UTIL_LPM_State_t) LPM_FALSE);
+                APP_LOG(TS_OFF, DBLEVEL_M, "u_app_com: go to stopmode: %d\r\n" , SourceWakeup_u8);
+            } else
+                UTIL_LPM_SetStopMode((UTIL_LPM_State_t) LPM_TRUE);
+        #else
+            UTIL_LPM_SetStopMode((UTIL_LPM_State_t) LPM_FALSE);
+            APP_LOG(TS_OFF, DBLEVEL_M, "u_app_com: go to stopmode: %d\r\n" , SourceWakeup_u8);
+        #endif
+            
+            //Func Lowpower
+            UTIL_LPM_EnterLowPower();
+        }
 	}
 }
 /*=================Func handler=====================*/
@@ -566,7 +562,7 @@ void AppComm_Init (void)
     pFunc_UTIL_Debug_Send  = &AppComm_Uart_Debug_Send;
     
     UTIL_ADV_TRACE_Init();
-    UTIL_ADV_TRACE_SetVerboseLevel(DBLEVEL_M);
+    UTIL_ADV_TRACE_SetVerboseLevel(VLevelDebug);
     
     //Nhan dang phan cung: 0: ca online va PSM. 1: ONLINE
     for (uint8_t i = 0; i < 10; i++) {
@@ -792,7 +788,7 @@ static void AppComm_Uart_Debug_Send (uint8_t *pData, uint16_t Length)
     #ifdef USB_CDC_DEBUG
         CDC_Transmit_FS(pData, Length);
     #else
-            HAL_UART_Transmit(&uart_debug, pData, Length, 1000);
+        HAL_UART_Transmit(&uart_debug, pData, Length, 1000);
     #endif
 }
 
@@ -813,35 +809,61 @@ uint8_t AppComm_Get_Reset_Source (void)
 {
     uint32_t ResetSource = 0;
     uint8_t Result = FALSE;
+    uint8_t len = 0;
     
     ResetSource = HAL_RCC_GetResetSource();
     
     if (ResetSource & RCC_RESET_FLAG_OBL)
     {
         Modem_Packet_Alarm_String("u_app_comm: reset source: OBL\r\n");
+        sModemInfor.RSResource_u8 = 1;
     } else if (ResetSource & RCC_RESET_FLAG_SW)
     {
         Modem_Packet_Alarm_String("u_app_comm: reset source: SW\r\n");
+        sModemInfor.RSResource_u8 = 2;
     } else if (ResetSource & RCC_RESET_FLAG_IWDG)
     {
         Modem_Packet_Alarm_String("u_app_comm: reset source: IWDG\r\n");
+        sModemInfor.RSResource_u8 = 3;
     } else if (ResetSource & RCC_RESET_FLAG_WWDG)
     {
         Modem_Packet_Alarm_String("u_app_comm: reset source: WWDG\r\n");
+        sModemInfor.RSResource_u8 = 4;
     } else if (ResetSource & RCC_RESET_FLAG_LPWR)
     {
         Modem_Packet_Alarm_String("u_app_comm: reset source: LPWR\r\n");
+        sModemInfor.RSResource_u8 = 5;
     } else if (ResetSource & RCC_RESET_FLAG_PIN) 
     {
         Modem_Packet_Alarm_String("u_app_comm: reset source: PIN\r\n");
+        sModemInfor.RSResource_u8 = 6;
         Result = TRUE;
     } else if (ResetSource & RCC_RESET_FLAG_PWR)
     {
         Modem_Packet_Alarm_String("u_app_comm: reset source: PWR\r\n");
+        sModemInfor.RSResource_u8 = 7;
         Result = TRUE;
+    } else {
+        sModemInfor.RSResource_u8 = 8;
     }
-                    
     
+    sModemInfor.cReset_u16++;
+    UTIL_MEM_cpy(&sModemInfor.sTimeReset, &sRTC, sizeof(ST_TIME_FORMAT));
+    
+    len = strlen((char *) sModemInfor.aRS_RESOURCE);
+    if ( len >= 19 ) {
+        for (uint8_t i = 0; i < 19; i++) {
+            sModemInfor.aRS_RESOURCE[i] = sModemInfor.aRS_RESOURCE[i + 1];
+        }
+    }
+    len = strlen((char *) sModemInfor.aRS_RESOURCE);
+    sModemInfor.aRS_RESOURCE[len] = sModemInfor.RSResource_u8 + 0x30;
+    
+    UTIL_Printf_Str(DBLEVEL_M, sModemInfor.aRS_RESOURCE);
+    
+     //luu creset
+    Modem_Save_Var();
+        
     return Result;
 }
 #endif  
@@ -1089,6 +1111,7 @@ uint8_t AppComm_Save_Log (uint8_t *pData, uint16_t Length)
     
     return true;
 }
+
 
 void AppComm_Finish_FTP (void)
 {

@@ -523,7 +523,7 @@ void DNS_init( uint8_t * buf)
 }
 
 /* DNS CLIENT RUN */
-int8_t DNS_run(uint8_t s,uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns,uint8_t mode)
+int8_t DNS_run(uint8_t s, uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns, uint8_t mode)
 {
 	int8_t ret;
 	struct dhdr dhp;
@@ -545,12 +545,7 @@ int8_t DNS_run(uint8_t s,uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns
 	    socket(s, Sn_MR_UDP6, 0, 0);
 		addr_len = 16;
 	}
-
-#ifdef _DNS_DEBUG_
-			printf("> DNS Query to DNS Server : %d.%d.%d.%d\r\n", dns_ip[0], dns_ip[1], dns_ip[2], dns_ip[3]);
-
-#endif
-
+    
 	len = dns_makequery(0, (char *)name, pDNSMSG, MAX_DNS_BUF_SIZE,mode);
 	sendto(s, pDNSMSG, len, dns_ip, IPPORT_DOMAIN,addr_len);
 
@@ -560,26 +555,15 @@ int8_t DNS_run(uint8_t s,uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns
 		{
 			if (len > MAX_DNS_BUF_SIZE) len = MAX_DNS_BUF_SIZE;
 			len = recvfrom(s, pDNSMSG, len, ip, &port,&addr_len);
-      #ifdef _DNS_DEBUG_
-	      printf("> Receive DNS message from %d.%d.%d.%d(%d). len = %d\r\n", ip[0], ip[1], ip[2], ip[3],port,len);
-      #endif
-         ret = parseDNSMSG(&dhp, pDNSMSG, ip_from_dns);
+            ret = parseDNSMSG(&dhp, pDNSMSG, ip_from_dns);
 			break;
 		}
 		// Check Timeout
 		ret_check_timeout = check_DNS_timeout();
 		if (ret_check_timeout < 0) {
-
-#ifdef _DNS_DEBUG_
-			printf("> DNS Server is not responding : %d.%d.%d.%d\r\n", dns_ip[0], dns_ip[1], dns_ip[2], dns_ip[3]);
-#endif
 			return 0; // timeout occurred
 		}
 		else if (ret_check_timeout == 0) {
-
-#ifdef _DNS_DEBUG_
-			printf("> DNS Timeout\r\n");
-#endif
 			sendto(s, pDNSMSG, len, dns_ip, IPPORT_DOMAIN,addr_len);
 		}
 	}
@@ -594,4 +578,75 @@ int8_t DNS_run(uint8_t s,uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns
 void DNS_time_handler(void)
 {
 	dns_1s_tick++;
+}
+
+/* DNS CLIENT RUN NON BLOCKING  
+    -1 Fail
+    0 Busy
+    1 Success
+*/
+int8_t DNS_ETH_run(uint8_t s, uint8_t * dns_ip, uint8_t * name, uint8_t * ip_from_dns, uint8_t mode)
+{
+    struct dhdr dhp;
+    uint8_t ip[4];
+    uint8_t addr_len;
+    uint16_t len, port;
+    
+    static uint32_t LandMarkSock_u32 = 0;
+    static uint8_t aData[50] = {0};
+    static uint8_t sHandle_Pending = false;
+    
+    uint16_t name_len = strlen((char *)name);
+    if (name_len >= sizeof(aData) - 1) {
+        return -1;
+    }
+
+    if (sHandle_Pending == false)
+    {
+        memset(aData, 0, sizeof(aData));
+        memcpy(aData, name, name_len);
+        aData[name_len] = '\0';
+
+        if (mode == AS_IPV4) {
+            socket(s, Sn_MR_UDP4, 0, 0);
+            addr_len = 4;
+        } else if (mode == AS_IPV6) {
+            socket(s, Sn_MR_UDP6, 0, 0);
+            addr_len = 16;
+        } else {
+            return -1;
+        }
+
+        len = dns_makequery(0, (char *)name, pDNSMSG, MAX_DNS_BUF_SIZE, mode);
+        sendto(s, pDNSMSG, len, dns_ip, IPPORT_DOMAIN, addr_len);
+        
+        LandMarkSock_u32 = RtCountSystick_u32;
+        sHandle_Pending = true;
+        
+        return 0; 
+    }
+    else 
+    {
+        if (strcmp((char *)aData, (char *)name) == 0) {
+            if ((len = getSn_RX_RSR(s)) > 0)
+            {
+                if (len > MAX_DNS_BUF_SIZE) len = MAX_DNS_BUF_SIZE;
+                len = recvfrom(s, pDNSMSG, len, ip, &port, &addr_len);
+                int8_t parse_ret = parseDNSMSG(&dhp, pDNSMSG, ip_from_dns);
+                sHandle_Pending = false;
+                close(s);
+                
+                return (parse_ret > 0) ? 1 : -1;
+            }
+        }
+        
+        if (Check_Time_Out(LandMarkSock_u32, 2000) == true)
+        {
+            sHandle_Pending = false;
+            close(s);
+            return -1; 
+        }
+    }
+
+    return 0;
 }

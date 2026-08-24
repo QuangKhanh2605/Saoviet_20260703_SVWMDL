@@ -480,7 +480,7 @@ void AppSensor_Packet_TNMT(void)
     {
         for(uint8_t i = _SS_TEMP; i<_END_SENSOR; i++)
         {
-            if(sMeasureMain[0][i].sUser == 1)
+            if(sMeasureMain[0][i].sUser != 0)
             {
                 c_pack++;
                 tnstatus_u8 = sMeasureMain[0][i].State;
@@ -798,7 +798,7 @@ void Init_UserSensor(void)
             for(uint8_t i = 0; i < _END_SENSOR; i++)
             {
                 sMeasureMain[j][i].sUser = *(__IO uint8_t*)(ADDR_USER_SENSOR+2 +i +j*_END_SENSOR);
-                if(sMeasureMain[j][i].sUser > 1)
+                if(sMeasureMain[j][i].sUser > 10)   // Gioi han 10 kenh
                     sMeasureMain[j][i].sUser = 0;
             }
         }
@@ -1139,7 +1139,7 @@ uint8_t SensorRS485_Packet_TSVH (sData *pData, uint8_t channel)
     uint8_t Result = 0;
     for(uint8_t i = 0; i < _END_SENSOR; i++)
     {
-        if(sMeasureMain[channel][i].sVal.State_u8 == 1)
+        if(sMeasureMain[channel][i].sUser != 0)
             Result = 1;
     }
     

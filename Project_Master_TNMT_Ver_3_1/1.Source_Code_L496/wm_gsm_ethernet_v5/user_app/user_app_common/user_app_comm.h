@@ -32,7 +32,7 @@ typedef enum
 	_EVENT_IDLE,                 //3
     _EVENT_TX_TIMER,             //4
     _EVENT_SAVE_BOX,             //6
-    _EVENT_RST_IWDG,            
+    _EVENT_RST_IWDG,
 	_EVENT_END_COMM,             //7
 }eKindEventAppCommon;
 
@@ -68,6 +68,6 @@ UTIL_ADV_TRACE_Status_t vcom_Trace_DMA(uint8_t *p_data, uint16_t size);
 void                    vcom_Resume(void);
 
 uint8_t AppComm_Save_Log (uint8_t *pData, uint16_t Length);
-void AppComm_Finish_FTP (void);
+void    AppComm_Finish_FTP (void);
 
 #endif /* INC_USER_APP_H_ */

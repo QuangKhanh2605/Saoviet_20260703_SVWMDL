@@ -606,9 +606,9 @@ static uint8_t _Cb_DNS_Process (uint8_t event)
 			break;
 		default:
             if (ip_ver == AS_IPV4) {
-                ret = DNS_run (SOCK_DNS, dns_server, sIP, pIP, AS_IPV4);
+                ret = DNS_ETH_run (SOCK_DNS, dns_server, sIP, pIP, AS_IPV4);
             } else {
-                ret = DNS_run(SOCK_DNS, dns_server_ip6, sIP, pIP, AS_IPV6);
+                ret = DNS_ETH_run(SOCK_DNS, dns_server_ip6, sIP, pIP, AS_IPV6);
             }
             
             if (ret == 1) {
@@ -1383,9 +1383,9 @@ static uint8_t _Cb_Get_Time_NTP (uint8_t event)
                 break;
             case 1:
                 if (ip_ver == AS_IPV4) {
-                    ret = DNS_run (SOCK_DNS, dns_server, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP, AS_IPV4);
+                    ret = DNS_ETH_run (SOCK_DNS, dns_server, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP, AS_IPV4);
                 } else {
-                    ret = DNS_run(SOCK_DNS, dns_server_ip6, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP, AS_IPV6);
+                    ret = DNS_ETH_run(SOCK_DNS, dns_server_ip6, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP, AS_IPV6);
                 }
                 
                 if (ret == 1) {
@@ -1837,7 +1837,7 @@ void AppEth_W5500_Init(void)
 //    setSIMR (0x0F);         //IRQ 4 sock 0 -> 3
 //	setSn_IMR (0, 0x1F);  //Mark All IRQ Sn
     
-    setSIMR((1 << 1) | (1 << 2) | (1 << 3));    // = 0x0E
+    setSIMR((1 << SOCKET_MQTT) | (1 << SOCKET_MQTT) | (1 << SOCKET_MQTT));    // = 0x0E
     setSn_IMR (SOCKET_MQTT, 0x1F);  //Mark All IRQ Sn
     
 //    if (ctlwizchip(CW_SET_INTRMASK, &temp) == -1) {

@@ -41,6 +41,8 @@ void            String_Packet_Stime (sData *pData, ST_TIME_FORMAT sTime);
 uint8_t Cut_String_2 (sData *pdata, uint16_t *pos, uint8_t Check,
                       sData *pDst, uint16_t MAX_LENGTH_DST);
 
+int16_t         Find_String_V3(sData *source, const char *pattern);
+
 
 #endif /*  */
 

@@ -275,6 +275,7 @@ static uint8_t fevent_sim_at_send_handler(uint8_t event)
             sSimVar.Pending_u8 = false;
         }
     } else {
+        sEventSim[event].e_period = SIM_CMD_FREQ;
         fevent_enable(sEventSim, _EVENT_SIM_AT_SEND);
     }
 

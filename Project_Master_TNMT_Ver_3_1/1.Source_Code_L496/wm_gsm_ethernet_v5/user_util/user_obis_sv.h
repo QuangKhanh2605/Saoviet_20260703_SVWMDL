@@ -25,8 +25,6 @@
 #define OBIS_NET_STATUS     0x10
 #define OBIS_TYPE           0x11
 
-#define OBIS_INDEX_OBIS_TSVH        0x15
-
 #define OBIS_EMET_VOL               0x20
 #define OBIS_EMET_VOL_A             0x21
 #define OBIS_EMET_VOL_B             0x22
@@ -70,10 +68,10 @@
 #define OBIS_WM_PULSE_REVERSE       0x6A
 #define OBIS_WM_DIG_FLOW            0x6B
 
-//#define OBIS_ENVI_TEMP_1            0x70
-//#define OBIS_ENVI_TEMP_2            0x71
-//#define OBIS_ENVI_HUMI_1            0x72
-//#define OBIS_ENVI_HUMI_2            0x6E
+#define OBIS_ENVI_TEMP_1            0x70
+#define OBIS_ENVI_TEMP_2            0x71
+#define OBIS_ENVI_HUMI_1            0x72
+#define OBIS_ENVI_HUMI_2            0x6E
 
 #define OBIS_ENVI_TEMP              0x70
 #define OBIS_ENVI_PH_WATER          0x73

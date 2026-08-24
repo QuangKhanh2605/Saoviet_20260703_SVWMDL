@@ -38,8 +38,8 @@
         .AddrStart_u32      = ADDR_GPS_START,   
         .AddrStop_u32       = ADDR_GPS_STOP,
 
-        .Size_u16     = 0,
-        .Max_u16      = 0,     
+        .Size_u16     = SIZE_DATA_GPS,
+        .Max_u16      = FLASH_MAX_MESS_GPS,  
     };
 #endif
     
@@ -167,14 +167,14 @@ static uint8_t Mem_IndexEntry_IsEmpty(const uint8_t *entry)
 
 static uint8_t Mem_IndexEntry_IsValid(const uint8_t *entry)
 {
-    return (entry[0] == BYTE_TEMP_FIRST);
+    return (entry[0] == BYTE_WRITEN);
 }
 
 static void Mem_Prepare_Index_Record_Buffer(uint8_t *entry)
 {
     memset(entry, FLASH_BYTE_EMPTY, INDEX_ENTRY_SIZE);
 
-    entry[0] = BYTE_TEMP_FIRST;
+    entry[0] = BYTE_WRITEN;
 
     entry[1]  = (sRecTSVH.iSend_u16 >> 8) & 0xFF;
     entry[2]  = sRecTSVH.iSend_u16 & 0xFF;
@@ -728,7 +728,7 @@ void Mem_Write_Data (uint8_t tmem, uint8_t tdata, uint32_t addr,
     qFlashTemp.TypeData_u8 = tdata;
     qFlashTemp.Addr_u32 = addr;
     
-    qFlashTemp.aData[Count++] = BYTE_TEMP_FIRST;
+    qFlashTemp.aData[Count++] = BYTE_WRITEN;
     qFlashTemp.aData[Count++] = (Length >> 8) & 0xFF;
     qFlashTemp.aData[Count++] = Length & 0xFF;
         
@@ -1079,10 +1079,6 @@ void Mem_Cb_Read_OK (uint8_t Kind, uint32_t Addr, uint8_t *pData, uint16_t lengt
     } else {
         IsValidData = false;
     }
-    
-    //Check first byte
-    if(*(pData) != 0xA5)
-        IsValidData = false;
     
     //Copy sang buff App sim Data
     if (Kind == _MEM_READ_NEW_MESS) {

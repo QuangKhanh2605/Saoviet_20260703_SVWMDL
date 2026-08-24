@@ -16,11 +16,11 @@
 #include "woteck_ultrasonic.h"
 #include "wm_mong_cai.h"
 #include "siemen_mag8000.h"
-
+#include "siemen_mag6000.h"
 #include "user_rs485.h"
 
 
-#define MAX_SLAVE_MODBUS        5
+#define MAX_SLAVE_MODBUS        3
 
 /*=========== Var struct =========*/
 typedef enum
@@ -34,6 +34,7 @@ typedef enum
     __MET_WOTECK_ULTRA,     //6
     __MET_WM_MONG_CAI,      //7
     __MET_SI_MAG8000,       //8
+    __MET_SI_MAG6000,       //9
     __MET_UNKNOWN,
 }eRS485MeterType;
 
@@ -50,6 +51,7 @@ typedef struct
 {
     uint8_t     Status_u8;
     uint8_t     Type_u8;
+    uint8_t     TypeSett_u8;
     
     int64_t     nTotal_i64;
     int64_t     nForw_i64;
@@ -85,6 +87,7 @@ typedef struct
     sWoteckData         sWoteck01;
     sMongCaiData        sMongcai;
     sMag8000Data        sMag8000;
+    sMag6000Data        sMag6000;
     
     uint8_t PinPercent_u8;
 }sModbusDeviceData;
@@ -119,7 +122,7 @@ typedef struct
 
 
 extern sWMDigitalVariable       sWmDigVar;
-extern sWMDigitalInfor          sListWmDigital[10];
+extern sWMDigitalInfor          sListWmDigital[11];
 /*============= Function =============*/
 
 void    WM_DIG_Init_Uart (UART_HandleTypeDef *huart, uint8_t type);

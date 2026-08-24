@@ -651,7 +651,7 @@ uint32_t Endian_Format(uint32_t Hex_Data, uint8_t length, uint8_t Type)
                 Result = (b1<<24)|(b2<<16)|(b3<<8)|b4;
                 break;
 
-            case _E_LE: // 12 32 56 78 -> 12 34 78 56
+            case _E_LE: // 12 34 56 78 -> 12 34 78 56
                 Result = (b1<<24)|(b2<<16)|(b4<<8)|b3;
                 break;
 

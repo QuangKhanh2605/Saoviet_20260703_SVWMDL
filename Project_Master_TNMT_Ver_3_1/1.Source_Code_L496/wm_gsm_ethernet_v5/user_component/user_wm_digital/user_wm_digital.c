@@ -7,7 +7,7 @@
 #include "user_rs485.h"
 #include "math.h"
 
-sWMDigitalInfor sListWmDigital[10] = 
+sWMDigitalInfor sListWmDigital[11] = 
 {
     {   __MET_WOTECK,       0,      120,    { 9600, UART_WORDLENGTH_8B, UART_STOPBITS_1, UART_PARITY_NONE },      Woteck_Decode     },  
     {   __MET_LEVEL_LIQ,    0,      6,      { 9600, UART_WORDLENGTH_8B, UART_STOPBITS_1, UART_PARITY_NONE },      Level_S_YW_Decode },
@@ -18,6 +18,7 @@ sWMDigitalInfor sListWmDigital[10] =
     {   __MET_WOTECK_ULTRA, 0,      24,     { 9600, UART_WORDLENGTH_8B, UART_STOPBITS_1, UART_PARITY_NONE },      WOTECK_ULTRA_Decode},
     {   __MET_WM_MONG_CAI,  2000,   10,     { 9600, UART_WORDLENGTH_8B, UART_STOPBITS_1, UART_PARITY_NONE },      MONG_CAI_Decode   },
     {   __MET_SI_MAG8000,   0,      24,     { 19200, UART_WORDLENGTH_9B, UART_STOPBITS_1, UART_PARITY_EVEN },     MAG8000_Decode    },
+    {   __MET_SI_MAG6000,   0,      24,     { 19200, UART_WORDLENGTH_9B, UART_STOPBITS_1, UART_PARITY_EVEN },     MAG6000_Decode    },
     {   __MET_UNKNOWN,      0,      1,      { 9600, UART_WORDLENGTH_8B, UART_STOPBITS_1, UART_PARITY_NONE },      NULL              },
 };
 
@@ -219,6 +220,24 @@ void WM_DIG_Get_Data (uint8_t chann, uint8_t type)
             
             sWmDigVar.sModbDevData[chann].Factor      = 0xFD;
             break;
+        case __MET_SI_MAG6000:
+            sWmDigVar.sModbDevData[chann].Status_u8 = true;
+            sWmDigVar.sModbDevData[chann].Type_u8 = type;
+
+            sWmDigVar.sModbDevData[chann].nTotal_i64   = (int64_t ) (sWmDigVar.sModbDevData[chann].sMag6000.Net_f * 1000);
+            sWmDigVar.sModbDevData[chann].nForw_i64   = (int64_t ) (sWmDigVar.sModbDevData[chann].sMag6000.Forward_f * 1000);
+            sWmDigVar.sModbDevData[chann].nRev_i64    = (int64_t ) (sWmDigVar.sModbDevData[chann].sMag6000.Revert_f * 1000);
+            
+            sWmDigVar.sModbDevData[chann].Flow_i32    = (int32_t ) (sWmDigVar.sModbDevData[chann].sMag6000.Flow_f * 1000);
+            sWmDigVar.sModbDevData[chann].FlowM3_i32  = sWmDigVar.sModbDevData[chann].Flow_i32;
+            
+            sWmDigVar.sModbDevData[chann].sFlowUnit   = " (m3/h)";
+            sWmDigVar.sModbDevData[chann].sTotalUnit  = " (m3)";
+            
+            sWmDigVar.sModbDevData[chann].PinPercent_u8  = 0;
+            
+            sWmDigVar.sModbDevData[chann].Factor      = 0xFD;
+            break;
         default:
             break;
     }
@@ -228,13 +247,40 @@ void WM_DIG_Get_Data (uint8_t chann, uint8_t type)
         case __MET_LEVEL_LIQ:
         case __MET_LEVEL_LIQ_SUP:
         case __MET_LEVEL_ULTRA:
-            //tinh lai level dong: qui doi lwire (cm) ra cung don vi voi Lval
-            Temp_u32 = sWmDigVar.sModbDevData[chann].Lwire_u16;
-            Temp_u32 *= Convert_Scale(sWmDigVar.sModbDevData[chann].LDecimal_u16);
-            Temp_u32 = Temp_u32 / WM_DIG_cm_To_cUnit(sWmDigVar.sModbDevData[chann].LUnit_u16);
+            switch (sWmDigVar.sModbDevData[chann].TypeSett_u8)
+            {
+                case __AN_ULTRA_485:
+                    //tinh lai level dong: qui doi lwire (cm) ra cung don vi voi Lval
+                    Temp_u32 = sWmDigVar.sModbDevData[chann].Lwire_u16;
+                    Temp_u32 *= Convert_Scale(sWmDigVar.sModbDevData[chann].LDecimal_u16);
+                    Temp_u32 = Temp_u32 / WM_DIG_cm_To_cUnit(sWmDigVar.sModbDevData[chann].LUnit_u16);
+                    
+                    sWmDigVar.sModbDevData[chann].Ldynamic_u16 = sWmDigVar.sModbDevData[chann].LVal_i16;
+                    sWmDigVar.sModbDevData[chann].LVal_i16 = (int16_t) ( Temp_u32 ) - sWmDigVar.sModbDevData[chann].Ldynamic_u16;
+                    
+                    Temp_u32 = sWmDigVar.sModbDevData[chann].Lstatic_u16;
+                    Temp_u32 *= Convert_Scale(sWmDigVar.sModbDevData[chann].LDecimal_u16);
+                    Temp_u32 = Temp_u32 / WM_DIG_cm_To_cUnit(sWmDigVar.sModbDevData[chann].LUnit_u16);
+                    
+                    sWmDigVar.sModbDevData[chann].Ldelta_i16 = sWmDigVar.sModbDevData[chann].Ldynamic_u16 - Temp_u32;
+                    
+                    break;
+                default:
+                    //tinh lai level dong: qui doi lwire (cm) ra cung don vi voi Lval
+                    Temp_u32 = sWmDigVar.sModbDevData[chann].Lwire_u16;
+                    Temp_u32 *= Convert_Scale(sWmDigVar.sModbDevData[chann].LDecimal_u16);
+                    Temp_u32 = Temp_u32 / WM_DIG_cm_To_cUnit(sWmDigVar.sModbDevData[chann].LUnit_u16);
+                    
+                    sWmDigVar.sModbDevData[chann].Ldynamic_u16 = (int16_t) ( Temp_u32 ) - sWmDigVar.sModbDevData[chann].LVal_i16;
+                    
+                    Temp_u32 = sWmDigVar.sModbDevData[chann].Lstatic_u16;
+                    Temp_u32 *= Convert_Scale(sWmDigVar.sModbDevData[chann].LDecimal_u16);
+                    Temp_u32 = Temp_u32 / WM_DIG_cm_To_cUnit(sWmDigVar.sModbDevData[chann].LUnit_u16);
+                    
+                    sWmDigVar.sModbDevData[chann].Ldelta_i16 = sWmDigVar.sModbDevData[chann].Ldynamic_u16 - Temp_u32;
+                    break;
+            }
             
-            sWmDigVar.sModbDevData[chann].Ldynamic_u16 = (int16_t) ( Temp_u32 ) - sWmDigVar.sModbDevData[chann].LVal_i16;
-            sWmDigVar.sModbDevData[chann].Ldelta_i16 = sWmDigVar.sModbDevData[chann].Ldynamic_u16 - sWmDigVar.sModbDevData[chann].Lstatic_u16;
             break;
     }
 }
@@ -244,6 +290,7 @@ void WM_DIG_Get_Data (uint8_t chann, uint8_t type)
 void WM_DIG_Packet_Mess (sData *pData, uint8_t chann)
 {
     uint16_t TempU16 = 0;  
+    uint32_t Temp_u32 = 0;
     
     switch (sWmDigVar.sModbDevData[chann].Type_u8)
     {
@@ -253,6 +300,7 @@ void WM_DIG_Packet_Mess (sData *pData, uint8_t chann)
         case __MET_WOTECK_ULTRA: 
         case __MET_WM_MONG_CAI:   
         case __MET_SI_MAG8000:
+        case __MET_SI_MAG6000:
             SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, 
                                     OBIS_WM_PULSE_FORWARD, &sWmDigVar.sModbDevData[chann].nForw_i64, 8, sWmDigVar.sModbDevData[chann].Factor);
 
@@ -279,9 +327,14 @@ void WM_DIG_Packet_Mess (sData *pData, uint8_t chann)
                 //----------Level Value Sensor --------------------
                 SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_SENSOR, &sWmDigVar.sModbDevData[chann].LVal_i16, 2, 
                                                 0 - (uint8_t)sWmDigVar.sModbDevData[chann].LDecimal_u16);
+                
+                Temp_u32 = sWmDigVar.sModbDevData[chann].Lstatic_u16;
+                Temp_u32 *= Convert_Scale(sWmDigVar.sModbDevData[chann].LDecimal_u16);
+                Temp_u32 = Temp_u32 / WM_DIG_cm_To_cUnit(sWmDigVar.sModbDevData[chann].LUnit_u16);
+                TempU16 = (uint16_t) Temp_u32; 
                 //gia tri muc nuoc tinh
-                SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_STA, &sWmDigVar.sModbDevData[chann].Lstatic_u16, 2, 
-                                                0 - (uint8_t)sWmDigVar.sModbDevData[chann].LDecimal_u16);
+                SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_STA, &TempU16, 2,
+                                                    0 - (uint8_t)sWmDigVar.sModbDevData[chann].LDecimal_u16);
                 
                 //gia tri muc nuoc dong
                 SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_WM_LEVEL_VAL_DYM, &sWmDigVar.sModbDevData[chann].Ldynamic_u16, 2, 
@@ -327,6 +380,9 @@ uint8_t WM_DIG_Get_Infor (uint8_t chann, uint8_t type, uint16_t *addr, uint8_t *
             break;
         case __MET_SI_MAG8000:
             result = MAG8000_Get_Reg(sWmDigVar.sModbDevData[chann].inReg, addr, nReg);
+            break;
+        case __MET_SI_MAG6000:
+            result = MAG6000_Get_Reg(sWmDigVar.sModbDevData[chann].inReg, addr, nReg);
             break;
         default:
             *addr = sListWmDigital[sWmDigVar.sModbInfor[chann].MType_u8].Addr_u32;

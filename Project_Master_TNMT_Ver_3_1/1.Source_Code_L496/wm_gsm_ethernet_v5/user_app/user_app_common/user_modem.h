@@ -110,7 +110,11 @@ typedef struct
     sServerInfor    sServerBack;                
     uint16_t        cReset_u16;                 //so lan reset
     sUpdateInfor    sServerTn;
-    sServerInfor    sServerModTCP;       
+    sServerInfor    sServerModTCP;     
+    
+    ST_TIME_FORMAT  sTimeReset;
+    uint8_t         RSResource_u8;
+    char            aRS_RESOURCE[20];
 }sModemInformation;
 
 
@@ -211,6 +215,10 @@ void    Modem_SER_Set_Level_Debug (sData *str_Receiv, uint16_t Pos);
 
 void    Modem_SER_Set_FTP_Main (sData *strRecei, uint16_t Pos);
 void    Modem_SER_Get_FTP_Main (sData *strRecei, uint16_t Pos);
+
+void    Modem_SER_Get_Status (sData *strRecei, uint16_t Pos);
+
+
 #endif
 
 uint8_t Modem_Check_AT(sData *str, uint8_t Type);

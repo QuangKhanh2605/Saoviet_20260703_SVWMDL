@@ -160,11 +160,11 @@
     #define ON_FLASH_BASE               0x08000000
     #define	ADDR_FLASH_END			    0x080FF800
     /*========Add Firmware: Main + Update=========== */
-    #define	ADDR_MAIN_PROGRAM			0x08004000	        //90 Page cho chuong trinh chinh = 180k
-    #define	ADDR_UPDATE_PROGRAM			0x080B4800	        //90 page -> End Program = 0x0805F000
+    #define	ADDR_MAIN_PROGRAM			0x08004000	        //100 Page cho chuong trinh chinh = 200k
+    #define	ADDR_UPDATE_PROGRAM			0x080B4800	        //100 page -> End Program = 0x08068000
 
     /*========Add Record Mess ================ */
-    #define	ADDR_MESS_A_START   		0x08060000	         //92k = 184 rec * 512
+    #define	ADDR_MESS_A_START   		0x08068000	         //92k = 184 rec * 512
     #define	ADDR_MESS_A_STOP			0x08077000
 
     #define	ADDR_EVENT_START   		    0x08077000	         //4k = 64 rec * 64
@@ -179,6 +179,7 @@
     /*=======Add Index Mess================ */    
     #define	ADDR_INDEX_REC 		        0x0807C800
     /* ============= Addr Meter config======== */  
+    #define ADDR_OUT_CONFIG             0x0807C000
     #define	ADDR_MODBUS_INFOR 		    0x0807D000
     #define	ADDR_TNMT_CONFIG 		    0x0807D800
 
@@ -190,7 +191,7 @@
     #define ADDR_FLAG_HAVE_NEW_FW       0x0807F800
 
     #define ADDR_TIME_WARNING_SENSOR    0x08080000
-    
+
     #define ADDR_CONST_PH_COMPENSATION  0x08080800    
     #define ADDR_CALIB_CHLORINE         0x08081000
     #define ADDR_CALIBPINT_CHLORINE     0x08081800
@@ -203,12 +204,12 @@
     #define ADDR_VALUE_AVG_ONE_HOUR     0x08090000
     #define ADDR_STATE_CALIB_SENSOR     0x08090800
 
-    #define	FLASH_MAX_MESS_TSVH_SAVE	180*2
+    #define	FLASH_MAX_MESS_TSVH_SAVE	60*2
     #define	FLASH_MAX_MESS_EVENT_SAVE   16
     #define FLASH_MAX_MESS_LOG_SAVE     120
     #define FLASH_MAX_MESS_GPS          2048
 
-    #define MAX_SIZE_FIRMWARE           300     //Kb
+    #define MAX_SIZE_FIRMWARE           300    
     #define FIRMWARE_SIZE_PAGE	        MAX_SIZE_FIRMWARE*1024/FLASH_PAGE_SIZE
 
     #define SIZE_DATA_TSVH	            256        

@@ -10,7 +10,7 @@
 /*===================Struct, Var=========================*/
 uint32_t        RtCountSystick_u32;
 ST_TIME_FORMAT  sRTC;
-uint8_t         VLevelDebug = DBLEVEL_DEFAULT;
+uint8_t         VLevelDebug = DBLEVEL_MESS;
 
 /*Func Pointer to Save Log to mem*/
 uint8_t (*pFunc_UTIL_Log_To_Mem) (uint8_t *pData, uint16_t Length);
@@ -188,8 +188,6 @@ void UTIL_Printf_Hex (uint8_t Level, uint8_t *pData, uint16_t Length)
         sprintf(buffer, "%02X", pData[i]);
     
         UTIL_Printf_Str(Level, buffer);
-//        if(i%2 == 0)
-//            UTIL_Printf_Str(Level, "|");
     }
 }
 
@@ -468,18 +466,6 @@ void UtilIntToString(int number, char* buffer)
 void UtilFloatToString(float number, char* buffer, int decimals) 
 {
     sprintf(buffer, "%.*f", decimals, number);
-    
-#ifdef USING_NUMBER_COMMA
-    // doi dau '.' thanh dau ','
-    for(char *p = buffer; *p != '\0'; p++)
-    {
-        if(*p == '.')
-        {
-            *p = ',';
-            break; 
-        }
-    }
-#endif
 }
 
 void UtilDoubleToString(double number, char* buffer, int decimals) 
@@ -689,7 +675,22 @@ void NTP_To_ST_TIME(uint32_t ntp_sec, ST_TIME_FORMAT *sTime)
     sTime->SubSeconds = 0;
 }
 
-
+int8_t UTIL_Hex_To_Val (uint8_t chr)
+{
+    if ((chr >= '0') && (chr <= '9')) {
+        return (int8_t)(chr - '0');
+    }
+    
+    if ((chr >= 'A') && (chr <= 'F')) {
+        return (int8_t)(chr - 'A' + 10);
+    }
+    
+    if ((chr >= 'a') && (chr <= 'f')) {
+        return (int8_t)(chr - 'a' + 10);
+    }
+    
+    return -1;
+}
 
             
             

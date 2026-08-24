@@ -127,11 +127,48 @@ sOjectInformation   sLCDObject[] =
     
     {   __SET_LEVEL_SETT,   "6.Level Set",      NULL,   _DTYPE_STRING,   0,      NULL,      2,  24, 0x00,    _LCD_SCR_SETTING_2 },
     {   __SET_RESTORE_DEV,  "7.Restore device", NULL,   _DTYPE_STRING,   0,      NULL,      3,  24, 0x00,    _LCD_SCR_SETTING_2 },
-    {   __SET_CHANGE_PASS,  "8.Change Password",NULL,   _DTYPE_STRING,   0,      NULL,      4,  24, 0x00,    _LCD_SCR_SETTING_2 },
-    {   __SET_MANUFACTOR,   "9.Information",    NULL,   _DTYPE_STRING,   0,      NULL,      5,  24, 0x00,    _LCD_SCR_SETTING_2 },
+    {   __SET_OPTION_SENSOR,"8.Option Sensor",  NULL,   _DTYPE_STRING,   0,      NULL,      4,  24, 0x00,    _LCD_SCR_SETTING_2 },
+    {   __SET_CHANGE_PASS,  "9.Change Password",NULL,   _DTYPE_STRING,   0,      NULL,      5,  24, 0x00,    _LCD_SCR_SETTING_2 },
+    {   __SET_MANUFACTOR,   "10.Information",   NULL,   _DTYPE_STRING,   0,      NULL,      6,  24, 0x00,    _LCD_SCR_SETTING_2 },
     
     {   __SET_REQ_2_1,      "*Tsend Data:",     NULL,   _DTYPE_STRING,   0,      NULL,      2,  24, 0x00,    _LCD_SCR_SET_FREQ },
     {   __SET_REQ_2_2,      NULL,               NULL,   _DTYPE_U32,      0,      " (min)",  3,  36, 0x02,    _LCD_SCR_SET_FREQ },
+    
+    {   __SET_OPTION_CH1_TITLE,  "OPTION CHANNEL 1",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1  },
+    {   __SET_OPTION_CH1_PH,     "1. pH     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1  },
+    {   __SET_OPTION_CH1_CLO,    "2. Clo    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1  },
+    {   __SET_OPTION_CH1_EC,     "3. EC     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1  },
+    {   __SET_OPTION_CH1_TURB,   "4. TURB   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1  },
+    {   __SET_OPTION_CH1_COD,    "5. COD    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        7,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1  },
+
+    {   __SET_OPTION_CH1_TITLE_2,"OPTION CHANNEL 1",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
+    {   __SET_OPTION_CH1_TSS,    "6. TSS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
+    {   __SET_OPTION_CH1_NH4,    "7. NH4_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
+    {   __SET_OPTION_CH1_DO,     "8. DO     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
+    {   __SET_OPTION_CH1_SALT,   "9. SALT   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
+    {   __SET_OPTION_CH1_TDS,    "10.TDS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        7,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
+    
+    {   __SET_OPTION_CH1_TITLE_3,"OPTION CHANNEL 1",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
+    {   __SET_OPTION_CH1_NO3,    "11.NO3_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
+    {   __SET_OPTION_CH1_TEMP,   "12.Temp   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
+    
+    {   __SET_OPTION_CH2_TITLE,  "OPTION CHANNEL 2",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
+    {   __SET_OPTION_CH2_PH,     "1. pH     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
+    {   __SET_OPTION_CH2_CLO,    "2. Clo    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
+    {   __SET_OPTION_CH2_EC,     "3. EC     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
+    {   __SET_OPTION_CH2_TURB,   "4. TURB   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
+    {   __SET_OPTION_CH2_COD,    "5. COD    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        7,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
+
+    {   __SET_OPTION_CH2_TITLE_2,"OPTION CHANNEL 2",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
+    {   __SET_OPTION_CH2_TSS,    "6. TSS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
+    {   __SET_OPTION_CH2_NH4,    "7. NH4_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
+    {   __SET_OPTION_CH2_DO,     "8. DO     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
+    {   __SET_OPTION_CH2_SALT,   "9. SALT   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
+    {   __SET_OPTION_CH2_TDS,    "10.TDS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        7,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
+    
+    {   __SET_OPTION_CH2_TITLE_3,"OPTION CHANNEL 2",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
+    {   __SET_OPTION_CH2_NO3,    "11.NO3_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
+    {   __SET_OPTION_CH2_TEMP,   "12.Temp   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
     
     {   __CHECK_STATE_SETTING,        NULL,             NULL,   _DTYPE_STRING,   0,      NULL,      1,  24, 0x00,     _LCD_SCR_CHECK_SETTING},
     
@@ -245,7 +282,10 @@ static uint8_t IsSensorDisabled(uint8_t id)
             if (SensorTable[i].Enable == NULL)
                 return 0;   
 
-            return (*(SensorTable[i].Enable) == _INACTIVE_SENSOR);
+            if(*(SensorTable[i].Enable) == 0)
+                return 1;
+            else 
+                return 0;
         }
     }
     return 0;  
@@ -328,6 +368,34 @@ void Display_Init (void)
     sLCDObject[__SC2_TDS].Scale_u8      = sMeasureMain[1][_SS_TDS].sVal.Scale_u8;  
     sLCDObject[__SC2_NO3].pData         = &sMeasureMain[1][_SS_NO3].sVal.Value_i32;  
     sLCDObject[__SC2_NO3].Scale_u8      = sMeasureMain[1][_SS_NO3].sVal.Scale_u8;  
+    
+    sLCDObject[__SET_OPTION_CH1_PH].pData      = &sMeasureMain[0][_SS_PH].sUser;
+    sLCDObject[__SET_OPTION_CH1_CLO].pData     = &sMeasureMain[0][_SS_CLO].sUser;
+    sLCDObject[__SET_OPTION_CH1_EC].pData      = &sMeasureMain[0][_SS_EC].sUser;
+    sLCDObject[__SET_OPTION_CH1_TURB].pData   = &sMeasureMain[0][_SS_TURB].sUser;
+    sLCDObject[__SET_OPTION_CH1_COD].pData   = &sMeasureMain[0][_SS_COD].sUser;
+    
+    sLCDObject[__SET_OPTION_CH1_TSS].pData    = &sMeasureMain[0][_SS_TSS].sUser;
+    sLCDObject[__SET_OPTION_CH1_NH4].pData    = &sMeasureMain[0][_SS_NH4].sUser;
+    sLCDObject[__SET_OPTION_CH1_DO].pData     = &sMeasureMain[0][_SS_DO].sUser;
+    sLCDObject[__SET_OPTION_CH1_SALT].pData   = &sMeasureMain[0][_SS_SALT].sUser;
+    sLCDObject[__SET_OPTION_CH1_TDS].pData    = &sMeasureMain[0][_SS_TDS].sUser;
+    sLCDObject[__SET_OPTION_CH1_NO3].pData    = &sMeasureMain[0][_SS_NO3].sUser;
+    sLCDObject[__SET_OPTION_CH1_TEMP].pData    = &sMeasureMain[0][_SS_TEMP].sUser;
+    
+    sLCDObject[__SET_OPTION_CH2_PH].pData      = &sMeasureMain[1][_SS_PH].sUser;
+    sLCDObject[__SET_OPTION_CH2_CLO].pData     = &sMeasureMain[1][_SS_CLO].sUser;
+    sLCDObject[__SET_OPTION_CH2_EC].pData      = &sMeasureMain[1][_SS_EC].sUser;
+    sLCDObject[__SET_OPTION_CH2_TURB].pData   = &sMeasureMain[1][_SS_TURB].sUser;
+    sLCDObject[__SET_OPTION_CH2_COD].pData   = &sMeasureMain[1][_SS_COD].sUser;
+    
+    sLCDObject[__SET_OPTION_CH2_TSS].pData    = &sMeasureMain[1][_SS_TSS].sUser;
+    sLCDObject[__SET_OPTION_CH2_NH4].pData    = &sMeasureMain[1][_SS_NH4].sUser;
+    sLCDObject[__SET_OPTION_CH2_DO].pData     = &sMeasureMain[1][_SS_DO].sUser;
+    sLCDObject[__SET_OPTION_CH2_SALT].pData   = &sMeasureMain[1][_SS_SALT].sUser;
+    sLCDObject[__SET_OPTION_CH2_TDS].pData    = &sMeasureMain[1][_SS_TDS].sUser;
+    sLCDObject[__SET_OPTION_CH2_NO3].pData    = &sMeasureMain[1][_SS_NO3].sUser;
+    sLCDObject[__SET_OPTION_CH2_TEMP].pData    = &sMeasureMain[1][_SS_TEMP].sUser;
 
     sLCDObject[__PULSE_1].pData =  &sPulse[0].Total_lf;
     sLCDObject[__PULSE_1].Scale_u8 = sPulse[0].FactorDec_u8;
@@ -396,7 +464,11 @@ static uint8_t _Cb_Display_Init (uint8_t event)
     {
         UTIL_Printf_Str(DBLEVEL_M, "u_lcd: init...\r\n");
         
-        HAL_GPIO_WritePin (LCD_ON_OFF_GPIO_Port, LCD_ON_OFF_Pin, GPIO_PIN_RESET);   
+        #ifdef BOARD_QN_V5_0
+            HAL_GPIO_WritePin (LCD_ON_OFF_GPIO_Port, LCD_ON_OFF_Pin, GPIO_PIN_RESET);   
+        #else
+            HAL_GPIO_WritePin (LCD_ON_OFF_GPIO_Port, LCD_ON_OFF_Pin, GPIO_PIN_SET); 
+        #endif
 
         glcd_init();
         glcd_tiny_set_font(Font5x7, 5, 7, 32, 127 + 9);
@@ -1135,41 +1207,6 @@ void Display_Show_Static_Param (void)
         + stime
         + icon: internet, baterry, "____"
 */
-void Display_Show_State_Sensor_Network(uint8_t screen)
-{
-    for (uint8_t i = 0; i < (sizeof(SensorTable) / sizeof((SensorTable)[0])); i++)
-    {
-        // TEMP khong can Enable
-        if (SensorTable[i].Enable != NULL)
-        {
-            if (*(SensorTable[i].Enable) == 0) 
-                continue;
-        }
-
-        uint8_t id = SensorTable[i].E_Kind;
-
-        if (sLCDObject[id].Screen_u8 != screen)
-            continue;
-
-        if (*(SensorTable[i].StateConnet) == 0)
-            glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, " ");
-        else
-        {
-            if (*(SensorTable[i].StateSensor) == _E_DANG_DO)
-                glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, "N");
-            else if (*(SensorTable[i].StateSensor) == _E_HIEU_CHUAN)
-                glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, "C");
-            else
-                glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, "E");
-        }
-    }
-}
-
-/*
-    Func: show static param
-        + stime
-        + icon: internet, baterry, "____"
-*/
 void Display_Show_State_Calib_Sensor (uint8_t screen)
 {
 //    if(screen == _LCD_SCR_CHECK_SETTING)
@@ -1208,30 +1245,6 @@ void Display_Show_State_Calib_Sensor (uint8_t screen)
 
 void Display_Update_ScrSensor(uint8_t screen)
 {
-//    uint8_t row  = 2;
-//    uint8_t page = _LCD_SCREEN_CM44;
-//
-//    uint8_t total = 1; 
-//
-//    for(int i = 0; i < (sizeof(SensorTable) / sizeof((SensorTable)[0])); i++)
-//        if(SensorTable[i].Enable && *SensorTable[i].Enable)
-//            total++;
-//
-//    sLCDPageSensor.Number = total;
-//    sLCDPageSensor.Page   = (total + 5) / 6;
-//
-//    for(int i = 0; i < (sizeof(SensorTable) / sizeof((SensorTable)[0])); i++)
-//    {
-//        const SENSOR_CFG *cfg = &SensorTable[i];
-//
-//        if(cfg->Enable && *cfg->Enable == 0)
-//            continue;
-//
-//        sLCDObject[cfg->E_Kind].Row_u8    = row;
-//        sLCDObject[cfg->E_Kind].Screen_u8 = page;
-//
-//        if(++row == 8) { row = 2; page++; }
-//    }
     uint8_t row  = 2;
     uint8_t page = _LCD_SCREEN_CM44;
 
@@ -1284,6 +1297,41 @@ void Display_Update_ScrSensor(uint8_t screen)
         {
             row = 2;
             page++;
+        }
+    }
+}
+
+/*
+    Func: show static param
+        + stime
+        + icon: internet, baterry, "____"
+*/
+void Display_Show_State_Sensor_Network(uint8_t screen)
+{
+    for (uint8_t i = 0; i < (sizeof(SensorTable) / sizeof((SensorTable)[0])); i++)
+    {
+        // TEMP khong can Enable
+        if (SensorTable[i].Enable != NULL)
+        {
+            if (*(SensorTable[i].Enable) == 0) 
+                continue;
+        }
+
+        uint8_t id = SensorTable[i].E_Kind;
+
+        if (sLCDObject[id].Screen_u8 != screen)
+            continue;
+
+        if (*(SensorTable[i].StateConnet) == 0)
+            glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, " ");
+        else
+        {
+            if (*(SensorTable[i].StateSensor) == _E_DANG_DO)
+                glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, "N");
+            else if (*(SensorTable[i].StateSensor) == _E_HIEU_CHUAN)
+                glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, "C");
+            else
+                glcd_tiny_draw_string(120, sLCDObject[id].Row_u8, "E");
         }
     }
 }

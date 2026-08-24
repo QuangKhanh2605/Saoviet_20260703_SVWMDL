@@ -228,7 +228,7 @@ uint8_t Sim_Common_Check_Attached (sData *strRecv, uint16_t pos)
         sSimCommVar.NetReady_u8      = TRUE;
         return 1;
 	}
-    
+
 	return 0;
 }
 

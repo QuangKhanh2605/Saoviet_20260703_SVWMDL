@@ -1308,9 +1308,6 @@
                 <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_hal_iwdg.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_hal_lptim.c</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_hal_pwr.c</name>
             </file>
             <file>
@@ -1660,69 +1657,6 @@
             </file>
         </group>
         <group>
-            <name>user_modb_tcp</name>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mb.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mb.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbconfig.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbframe.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbfunc.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbfunccoils.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbfuncdiag.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbfuncdisc.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbfuncholding.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbfuncinput.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbfuncother.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbport.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbproto.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbtcp.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbtcp.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbutils.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\mbutils.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\port.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\portevent.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_modb_tcp\porttcp.c</name>
-            </file>
-        </group>
-        <group>
             <name>user_sim</name>
             <group>
                 <name>module</name>
@@ -1782,6 +1716,12 @@
                 <name>$PROJ_DIR$\..\user_component\user_wm_digital\level_ultrasonic.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\user_component\user_wm_digital\siemen_mag6000.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_wm_digital\siemen_mag6000.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\user_component\user_wm_digital\siemen_mag8000.c</name>
             </file>
             <file>
@@ -1827,6 +1767,12 @@
     </group>
     <group>
         <name>user_driver_stm32_lptim</name>
+        <file>
+            <name>$PROJ_DIR$\..\HAL_Driver_LPTIM_Counter\stm32l4xx_hal_lptim.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\HAL_Driver_LPTIM_Counter\stm32l4xx_hal_lptim.h</name>
+        </file>
     </group>
     <group>
         <name>user_glcd</name>

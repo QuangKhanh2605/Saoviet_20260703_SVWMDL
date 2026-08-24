@@ -150,9 +150,47 @@ typedef enum
     _E_PH_S_SENSOR_2,
     _E_PH_S_VALUE_2,
     
+    _E_CLO_SEND_PH_2,
+    _E_CLO_VALUE_2,
+    _E_CLO_S_SENSOR_2,
+    _E_CLO_S_VALUE_2,
+    
+    _E_EC_VALUE_2,
+    _E_EC_S_SENSOR_2,
+    _E_EC_S_VALUE_2,
+    
     _E_TURB_VALUE_2,
     _E_TURB_S_SENSOR_2,
     _E_TURB_S_VALUE_2,
+    
+    _E_COD_VALUE_2,
+    _E_COD_S_SENSOR_2,
+    _E_COD_S_VALUE_2,
+    
+    _E_TSS_VALUE_2,
+    _E_TSS_S_SENSOR_2,
+    _E_TSS_S_VALUE_2,
+    
+    _E_NH4_VALUE_2,
+    _E_NH4_S_SENSOR_2,
+    _E_NH4_S_VALUE_2,
+    
+    _E_DO_SALT_2,
+    _E_DO_VALUE_2,
+    _E_DO_S_SENSOR_2,
+    _E_DO_S_VALUE_2,
+    
+    _E_SALT_VALUE_2,
+    _E_SALT_S_SENSOR_2,
+    _E_SALT_S_VALUE_2,
+    
+    _E_TDS_VALUE_2,
+    _E_TDS_S_SENSOR_2,
+    _E_TDS_S_VALUE_2,
+    
+    _E_NO3_VALUE_2,
+    _E_NO3_S_SENSOR_2,
+    _E_NO3_S_VALUE_2,
     
     _E_TEMP_VALUE_2,
     _E_TEMP_S_SENSOR_2,
@@ -223,26 +261,6 @@ typedef struct
     void    *vReturn;                  
     uint8_t  *nConnect;
 }Struct_RegSensor;
-
-typedef struct
-{
-    uint8_t eKind;
-    uint8_t ID_Modbus;              // ID su dung trong giao thuc Modbus
-    char    Name[10];
-    char    Unit[10];
-    
-    uint8_t sUser;                  //Trang thai su dung hay khong
-    uint8_t nConnect_u8;            //Dem so lan connect
-    uint8_t sConnect_u8;            //Trang thai connect
-    
-    uint8_t stateSensor;            //Dung cho cam bien Chau Au
-    uint8_t stateValue;             //Dung cho cam bien Chau Au
-    uint8_t sUnit;                  //Dung cho cam bien Chau Au
-    
-    float   Value_f;                //Gia tri do cam bien
-    float   Temp_f;                 //Nhiet do
-    float   Offset_f;               //Offset gia tri do
-}Struct_Modb_Measure;
 
 typedef struct
 {

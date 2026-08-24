@@ -9,6 +9,7 @@
 
     #define FLASH_BYTE_WRTIE    4
     #define FLASH_BYTE_EMPTY    0x00   
+    #define BYTE_WRITEN         0xA5   
 #endif
 
 #if defined (STM32L433xx) || defined (STM32L452xx) || defined (STM32L496xx)  
@@ -17,6 +18,7 @@
     
     #define FLASH_BYTE_EMPTY    0xFF   
     #define FLASH_BYTE_WRTIE    8
+    #define BYTE_WRITEN         0xA5   
 #endif
 
 #if defined (STM32L072xx) || defined (STM32L082xx)
@@ -25,6 +27,7 @@
 
     #define FLASH_BYTE_WRTIE    4
     #define FLASH_BYTE_EMPTY    0x00   
+    #define BYTE_WRITEN         0xA5   
 #endif
 
 #include "main.h"
@@ -36,8 +39,6 @@
 
 #ifndef USER_UTIL_H
 #define USER_UTIL_H
-
-//#define USING_NUMBER_COMMA
 
 
 /*===================Define=========================*/
@@ -56,7 +57,8 @@
 //#define BOARD_QN_V4_0
 //#define BOARD_LC_V1_0
 //#define BOARD_LC_V1_1
-#define BOARD_QN_V5_0
+//#define BOARD_QN_V5_0
+#define BOARD_QN_V5_1
 
 //#define USING_ETHERNET
 
@@ -77,8 +79,6 @@
 #define DBLEVEL_L       2       /*!< just essential traces */
 #define DBLEVEL_M       3       /*!< functional traces */
 #define DBLEVEL_H       4       /*!< all traces */
-
-#define DBLEVEL_DEFAULT     DBLEVEL_M
 
 #define pi 3.14159265358979323846
 
@@ -167,6 +167,18 @@ typedef enum
     _POWER_MODE_ONLINE,
 }sKind_Mode_Modem;
 
+typedef enum
+{
+    __AN_PRESS,
+    __AN_LEVEL,
+    __AN_VOL,
+    __AN_LEVEL_2,
+    __AN_ULTRA,
+    __AN_LEVEL_485,
+    __AN_ULTRA_485,
+    __AN_END,
+}eAnalogType;
+
 
 typedef enum
 {
@@ -202,7 +214,8 @@ extern void (*pFunc_UTIL_Debug_Send) (uint8_t *pData, uint16_t Length);
 extern uint32_t        RtCountSystick_u32;
 extern ST_TIME_FORMAT  sRTC;
 extern uint8_t         VLevelDebug;
-extern sCommonVariable UTIL_var;
+extern sCommonVariable  UTIL_var;
+
 /*===================Function=========================*/
 uint32_t    Cal_Time(uint32_t Millstone_Time, uint32_t Systick_now);
 uint32_t    Cal_Time_s(uint32_t Millstone_Time, uint32_t Systick_now);
@@ -265,4 +278,6 @@ char        *UTIL_Get_strNum (const char *input, char *output, uint16_t max) ;
 
 uint8_t     IsLeapYear(uint16_t year);
 void        NTP_To_ST_TIME(uint32_t ntp_sec, ST_TIME_FORMAT *sTime);
+
+int8_t      UTIL_Hex_To_Val (uint8_t chr);
 #endif

@@ -190,7 +190,7 @@ uint8_t Save_Array(uint32_t ADD, uint8_t* Buff, uint16_t length)
 
     OnchipFlashPageErase(ADD);
 
-    aTemp[0] = BYTE_TEMP_FIRST;
+    aTemp[0] = BYTE_WRITEN;
     aTemp[1] = length;
     for(i = 0; i < length; i++)
         aTemp[i+2] = *(Buff + i);
@@ -209,7 +209,7 @@ uint8_t Save_Array_without_erase (uint32_t ADD, uint8_t* Buff, uint16_t length)
     uint16_t i = 0;
     uint8_t aTemp[256] = {0};
 
-    aTemp[0] = BYTE_TEMP_FIRST;
+    aTemp[0] = BYTE_WRITEN;
     aTemp[1] = length;
     for(i = 0; i < length; i++)
         aTemp[i+2] = *(Buff + i);

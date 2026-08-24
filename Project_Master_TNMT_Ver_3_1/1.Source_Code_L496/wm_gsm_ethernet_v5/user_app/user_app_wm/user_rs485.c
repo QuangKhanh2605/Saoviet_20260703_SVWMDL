@@ -172,48 +172,6 @@ void RS485_Modbus_Send (uint8_t SlaveID, uint8_t Func, uint16_t Addr, uint16_t n
     HAL_GPIO_WritePin(DE_GPIO_PORT, DE_GPIO_PIN, GPIO_PIN_RESET);
 }
 
-/*
-    FuncTest: Master Read
-*/
-
-void RS485_Modbus_Read_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis)
-{
-    uint8_t aFrame[48] = {0};
-    sData   strFrame = {(uint8_t *) &aFrame[0], 0};
-    
-    ModRTU_Master_Read_Frame(&strFrame, SlaveID, FUN_READ_BYTE, Addr, nRegis);
-
-    HAL_GPIO_WritePin(DE_GPIO_PORT, DE_GPIO_PIN, GPIO_PIN_SET);
-    HAL_Delay(10);
-    // Send
-    RS485_Init_Data();
-    HAL_UART_Transmit(&uart_rs485, strFrame.Data_a8, strFrame.Length_u16, 1000); 
-    
-    //Dua DE ve Receive
-    HAL_GPIO_WritePin(DE_GPIO_PORT, DE_GPIO_PIN, GPIO_PIN_RESET);
-}
-
-void RS485_Modbus_Write_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis, uint8_t *aData)
-{
-    uint8_t aFrame[48] = {0};
-    sData   strFrame = {(uint8_t *) &aFrame[0], 0};
-    
-//    ModRTU_Master_Read_Frame(&strFrame, SlaveID, FUN_READ_BYTE, Addr, nRegis);
-    if(nRegis == 1)
-        ModRTU_Master_Write_Frame(&strFrame, SlaveID, FUN_WRITE_BYTE, Addr, nRegis, aData);
-    else
-        ModRTU_Master_Write_Frame(&strFrame, SlaveID, FUN_WRITE_MULTI, Addr, nRegis, aData);
-
-    HAL_GPIO_WritePin(DE_GPIO_PORT, DE_GPIO_PIN, GPIO_PIN_SET);
-    HAL_Delay(10);
-    // Send
-    RS485_Init_Data();
-    HAL_UART_Transmit(&uart_rs485, strFrame.Data_a8, strFrame.Length_u16, 1000); 
-    
-    //Dua DE ve Receive
-    HAL_GPIO_WritePin(DE_GPIO_PORT, DE_GPIO_PIN, GPIO_PIN_RESET);
-}
-
 
 /*--------- RS485 2 --------------*/
 void RS485_2_Init_Data (void)
@@ -267,43 +225,6 @@ void RS485_2_Modbus_Send (uint8_t SlaveID, uint8_t Func, uint16_t Addr, uint16_t
     HAL_GPIO_WritePin(DE_2_GPIO_PORT, DE_2_GPIO_PIN, GPIO_PIN_RESET);
 }
 
-void RS485_2_Modbus_Read_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis)
-{
-    uint8_t aFrame[48] = {0};
-    sData   strFrame = {(uint8_t *) &aFrame[0], 0};
-    
-    ModRTU_Master_Read_Frame(&strFrame, SlaveID, FUN_READ_BYTE, Addr, nRegis);
-
-    HAL_GPIO_WritePin(DE_2_GPIO_PORT, DE_2_GPIO_PIN, GPIO_PIN_SET);
-    HAL_Delay(10);
-    // Send
-    RS485_2_Init_Data();
-    HAL_UART_Transmit(&uart_rs485_2, strFrame.Data_a8, strFrame.Length_u16, 1000); 
-    
-    //Dua DE ve Receive
-    HAL_GPIO_WritePin(DE_2_GPIO_PORT, DE_2_GPIO_PIN, GPIO_PIN_RESET);
-}
-
-void RS485_2_Modbus_Write_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis, uint8_t *aData)
-{
-    uint8_t aFrame[48] = {0};
-    sData   strFrame = {(uint8_t *) &aFrame[0], 0};
-    
-//    ModRTU_Master_Read_Frame(&strFrame, SlaveID, FUN_READ_BYTE, Addr, nRegis);
-    if(nRegis == 1)
-        ModRTU_Master_Write_Frame(&strFrame, SlaveID, FUN_WRITE_BYTE, Addr, nRegis, aData);
-    else
-        ModRTU_Master_Write_Frame(&strFrame, SlaveID, FUN_WRITE_MULTI, Addr, nRegis, aData);
-
-    HAL_GPIO_WritePin(DE_2_GPIO_PORT, DE_2_GPIO_PIN, GPIO_PIN_SET);
-    HAL_Delay(10);
-    // Send
-    RS485_2_Init_Data();
-    HAL_UART_Transmit(&uart_rs485_2, strFrame.Data_a8, strFrame.Length_u16, 1000); 
-    
-    //Dua DE ve Receive
-    HAL_GPIO_WritePin(DE_2_GPIO_PORT, DE_2_GPIO_PIN, GPIO_PIN_RESET);
-}
 
 
 
@@ -376,55 +297,6 @@ void RS485_2_Rx_Callback (uint16_t Size)
         pRS485_2_Rx_Done();
 }
 
-/*
-    Kiem tra format modbus
-        return: 
-*/
-
-uint8_t RS485_Modbus_Check_Format (uint8_t SlaveID, uint16_t nRegis,
-                                   sData *pSource, sData *Content)
-{
-    uint16_t CrcCalcu = 0;
-    uint8_t aCRC_GET[2] = {0};
-    uint16_t Pos = 0;
-    uint8_t ModFunc = 0, ModLength = 0, ModSlave = 0;
-    
-    if (pSource->Length_u16 < 4)
-        return false;
-    
-    CrcCalcu = ModRTU_CRC(pSource->Data_a8, pSource->Length_u16 - 2);
-            
-    aCRC_GET[0] = (uint8_t) (CrcCalcu & 0x00FF);
-    aCRC_GET[1] = (uint8_t) ( (CrcCalcu >> 8) & 0x00FF );
-    
-    if ( (aCRC_GET[0] != *(pSource->Data_a8 + pSource->Length_u16 - 2)) 
-        || (aCRC_GET[1] != *(pSource->Data_a8 + pSource->Length_u16 - 1)) )
-        return false;
-            
-    ModSlave = *(pSource->Data_a8 + Pos++);
-    ModFunc = *(pSource->Data_a8 + Pos++);
-            
-    switch (ModFunc)
-    {
-        case FUN_READ_BYTE:
-        case FUN_READ_REGIS:
-            ModLength = *(pSource->Data_a8 + Pos++);
-            //check frame
-            if ((ModSlave != SlaveID) && ModLength != (nRegis * 2))
-                return false;
-            
-            //tro content vao data
-            Content->Data_a8 = pSource->Data_a8 + Pos;
-            Content->Length_u16 = ModLength;   
-            break;
-      
-        default:
-            break;
-    }
-    
-    return true;
-}
-
 void RS485_1_Trans(uint8_t *Data, uint16_t Length)
 {
     HAL_GPIO_WritePin(DE_GPIO_PORT, DE_GPIO_PIN, GPIO_PIN_SET);
@@ -448,5 +320,3 @@ void RS485_2_Trans(uint8_t *Data, uint16_t Length)
     //Dua DE ve Receive
     HAL_GPIO_WritePin(DE_2_GPIO_PORT, DE_2_GPIO_PIN, GPIO_PIN_RESET);
 }
-
-

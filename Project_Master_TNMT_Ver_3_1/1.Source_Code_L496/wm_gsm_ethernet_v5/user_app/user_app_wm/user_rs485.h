@@ -65,9 +65,13 @@ extern DMA_HandleTypeDef            hdma_lpuart_rx;
 #define RS485_POWER_PORT    RS485_ON_OFF_GPIO_Port     //thay doi chan nay thanh chan on/off 485
 #define RS485_POWER_PIN     RS485_ON_OFF_Pin    
 
-#define RS485_ON        HAL_GPIO_WritePin(RS485_POWER_PORT, RS485_POWER_PIN, GPIO_PIN_RESET);
-#define RS485_OFF       HAL_GPIO_WritePin(RS485_POWER_PORT, RS485_POWER_PIN, GPIO_PIN_SET);
-
+#ifdef BOARD_QN_V5_0
+    #define RS485_ON        HAL_GPIO_WritePin(RS485_POWER_PORT, RS485_POWER_PIN, GPIO_PIN_RESET);
+    #define RS485_OFF       HAL_GPIO_WritePin(RS485_POWER_PORT, RS485_POWER_PIN, GPIO_PIN_SET); 
+#else
+    #define RS485_ON        HAL_GPIO_WritePin(RS485_POWER_PORT, RS485_POWER_PIN, GPIO_PIN_SET);
+    #define RS485_OFF       HAL_GPIO_WritePin(RS485_POWER_PORT, RS485_POWER_PIN, GPIO_PIN_RESET);
+#endif
 
 extern uint8_t Rs485Status_u8;
 extern uint8_t Rs485_2Status_u8;
@@ -85,8 +89,7 @@ void RS485_Init_RX_Mode(void);
 void RS485_Stop_RX_Mode (void);
 void RS485_Rx_Callback (uint16_t Size);
 void RS485_Modbus_Send (uint8_t SlaveID, uint8_t Func, uint16_t Addr, uint16_t nRegis);
-void RS485_Modbus_Read_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis);
-void RS485_Modbus_Write_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis, uint8_t *aData);
+
 
 void RS485_2_Init_Data (void);
 void RS485_2_Init_Uart (void);
@@ -94,16 +97,10 @@ void RS485_2_Init_RX_Mode(void);
 void RS485_2_Stop_RX_Mode (void);
 
 void RS485_2_Modbus_Send (uint8_t SlaveID, uint8_t Func, uint16_t Addr, uint16_t nRegis);
-void RS485_2_Modbus_Read_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis);
-void RS485_2_Modbus_Write_Value (uint8_t SlaveID, uint16_t Addr, uint16_t nRegis, uint8_t *aData);
 void RS485_2_Rx_Callback (uint16_t Size);
-
-uint8_t RS485_Modbus_Check_Format (uint8_t SlaveID, uint16_t nRegis, 
-                                   sData *pSource, sData *Content);
 
 void RS485_1_Trans(uint8_t *Data, uint16_t Length);
 void RS485_2_Trans(uint8_t *Data, uint16_t Length);
-
 #endif
 
 

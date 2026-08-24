@@ -57,7 +57,8 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, LED_Pin|ETH2_INTn_Pin|RS485_2_TXDE_Pin|ETH2_SCSn_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, LED_Pin|SD_ON_OFF_Pin|ETH2_INTn_Pin|RS485_2_TXDE_Pin
+                          |ETH2_SCSn_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(SIM_RESET_GPIO_Port, SIM_RESET_Pin, GPIO_PIN_RESET);
@@ -79,8 +80,8 @@ void MX_GPIO_Init(void)
                           |ETH_RSTn_Pin|ETH_SCSn_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, RS485_1_TXDE_Pin|LCD_ON_OFF_Pin|LCD_RST_Pin|LCD_CS_Pin
-                          |LCD_A0_Pin|ETH_ON_OFF_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, RS485_1_TXDE_Pin|FLASH_ON_OFF_Pin|LCD_ON_OFF_Pin|LCD_RST_Pin
+                          |LCD_CS_Pin|LCD_A0_Pin|ETH_ON_OFF_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : DEV_INSTAN_Pin */
   GPIO_InitStruct.Pin = DEV_INSTAN_Pin;
@@ -88,23 +89,25 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(DEV_INSTAN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_Pin ETH2_INTn_Pin RS485_2_TXDE_Pin ETH2_SCSn_Pin */
-  GPIO_InitStruct.Pin = LED_Pin|ETH2_INTn_Pin|RS485_2_TXDE_Pin|ETH2_SCSn_Pin;
+  /*Configure GPIO pins : LED_Pin SD_ON_OFF_Pin ETH2_INTn_Pin RS485_2_TXDE_Pin
+                           ETH2_SCSn_Pin */
+  GPIO_InitStruct.Pin = LED_Pin|SD_ON_OFF_Pin|ETH2_INTn_Pin|RS485_2_TXDE_Pin
+                          |ETH2_SCSn_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PE4 PE5 PE6 PE1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_1;
+  /*Configure GPIO pins : PE5 PE6 PE1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PC13 PC7 PC8 PC9
-                           PC10 PC11 PC12 */
+                           PC10 PC11 */
   GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_7|GPIO_PIN_8|GPIO_PIN_9
-                          |GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12;
+                          |GPIO_PIN_10|GPIO_PIN_11;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -122,11 +125,11 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(SIM_RESET_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SD_CD_Pin */
-  GPIO_InitStruct.Pin = SD_CD_Pin;
+  /*Configure GPIO pins : SD_CD_Pin BUTTON_PRESS_4_Pin LCD_DETECT_Pin */
+  GPIO_InitStruct.Pin = SD_CD_Pin|BUTTON_PRESS_4_Pin|LCD_DETECT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(SD_CD_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SIM_ON_OFF_Pin SIM_DTR_Pin */
   GPIO_InitStruct.Pin = SIM_ON_OFF_Pin|SIM_DTR_Pin;
@@ -162,26 +165,22 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(RS485_ON_OFF_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DEV_DO_4_Pin DEV_DO_3_Pin DEV_DO_2_Pin DEV_DO_1_Pin */
-  GPIO_InitStruct.Pin = DEV_DO_4_Pin|DEV_DO_3_Pin|DEV_DO_2_Pin|DEV_DO_1_Pin;
+  /*Configure GPIO pins : DEV_DO_4_Pin DEV_DO_3_Pin DEV_DO_2_Pin DEV_DO_1_Pin
+                           ETH_RSTn_Pin ETH_SCSn_Pin */
+  GPIO_InitStruct.Pin = DEV_DO_4_Pin|DEV_DO_3_Pin|DEV_DO_2_Pin|DEV_DO_1_Pin
+                          |ETH_RSTn_Pin|ETH_SCSn_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RS485_1_TXDE_Pin LCD_RST_Pin LCD_CS_Pin LCD_A0_Pin
-                           ETH_ON_OFF_Pin */
-  GPIO_InitStruct.Pin = RS485_1_TXDE_Pin|LCD_RST_Pin|LCD_CS_Pin|LCD_A0_Pin
-                          |ETH_ON_OFF_Pin;
+  /*Configure GPIO pins : RS485_1_TXDE_Pin FLASH_ON_OFF_Pin LCD_RST_Pin LCD_CS_Pin
+                           LCD_A0_Pin ETH_ON_OFF_Pin */
+  GPIO_InitStruct.Pin = RS485_1_TXDE_Pin|FLASH_ON_OFF_Pin|LCD_RST_Pin|LCD_CS_Pin
+                          |LCD_A0_Pin|ETH_ON_OFF_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PD11 */
-  GPIO_InitStruct.Pin = GPIO_PIN_11;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SD_IN_Pin BUTTON_PRESS_1_Pin BUTTON_PRESS_2_Pin BUTTON_PRESS_3_Pin */
@@ -189,12 +188,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : BUTTON_PRESS_4_Pin */
-  GPIO_InitStruct.Pin = BUTTON_PRESS_4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(BUTTON_PRESS_4_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PA8 PA15 */
   GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_15;
@@ -222,13 +215,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(ETH_INTn_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : ETH_RSTn_Pin ETH_SCSn_Pin */
-  GPIO_InitStruct.Pin = ETH_RSTn_Pin|ETH_SCSn_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PH3 */
   GPIO_InitStruct.Pin = GPIO_PIN_3;

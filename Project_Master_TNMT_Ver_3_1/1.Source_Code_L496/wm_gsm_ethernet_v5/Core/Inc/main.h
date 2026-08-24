@@ -62,6 +62,8 @@ void Error_Handler(void);
 #define DEV_INSTAN_EXTI_IRQn EXTI2_IRQn
 #define LED_Pin GPIO_PIN_3
 #define LED_GPIO_Port GPIOE
+#define SD_ON_OFF_Pin GPIO_PIN_4
+#define SD_ON_OFF_GPIO_Port GPIOE
 #define BUTTON_1_Pin GPIO_PIN_0
 #define BUTTON_1_GPIO_Port GPIOH
 #define SIM_RESET_Pin GPIO_PIN_1
@@ -122,6 +124,8 @@ void Error_Handler(void);
 #define RS485_1_RX_GPIO_Port GPIOD
 #define RS485_1_TXDE_Pin GPIO_PIN_10
 #define RS485_1_TXDE_GPIO_Port GPIOD
+#define FLASH_ON_OFF_Pin GPIO_PIN_11
+#define FLASH_ON_OFF_GPIO_Port GPIOD
 #define SD_IN_Pin GPIO_PIN_12
 #define SD_IN_GPIO_Port GPIOD
 #define BUTTON_PRESS_1_Pin GPIO_PIN_13
@@ -136,6 +140,8 @@ void Error_Handler(void);
 #define DEBUG_TX_GPIO_Port GPIOA
 #define DEBUG_RX_Pin GPIO_PIN_10
 #define DEBUG_RX_GPIO_Port GPIOA
+#define LCD_DETECT_Pin GPIO_PIN_12
+#define LCD_DETECT_GPIO_Port GPIOC
 #define LCD_ON_OFF_Pin GPIO_PIN_0
 #define LCD_ON_OFF_GPIO_Port GPIOD
 #define LCD_RST_Pin GPIO_PIN_1

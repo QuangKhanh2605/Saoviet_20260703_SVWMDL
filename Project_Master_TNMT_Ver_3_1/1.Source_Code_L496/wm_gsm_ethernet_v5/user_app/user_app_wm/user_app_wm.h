@@ -72,17 +72,32 @@
 
 #define MAX_TIME_MODBUS         120000
 #define PERIOD_READ_MODBUS      10000
+#define PERIOD_READ_PRESS       1000
 
 #define TIME_CHECK_ALARM        5000
 
 #define MAX_SAMPLE_FLOW         8
 
-#define MAX_PARAM_TNMT          2 
-#define MAX_PARAM_TYPE          1
+#define MAX_PARAM_TNMT          3 
+#define MAX_PARAM_TYPE          2
 #define MAX_PACKET_MODE         2
 
 #define MAX_DISCONN_RS485       2
 #define MAX_BLOCK               2
+
+/*motor define */
+#define NUMBER_MOTOR                        2   /* max 16 */
+#define NUMBER_BLOCK_MAX                    24  /* 24 */
+#define NUMBER_CYCLE_MAX                    6   /* 24 */
+#define NUMBER_BLOCK_MIN                    0   /*  1 */  //khi loi eeprom se cho dong co dung
+
+#define MAX_OUT_CYCLE_TIME                  30      /* MAX */
+#define MAX_OUT_CYCLE_RUN_TIME              5       /* MAX */
+#define MAX_OUT_BLOCK_START_MAX             1440    /* MAX */
+#define MAX_OUT_BLOCK_START_DEFAULT         0       /* Default */
+
+#define MAX_OUT_BLOCK_END_MAX               1440    /* MAX */
+#define MAX_OUT_BLOCK_END_DEFAULT           1440    /* Default */
 /*================ var struct =================*/
 typedef enum
 {
@@ -106,6 +121,8 @@ typedef enum
 
     _EVENT_RS485_1_RECV,
     _EVENT_RS485_2_RECV,
+    
+    _EVENT_CTRL_OUT_PUT,
     
 	_EVENT_END_WM,
 }eKindEventWm;
@@ -160,14 +177,6 @@ typedef enum
     
 	_ALARM_END,
 }Struct_Type_Alarm;
-
-
-typedef enum
-{
-    __AN_PRESS,
-    __AN_LEVEL,
-    __AN_VOL,
-}eAnalogType;
 
 
 typedef struct
@@ -245,12 +254,44 @@ typedef struct
     uint8_t nParam_u8;
 }sChannelInformation;
 
+typedef struct
+{
+    uint16_t start_u16;
+    uint16_t end_u16;
+}sBlockTimeVar; 
 
 typedef struct
 {
+    uint8_t     OutMode[NUMBER_MOTOR];           /* 1-free run   2-block */
+    uint8_t     OutOnOff[NUMBER_MOTOR];           /* ON - OFF fast motor */
+    uint16_t    nBlockTime[NUMBER_MOTOR];
+    sBlockTimeVar aBlockTime[NUMBER_MOTOR][NUMBER_BLOCK_MAX];
+    
+    uint16_t    nCycle[NUMBER_MOTOR];
+    sBlockTimeVar aCycleBlockTime[NUMBER_MOTOR][NUMBER_CYCLE_MAX];
+    uint16_t    CycleTime[NUMBER_MOTOR][NUMBER_CYCLE_MAX];
+    uint16_t    RunTimeInCycle[NUMBER_MOTOR][NUMBER_CYCLE_MAX];
+}sOutputContrlVar;
+
+typedef   void (*ctrFUNC)(uint8_t on_off);
+typedef   int8_t (*checkFB)(void);
+typedef struct
+{
+    uint8_t      control;
+    uint8_t      status;        /* 0:off    1:on    2:error */
+    ctrFUNC      pCtrFunc;
+    checkFB      pReadFb;
+    uint32_t     Landmark_u32;
+}sOutputVariable;
+
+
+typedef struct
+{
+    uint8_t         Status_u8;
+    uint32_t        LandMark_u32;
     uint8_t             IrqPowUp_u8;
     uint16_t            aINPUT_VAL[MAX_PORT_INPUT];
-    sAppWmPressureInfor aPRESSURE[MAX_CHANNEL];
+    sAppWmPressureInfor aPRESSURE[MAX_CHANNEL + MAX_SLAVE_MODBUS];
     sChannelInformation sChannInfor[MAX_CHANNEL + MAX_SLAVE_MODBUS];
     uint8_t             nChannel_u8;
     uint8_t             rDefault_u8;
@@ -271,6 +312,11 @@ typedef struct
     sStatusAlarm    sAlarm[MAX_CHANNEL];
     uint8_t         iCaculOK[MAX_CHANNEL];
     uint8_t         ModePacket_u8;
+    
+    sOutputContrlVar    sOutputContrl;
+    float               aThreshPress_f[NUMBER_MOTOR][2];   //nguong duoi, nguong tren
+    uint8_t             aPressDir_u8[NUMBER_MOTOR];
+    sOutputVariable     sOutVar[NUMBER_MOTOR];
 }sAppWmVariable;
 
 
@@ -298,6 +344,7 @@ extern sAppWmVariable       sWmVar;
 extern char AnalogType[2][10];
 extern char aUnitWm[5][10]; 
 extern char AppWm_TN_PARAM[2][10]; 
+extern char aUnitLevel[3][8]; 
 /*================ Function =================*/
 
 //Function handler
@@ -372,10 +419,25 @@ void    AppWm_SER_Get_Pressure_Val(sData *str_Receiv, uint16_t Pos);
 void    AppWm_SER_Get_Level_Infor(sData *str_Receiv, uint16_t Pos);
 void    AppWm_SER_Set_Level_Infor(sData *str_Receiv, uint16_t Pos);
 
+void    AppWm_SER_Set_Out_Block(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Get_Out_Block(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Set_Out_Duty(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Get_Out_Duty(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Set_Out_Mode(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Get_Out_Mode(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Set_Out_Val(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Get_Out_Val(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Set_Press_Thresh(sData *str_Receiv, uint16_t Pos);
+void    AppWm_SER_Get_Press_Thresh(sData *str_Receiv, uint16_t Pos);
+
 void    AppWm_Init_WM_Dig_Infor (void);
 void    AppWm_Save_WM_Dig_Infor (void);
 void    AppWm_Init_Press_Infor (void);
 void    AppWm_Save_Press_Infor (void);
+
+void    AppWm_Init_OutCtrl_Infor (void);
+void    AppWm_Save_OutCtrl_Infor (void);
+
 
 void    AppWm_Init_Default_Pressure (void);
 
@@ -426,10 +488,11 @@ void    AppWm_Cacul_Param (void);
 uint8_t AppWm_Cacul_Flow_1 (uint8_t chann);
 uint8_t AppWm_Cacul_Flow_2 (uint8_t chann);
 uint8_t AppWm_Packet_Param (char *pdata, uint8_t chann, uint8_t param);
+uint8_t AppWm_iPending (void);
 
 
-
-
+void _cb_OUT1_Set (uint8_t on_off);
+void _cb_OUT2_Set (uint8_t on_off);
 
 
 

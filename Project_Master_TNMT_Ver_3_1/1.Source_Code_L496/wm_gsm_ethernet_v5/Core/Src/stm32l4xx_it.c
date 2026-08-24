@@ -195,16 +195,19 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-  RtCountSystick_u32++;
-  Socket_Inc_Tick();
-  if (RtCountSystick_u32 % 1000 == 0){
-    DNS_time_handler();
-    DHCPv4_time_handler();
-    DHCP_time_handler();
-  }
-  if (RtCountSystick_u32 % 1000) {
+    static uint32_t last = 0;
     
-  }
+    RtCountSystick_u32++;
+    Socket_Inc_Tick();
+
+    if ((RtCountSystick_u32 - last) >= 1000)
+    {
+        last = RtCountSystick_u32;
+
+        DNS_time_handler();
+        DHCP_time_handler();
+        DHCPv4_time_handler();
+    }
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */

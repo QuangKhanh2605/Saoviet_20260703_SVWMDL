@@ -57,15 +57,22 @@
 
 #define SPI_NSS_GPIO_Port       ETH2_SCSn_GPIO_Port  
 #define SPI_NSS_Pin             ETH2_SCSn_Pin  
-
-#define FLASH_ON_OFF_GPIO_Port  ETH_ON_OFF_GPIO_Port
-#define FLASH_ON_OFF_Pin        ETH_ON_OFF_Pin
+     
+#ifdef BOARD_QN_V5_0
+    #define FLASH_ON_OFF_GPIO_Port  ETH_ON_OFF_GPIO_Port
+    #define FLASH_ON_OFF_Pin        ETH_ON_OFF_Pin
+         
+    #define FLASH_POWER_OFF         HAL_GPIO_WritePin(FLASH_ON_OFF_GPIO_Port, FLASH_ON_OFF_Pin, GPIO_PIN_SET)    
+    #define FLASH_POWER_ON          HAL_GPIO_WritePin(FLASH_ON_OFF_GPIO_Port, FLASH_ON_OFF_Pin, GPIO_PIN_RESET)   
+#else
+    #define FLASH_POWER_OFF         HAL_GPIO_WritePin(FLASH_ON_OFF_GPIO_Port, FLASH_ON_OFF_Pin, GPIO_PIN_RESET)    
+    #define FLASH_POWER_ON          HAL_GPIO_WritePin(FLASH_ON_OFF_GPIO_Port, FLASH_ON_OFF_Pin, GPIO_PIN_SET)  
+#endif //BOARD_QN_V5_0
 
 #define FLASH_RESET_GPIO_Port   ETH2_INTn_GPIO_Port  
 #define FLASH_RESET_Pin         ETH2_INTn_Pin    
 
-#define FLASH_POWER_OFF         HAL_GPIO_WritePin(FLASH_ON_OFF_GPIO_Port, FLASH_ON_OFF_Pin, GPIO_PIN_SET)    
-#define FLASH_POWER_ON          HAL_GPIO_WritePin(FLASH_ON_OFF_GPIO_Port, FLASH_ON_OFF_Pin, GPIO_PIN_RESET)      
+   
 
 #define FLASH_RESET_OFF         HAL_GPIO_WritePin(FLASH_RESET_GPIO_Port, FLASH_RESET_Pin, GPIO_PIN_SET)    
 #define FLASH_RESET_ON          HAL_GPIO_WritePin(FLASH_RESET_GPIO_Port, FLASH_RESET_Pin, GPIO_PIN_RESET)      
@@ -75,7 +82,7 @@
 #define TIMEOUT_ER_CHIP					60000
 #define TIMEOUT_ER_SECTOR				1000
 #define TIMEOUT_WR_PAGE					100
-#define TIMEOUT_WR_ENABLE				1000
+#define TIMEOUT_WR_ENABLE				100 // 1000
 
 #define FLASH_CMD_TIMEOUT               (200)
 #define FLASH_CMD_TIME 	                (1)
@@ -102,18 +109,18 @@
 #define FLASH_ADDR_TSVH_STOP			0x03C000		//Sector 60
 
 #define FLASH_ADDR_GPS_START 			0x03C000	    //Sector 60
-#define FLASH_ADDR_GPS_STOP			    0xA00000	    //Sector 2560
+#define FLASH_ADDR_GPS_STOP			    0xA00000	    //Sector 2048
 
 /*--------- Max size record ----------*/
-#define FLASH_MAX_RECORD_TSVH           180         // 192
-#define FLASH_MAX_RECORD_EVENT          100         //max 256
-#define FLASH_MAX_RECORD_LOG            2000        //max 2000
-#define FLASH_MAX_RECORD_GPS            18000       // 64k
+#define FLASH_MAX_RECORD_TSVH           180             // 192
+#define FLASH_MAX_RECORD_EVENT          100             //max 256
+#define FLASH_MAX_RECORD_LOG            2000            //max 2000
+#define FLASH_MAX_RECORD_GPS            18000           // 64k
 
 #define FLASH_SIZE_DATA_TSVH            256
 #define FLASH_SIZE_DATA_EVENT           64
 #define FLASH_SIZE_DATA_LOG             64
-#define FLASH_SIZE_DATA_GPS             512        // Old 128
+#define FLASH_SIZE_DATA_GPS             512             //OLD 128
 
 #define FLASH_MAX_RETRY_ITEM            3
 #define FLASH_MAX_RETRY_SKIP            6

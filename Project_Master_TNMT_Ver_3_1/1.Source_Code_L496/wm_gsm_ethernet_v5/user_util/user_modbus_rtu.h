@@ -14,6 +14,7 @@
 #define FUN_WRITE_BYTE      0x06
 #define FUN_WRITE_MULTI     0x10
 
+
 /*======================== Funcion ======================*/
 uint16_t    ModRTU_CRC(uint8_t* buf, int len);
 void        ModRTU_Convert_Special_Byte (uint8_t* Buff_Source, uint16_t* length);

@@ -38,10 +38,10 @@ void SV_Protocol_Packet_Data (uint8_t *pTarget, uint16_t *LenTarget, uint8_t Obi
             pTarget[Pos++] = sRTCTemp->min;
             pTarget[Pos++] = sRTCTemp->sec;
             break;
-//        case OBIS_ENVI_TEMP_1:
-//        case OBIS_ENVI_HUMI_1: 
-//        case OBIS_ENVI_TEMP_2:
-//        case OBIS_ENVI_HUMI_2:
+        case OBIS_ENVI_TEMP_1:
+        case OBIS_ENVI_HUMI_1: 
+        case OBIS_ENVI_TEMP_2:
+        case OBIS_ENVI_HUMI_2:
         case OBIS_EMET_CUR:
         case OBIS_DEV_VOL1:
         case OBIS_DEV_VOL2:
