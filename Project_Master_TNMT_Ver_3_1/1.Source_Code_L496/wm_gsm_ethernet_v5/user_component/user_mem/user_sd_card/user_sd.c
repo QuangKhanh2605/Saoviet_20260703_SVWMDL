@@ -99,7 +99,7 @@ static uint8_t _Cb_Sd_Check (uint8_t event)
             }
             else
             {
-                SD_Card_Init();
+                ReInit_SD_Card();
             }
         }
         else
@@ -197,17 +197,25 @@ void AT_CMD_Get_SD_Card_Free(sData *str, uint16_t Pos)
 }
 #endif
 /*======================Handle Task and Init app====================*/
-void SD_Card_Init (void)
+void ReInit_SD_Card(void)
 {
     SD_Free_i32 = 0;
     sd_unmount();
+#ifdef BOARD_QN_V5_1
     SD_POWER_OFF;
     HAL_Delay(50);
     SD_POWER_ON;
+#endif
     SD_SPI_Init();
     HAL_Delay(50);
     
-    sd_mount();   
+    sd_mount();
+}
+
+
+void SD_Card_Init (void)
+{
+    ReInit_SD_Card();
     
     qQueue_Create (&qSDCardWrite, MAX_QUEUE_SD, sizeof (sMemSDCardWrite), (sMemSDCardWrite *) &sQSDCardWrite);  
   

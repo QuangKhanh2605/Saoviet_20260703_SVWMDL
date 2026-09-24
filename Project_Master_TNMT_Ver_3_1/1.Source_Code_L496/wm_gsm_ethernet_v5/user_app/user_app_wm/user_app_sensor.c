@@ -64,14 +64,14 @@ Struct_MeasureMain sMeasureMain[MAX_CHANNEL_SS][_END_SENSOR] =
 {
     // ==================== KÊNH 1 (CH1) ====================
     {
-      {_SS_TEMP,    OBIS_ENVI_TEMP,     ID_SS_TEMP,         "Temp",         "°C",       0xFE,       0,      0xFE},       // 0 Temperature       
+      {_SS_TEMP,    OBIS_ENVI_TEMP,     ID_SS_TEMP,         "Temp",         "oC",       0xFE,       0,      0xFE},       // 0 Temperature       
       {_SS_PH,      OBIS_ENVI_PH_WATER, ID_SS_PH,           "pH",           "-",        0xFE,       0,      0xFE},       // 1 pH          
       {_SS_CLO,     OBIS_ENVI_CLO,      ID_SS_CLO,          "CLO",          "mg/l",     0xFE,       0,      0xFE},       // 2 Clo        
       {_SS_EC,      OBIS_ENVI_EC,       ID_SS_EC,           "EC",           "µS/cm",    0x00,       0,      0x00},       // 3 EC          
       {_SS_TURB,    OBIS_ENVI_TURB,     ID_SS_TURB,         "TURB",         "NTU",      0xFE,       10,     0xFF},       // 4 Turb        
       {_SS_COD,     OBIS_ENVI_COD,      ID_SS_COD,          "COD",          "mg/l",     0xFE,       0,      0xFE},       // 5 COD         
       {_SS_TSS,     OBIS_ENVI_TSS,      ID_SS_TSS,          "TSS",          "mg/l",     0xFF,       0,      0xFF},       // 6 TSS             
-      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4-N",        "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
+      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4+",        "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
       {_SS_DO,      OBIS_ENVI_OXY_MG_L, ID_SS_DO,           "DO",           "mg/l",     0xFE,       0,      0xFE},       // 8 DO          
       {_SS_SALT,    OBIS_ENVI_SALT_UNIT,ID_SS_EC,           "SALT",         "%",        0xFE,       0,      0xFE},       // 9 SALT         
       {_SS_TDS,     OBIS_ENVI_TDS,      ID_SS_EC,           "TDS",          "mg/l",     0x00,       0,      0x00},       //10 TDS
@@ -87,7 +87,7 @@ Struct_MeasureMain sMeasureMain[MAX_CHANNEL_SS][_END_SENSOR] =
       {_SS_TURB,    OBIS_ENVI_TURB,     ID_SS_TURB,         "TURB",         "NTU",      0xFE,       10,     0xFF},       // 4 Turb        
       {_SS_COD,     OBIS_ENVI_COD,      ID_SS_COD,          "COD",          "mg/l",     0xFE,       0,      0xFE},       // 5 COD         
       {_SS_TSS,     OBIS_ENVI_TSS,      ID_SS_TSS,          "TSS",          "mg/l",     0xFF,       0,      0xFF},       // 6 TSS             
-      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4-N",        "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
+      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4+",        "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
       {_SS_DO,      OBIS_ENVI_OXY_MG_L, ID_SS_DO,           "DO",           "mg/l",     0xFE,       0,      0xFE},       // 8 DO          
       {_SS_SALT,    OBIS_ENVI_SALT_UNIT,ID_SS_EC,           "SALT",         "%",        0xFE,       0,      0xFE},       // 9 SALT         
       {_SS_TDS,     OBIS_ENVI_TDS,      ID_SS_EC,           "TDS",          "mg/l",     0x00,       0,      0x00},       //10 TDS
@@ -259,17 +259,31 @@ static uint8_t fevent_sensor_handle_status(uint8_t event)
                 sMeasureMain[j][i].State = _E_BAO_LOI_THIET_BI;
             else
             {
-                if(sMeasureMain[j][i].stateSensor == 0x03)
-                    sMeasureMain[j][i].State = _E_HIEU_CHUAN;        
-                else if(sMeasureMain[j][i].stateSensor == 0x02)
-                {
-                    if(sMeasureMain[j][i].stateValue== 0x01)
-                      sMeasureMain[j][i].State = _E_DANG_DO;    
+                #ifdef MODBUS_SENSOR_DARUIFUNO
+                    if(sMeasureMain[j][i].stateSensor == 0x02)
+                        sMeasureMain[j][i].State = _E_HIEU_CHUAN;        
+                    else if(sMeasureMain[j][i].stateSensor == 0x00 || sMeasureMain[j][i].stateSensor == 0x03)
+                    {
+                        if(sMeasureMain[j][i].stateValue== 0x01)
+                          sMeasureMain[j][i].State = _E_DANG_DO;    
+                        else
+                          sMeasureMain[j][i].State = _E_BAO_LOI_THIET_BI;
+                    }
                     else
                       sMeasureMain[j][i].State = _E_BAO_LOI_THIET_BI;
-                }
-                else
-                  sMeasureMain[j][i].State = _E_BAO_LOI_THIET_BI;
+                #else
+                    if(sMeasureMain[j][i].stateSensor == 0x03)
+                        sMeasureMain[j][i].State = _E_HIEU_CHUAN;        
+                    else if(sMeasureMain[j][i].stateSensor == 0x02)
+                    {
+                        if(sMeasureMain[j][i].stateValue== 0x01)
+                          sMeasureMain[j][i].State = _E_DANG_DO;    
+                        else
+                          sMeasureMain[j][i].State = _E_BAO_LOI_THIET_BI;
+                    }
+                    else
+                      sMeasureMain[j][i].State = _E_BAO_LOI_THIET_BI;
+                #endif
             }
         }
     }
@@ -518,9 +532,18 @@ void AppSensor_Packet_TNMT(void)
         }
     }
 }
-
+//float PH_P = 7.5;
+//float NHN = 0.5;
+//float DO = 6.5;
+//float COD = 0.52;
+//float TSS = 25.5;
 uint8_t AppSensor_Packet_Param (char *pdata, uint8_t chann)
 {
+//    sMeasureMain[0][_SS_PH].Value_f = PH_P;
+//    sMeasureMain[0][_SS_NH4].Value_f = NHN;
+//    sMeasureMain[0][_SS_DO].Value_f = DO;
+//    sMeasureMain[0][_SS_COD].Value_f = COD;
+//    sMeasureMain[0][_SS_TSS].Value_f = TSS;
     sprintf(pdata, "%.3lf\t%s", sMeasureMain[0][chann].Value_f , sMeasureMain[0][chann].Unit);
 
 #ifdef USING_NUMBER_COMMA
@@ -686,7 +709,7 @@ void AT_CMD_Get_User_Sensor (sData *str_Receiv, uint16_t Pos)
     
     for (uint8_t j = 0; j < MAX_CHANNEL_SS; j++)
     {
-        for (uint8_t i = 1; i < _END_SENSOR; i++)   
+        for (uint8_t i = 0; i < _END_SENSOR; i++)   
         {
             Insert_String_To_String(aTemp, &length,(uint8_t*)" ", 0, 1);
             Insert_String_To_String(aTemp, &length,(uint8_t*)sMeasureMain[j][i].Name, 0,strlen(sMeasureMain[j][i].Name));
@@ -736,7 +759,7 @@ void AT_CMD_Set_User_Sensor (sData *str_Receiv, uint16_t Pos)
         if(length_2 > 0)
             TempU32_2 = Convert_String_To_Dec(&str_Receiv->Data_a8[length_0 + 1 + length_1+1] , length_2);
         
-        if(TempU32_0 < MAX_CHANNEL_SS && TempU32_1 < _END_SENSOR && TempU32_2 <= 1)
+        if(TempU32_0 < MAX_CHANNEL_SS && TempU32_1 < _END_SENSOR && TempU32_2 <= 250)
         {
             Save_UserSensor(TempU32_0, TempU32_1, TempU32_2);
             Modem_Respond_Str(PortConfig, (char*)"OK", 0);

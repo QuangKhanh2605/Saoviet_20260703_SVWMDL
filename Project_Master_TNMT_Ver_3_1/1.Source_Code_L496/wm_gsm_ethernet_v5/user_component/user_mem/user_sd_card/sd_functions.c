@@ -165,7 +165,7 @@ int sd_write_file(const char *filename, const char *text) {
 	res = f_write(&file, text, strlen(text), &bw);
 	f_close(&file);
 
-    char *buf = calloc(100, sizeof(char));
+    char *buf = calloc(200, sizeof(char));
     sprintf (buf, "Write %u bytes to %s\r\n", bw, filename);
     Send_Uart(buf);
     free(buf);

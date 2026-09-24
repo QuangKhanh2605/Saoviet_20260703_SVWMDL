@@ -57,8 +57,8 @@
 //#define BOARD_QN_V4_0
 //#define BOARD_LC_V1_0
 //#define BOARD_LC_V1_1
-//#define BOARD_QN_V5_0
-#define BOARD_QN_V5_1
+#define BOARD_QN_V5_0
+//#define BOARD_QN_V5_1
 
 //#define USING_ETHERNET
 

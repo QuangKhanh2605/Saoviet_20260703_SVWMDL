@@ -26,6 +26,7 @@ static uint8_t _Cb_Set_RTC (uint8_t event);
 static void _Cb_TX_Timer_Event(void *context);
 static uint8_t _Cb_Save_Box (uint8_t event);
 static uint8_t _Cb_RST_IWDG (uint8_t event);
+static uint8_t _Cb_Charger_RTC (uint8_t event);
 
 static uint32_t  AppCom_Calcu_Period_To_RoudTime (uint32_t FreqWakeup);
 
@@ -44,6 +45,7 @@ sEvent_struct sEventAppComm[] =
     //Event Log
     { _EVENT_SAVE_BOX,		        0, 0, 0, 	    _Cb_Save_Box }, 
     { _EVENT_RST_IWDG,              1, 0, 1000,     _Cb_RST_IWDG},
+    { _EVENT_CHARGER_RTC,           1, 0, 500,      _Cb_Charger_RTC},
 };
 
 /*===============================================*/
@@ -67,7 +69,7 @@ char aSaoVietCom[15][71] =
 };
 
 
-char sFirmVersion[] = {"SVTH_SVM_DLS_V5_1_1"};  //19 byte
+char sFirmVersion[] = {"SVTH_SVM_DLS_V5_0_4"};  //19 byte
 
 static UTIL_TIMER_Object_t TimerTx;
 
@@ -384,6 +386,65 @@ static uint8_t _Cb_RST_IWDG (uint8_t event)
     return 1;
 }
 
+uint32_t vbat_mV = 0;
+static uint8_t _Cb_Charger_RTC(uint8_t event)
+{
+    static uint32_t charge_time_ms = 0;
+    static uint32_t off_time_ms = 0;
+    static uint8_t charging = 0;
+    static uint8_t measuring = 0;
+    
+    if (measuring)
+    {
+        if (RtCountSystick_u32 - off_time_ms >= 500U)
+        {
+            measuring = 0;
+            vbat_mV = ADC_Get_Value(ADC_CHANNEL_VBAT) * 3U;
+            if (vbat_mV >= 3000U)
+            {
+                HAL_PWREx_DisableBatteryCharging();
+                charging = 0;
+            }
+            else
+            {
+                HAL_PWREx_EnableBatteryCharging(PWR_BATTERY_CHARGING_RESISTOR_5);
+                charge_time_ms = RtCountSystick_u32;
+                charging = 1;
+            }
+        }
+
+        fevent_enable(sEventAppComm, event);
+        return 1;
+    }
+
+    if (charging)
+    {
+        vbat_mV = ADC_Get_Value(ADC_CHANNEL_VBAT) * 3U;
+        if (RtCountSystick_u32 - charge_time_ms >= 60000U)
+        {
+            HAL_PWREx_DisableBatteryCharging();
+            off_time_ms = RtCountSystick_u32;
+
+            charging = 0;
+            measuring = 1;
+        }
+
+        fevent_enable(sEventAppComm, event);
+        return 1;
+    }
+
+    vbat_mV = ADC_Get_Value(ADC_CHANNEL_VBAT) * 3U;
+    if (vbat_mV < 2800U)
+    {
+        HAL_PWREx_EnableBatteryCharging(PWR_BATTERY_CHARGING_RESISTOR_5);
+        charge_time_ms = RtCountSystick_u32;
+        charging = 1;
+    }
+
+    fevent_enable(sEventAppComm, event);
+    return 1;
+}
+
 
 /*=========================== Func App Main ========================*/
 void SysApp_Init (void)
@@ -423,12 +484,12 @@ void SysApp_Setting (void)
     AppWm_Init();
 #endif
     
-#ifdef USING_APP_MODB
-    Init_AppModb();
-#endif
-    
 #ifdef USING_APP_SENSOR
     Init_AppSensor();
+#endif
+    
+#ifdef USING_APP_MODB
+    Init_AppModb();
 #endif
     
 #ifdef USING_APP_TEMH

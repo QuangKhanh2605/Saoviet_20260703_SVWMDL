@@ -1320,10 +1320,7 @@ void BUTTON_Up_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                  sButton.Old_value++;
                                 break;
                             
                             default:
@@ -1364,10 +1361,7 @@ void BUTTON_Up_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                sButton.Old_value++;
                                 break;
                             
                             default:
@@ -1405,10 +1399,7 @@ void BUTTON_Up_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                sButton.Old_value++;
                                 break;
                             
                             default:
@@ -1449,10 +1440,7 @@ void BUTTON_Up_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                sButton.Old_value++;
                                 break;
                             
                             default:
@@ -1493,10 +1481,7 @@ void BUTTON_Up_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                sButton.Old_value++;
                                 break;
                             
                             default:
@@ -1534,10 +1519,7 @@ void BUTTON_Up_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                sButton.Old_value++;
                                 break;
                             
                             default:
@@ -1744,10 +1726,8 @@ void BUTTON_Down_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                if(sButton.Old_value > 0)
+                                  sButton.Old_value--;
                                 break;
                             
                             default:
@@ -1788,10 +1768,8 @@ void BUTTON_Down_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                if(sButton.Old_value > 0)
+                                  sButton.Old_value--;
                                 break;
                             
                             default:
@@ -1829,10 +1807,8 @@ void BUTTON_Down_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                if(sButton.Old_value > 0)
+                                  sButton.Old_value--;
                                 break;
                             
                             default:
@@ -1873,10 +1849,8 @@ void BUTTON_Down_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                if(sButton.Old_value > 0)
+                                  sButton.Old_value--;
                                 break;
                             
                             default:
@@ -1917,10 +1891,8 @@ void BUTTON_Down_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                if(sButton.Old_value > 0)
+                                  sButton.Old_value--;
                                 break;
                             
                             default:
@@ -1954,10 +1926,8 @@ void BUTTON_Down_Process (void)
                                 break;
                                 
                             case 1:
-                                if(sButton.Old_value == 0)
-                                  sButton.Old_value = 1;
-                                else
-                                  sButton.Old_value = 0;
+                                if(sButton.Old_value > 0)
+                                  sButton.Old_value--;
                                 break;
                             
                             default:
@@ -2644,11 +2614,11 @@ void BUTTON_ESC_Process (void)
             break;  
             
         case _LCD_SCR_CHECK_SETTING:
-          if(sHandleModb.State_Wait_Calib != _STATE_CALIB_WAIT)
-          {
-            UTIL_MEM_cpy(&sLCD.sScreenNow, &sLCD.sScreenBack, sizeof(sScreenInformation));
-            sHandleModb.State_Wait_Calib = _STATE_CALIB_FREE;
-          }
+//          if(sHandleModb.State_Wait_Calib != _STATE_CALIB_WAIT)
+//          {
+//            UTIL_MEM_cpy(&sLCD.sScreenNow, &sLCD.sScreenBack, sizeof(sScreenInformation));
+//            sHandleModb.State_Wait_Calib = _STATE_CALIB_FREE;
+//          }
           break; 
             
         case _LCD_SCR_SET_PRESS_1:

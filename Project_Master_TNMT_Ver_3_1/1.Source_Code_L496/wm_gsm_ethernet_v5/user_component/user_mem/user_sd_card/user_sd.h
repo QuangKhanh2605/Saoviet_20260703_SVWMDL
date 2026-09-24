@@ -54,6 +54,8 @@ uint8_t SD_Card_Task (void);
 
 uint8_t SD_Check(void);
 
+void ReInit_SD_Card(void);
+
 uint8_t Write_Mem_SDCard(const char *foldername, const char *filename, const char *text);
 uint8_t SD_WriteLog(const char *folder,
                     const char *filename,

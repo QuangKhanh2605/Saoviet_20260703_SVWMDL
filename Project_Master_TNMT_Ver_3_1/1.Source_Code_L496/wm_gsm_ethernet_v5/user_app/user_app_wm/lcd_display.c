@@ -52,7 +52,7 @@ sOjectInformation   sLCDObject[] =
     {   __SC1_SALINITY,     "Salt : ",         NULL,   _DTYPE_I32,        0,   " %",      2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_COD,          "COD  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_TSS,          "TSS  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
-    {   __SC1_NH4,          "NH4_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC1_NH4,          "NH4+ : ",          NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_DO,           "DO   : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_TDS,          "TDS  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_NO3,          "NO3_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },

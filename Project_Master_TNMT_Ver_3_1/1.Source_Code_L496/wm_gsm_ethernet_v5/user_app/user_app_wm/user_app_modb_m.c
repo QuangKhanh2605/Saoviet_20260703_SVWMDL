@@ -5,36 +5,33 @@
 #include "user_app_wm.h"
 #include "user_define.h"
 #include "user_modem.h"
+#include "user_sensor_saoviet.h"
+#include "user_sensor_xylem.h"
+#include "user_sensor_daruifuno.h"
 /*=========================Fucntion Static=========================*/
 static uint8_t fevent_modb_entry(uint8_t event);
 
-static uint8_t fevent_modb_wait_calib(uint8_t event);
 static uint8_t fevent_modb_rs485_1_refresh(uint8_t event);
 static uint8_t fevent_modb_rs485_2_refresh(uint8_t event);
-
-static uint8_t fevent_modb_handle_subreg(uint8_t event);
 
 static uint8_t fevent_modb_rs485_1_handle(uint8_t event);
 static uint8_t fevent_modb_rs485_2_handle(uint8_t event);
 static uint8_t fevent_modb_tcp_handle(uint8_t event);
 
-static uint8_t fevent_ptr_temp(uint8_t event);
+static uint8_t fevent_call_cycle(uint8_t event);
 /*==============================Struct=============================*/
 sEvent_struct               sEventAppModb[]=
 {
   {_EVENT_MODB_ENTRY,              1, 5, 30000,            fevent_modb_entry},            //Doi slave khoi dong moi truyen opera
   
-  {_EVENT_MODB_WAIT_CALIB,         0, 5, 5000,             fevent_modb_wait_calib},
   {_EVENT_MODB_RS485_1_REFRESH,    0, 5, 60000,            fevent_modb_rs485_1_refresh},
   {_EVENT_MODB_RS485_2_REFRESH,    0, 5, 60000,            fevent_modb_rs485_2_refresh},
-  
-  {_EVENT_MODB_HANDLE_SUBREG,      1, 5, 500,              fevent_modb_handle_subreg},
   
   {_EVENT_MODB_RS485_1_HANDLE,     1, 5, 100,              fevent_modb_rs485_1_handle},
   {_EVENT_MODB_RS485_2_HANDLE,     1, 5, 100,              fevent_modb_rs485_2_handle},
   {_EVENT_MODB_TCP_HANDLE,         1, 5, 100,              fevent_modb_tcp_handle},
   
-  {_EVENT_PTR_TEMP,                1, 5, 100,              fevent_ptr_temp},
+  {_EVENT_CALL_CYCLE,              1, 5, 100,              fevent_call_cycle},
 };
 uint16_t CountBufferHandleRecv = 0;
 
@@ -46,457 +43,27 @@ extern sData sUart485_2;
 
 Struct_TransModbusTCP       sTransModTCP = {0};
 
-Struct_Modb_SubReg          sModbSubReg = {0};
-Struct_Hanlde_Modb          sHandleModb = {0};
-
-uint8_t Connect_Test = 0;
-
-uint8_t ID_Default = 1;
-uint8_t User_True = 1;
-uint8_t User_False = 0;
-
-Struct_RegSensor            sRegSensor[] =
-{
-#ifdef MODBUS_SENSOR_SAOVIET
-   /*---------------------Kênh 1----------------------*/
-    //eKind             //State  //cmdRW //idDev     //cmdLen  //Addr   //vFormat  //vBeLe  //vScale  //subReg  //nPort         //vReturn  //nConnect
-  {_E_PH_VALUE,     1,  NULL,    0,      NULL,   2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_PH_S_SENSOR,  1,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_PH_S_VALUE,   1,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_CLO_SEND_PH,  2,  NULL,    1,      NULL,  2,        0x0006,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_CLO_VALUE,    3,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_CLO_S_SENSOR, 3,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_CLO_S_VALUE,  3,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_EC_VALUE,     4,  NULL,    0,      NULL,   2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_EC_S_SENSOR,  4,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_EC_S_VALUE,   4,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_TURB_VALUE,   5,  NULL,    0,      NULL, 2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TURB_S_SENSOR,5,  NULL,    0,      NULL, 1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TURB_S_VALUE, 5,  NULL,    0,      NULL, 1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_COD_VALUE,    6,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_COD_S_SENSOR, 6,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_COD_S_VALUE,  6,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_TSS_VALUE,    7,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TSS_S_SENSOR, 7,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TSS_S_VALUE,  7,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_NH4_VALUE,    8,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_NH4_S_SENSOR, 8,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_NH4_S_VALUE,  8,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_DO_SALT,      9,   NULL,    1,      NULL,   2,        0x0008,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_DO_VALUE,     10,  NULL,    0,      NULL,   2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_DO_S_SENSOR,  10,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_DO_S_VALUE,   10,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_SALT_VALUE,   11,  NULL,    0,      NULL,   2,        0x0008,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_SALT_S_SENSOR,11,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_SALT_S_VALUE, 11,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_TDS_VALUE,    12,  NULL,    0,      NULL,   2,        0x0006,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TDS_S_SENSOR, 12,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TDS_S_VALUE,  12,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_NO3_VALUE,    13,  NULL,    0,      NULL,   2,       0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_NO3_S_SENSOR, 13,  NULL,    0,      NULL,   1,       0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_NO3_S_VALUE,  13,  NULL,    0,      NULL,   1,       0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  
-  {_E_TEMP_VALUE,    14,    NULL,    0,     NULL,   2,      0x0004,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TEMP_S_SENSOR, 14,    NULL,    0,     NULL,   1,      0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-  {_E_TEMP_S_VALUE,  14,    NULL,    0,     NULL,   1,      0x000C,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_1,       NULL,      NULL},
-    
-  /*-------------------Kênh 2------------------*/
-  {_E_PH_VALUE_2,     1,  NULL,    0,      NULL,   2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_PH_S_SENSOR_2,  1,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_PH_S_VALUE_2,   1,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_CLO_SEND_PH_2,  2,  NULL,    1,      NULL,  2,        0x0006,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_CLO_VALUE_2,    3,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_CLO_S_SENSOR_2, 3,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_CLO_S_VALUE_2,  3,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_EC_VALUE_2,     4,  NULL,    0,      NULL,   2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_EC_S_SENSOR_2,  4,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_EC_S_VALUE_2,   4,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_TURB_VALUE_2,   5,  NULL,    0,      NULL, 2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,       _PORT_RS485_2,       NULL,      NULL},
-  {_E_TURB_S_SENSOR_2,5,  NULL,    0,      NULL, 1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,       _PORT_RS485_2,       NULL,      NULL},
-  {_E_TURB_S_VALUE_2, 5,  NULL,    0,      NULL, 1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,       _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_COD_VALUE_2,    6,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,      _PORT_RS485_2,       NULL,      NULL},
-  {_E_COD_S_SENSOR_2, 6,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,      _PORT_RS485_2,       NULL,      NULL},
-  {_E_COD_S_VALUE_2,  6,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,      _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_TSS_VALUE_2,    7,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_TSS_S_SENSOR_2, 7,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_TSS_S_VALUE_2,  7,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_NH4_VALUE_2,    8,  NULL,    0,      NULL,  2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_NH4_S_SENSOR_2, 8,  NULL,    0,      NULL,  1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_NH4_S_VALUE_2,  8,  NULL,    0,      NULL,  1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_DO_SALT_2,      9,   NULL,    1,      NULL,   2,        0x0008,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_DO_VALUE_2,     10,  NULL,    0,      NULL,   2,        0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_DO_S_SENSOR_2,  10,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_DO_S_VALUE_2,   10,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_SALT_VALUE_2,   11,  NULL,    0,      NULL,   2,        0x0008,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_SALT_S_SENSOR_2,11,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_SALT_S_VALUE_2, 11,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_TDS_VALUE_2,    12,  NULL,    0,      NULL,   2,        0x0006,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_TDS_S_SENSOR_2, 12,  NULL,    0,      NULL,   1,        0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_TDS_S_VALUE_2,  12,  NULL,    0,      NULL,   1,        0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_NO3_VALUE_2,    13,  NULL,    0,      NULL,   2,       0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_NO3_S_SENSOR_2, 13,  NULL,    0,      NULL,   1,       0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_NO3_S_VALUE_2,  13,  NULL,    0,      NULL,   1,       0x000B,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  
-  {_E_TEMP_VALUE_2,    14,    NULL,    0,     NULL,   2,      0x0004,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_TEMP_S_SENSOR_2, 14,    NULL,    0,     NULL,   1,      0x000A,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  {_E_TEMP_S_VALUE_2,  14,    NULL,    0,     NULL,   1,      0x000C,  _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_RS485_2,       NULL,      NULL},
-  /*-------------------Kênh Modbus TCP------------------*/
-  {_E_TURB1_WRITE,   15,    NULL,       1,     NULL,     2,      0x0000,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_PH1_WRITE,     15,    NULL,       1,     NULL,     2,      0x0002,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-
-  {_E_TURB2_WRITE,   15,    NULL,       1,     NULL,     2,      0x0006,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_PH2_WRITE,     15,    NULL,       1,     NULL,     2,      0x0008,  _ETYPE_F,  _E_WS,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-#else 
-  {_E_PH_S_SENSOR,  1,  NULL,    0,      NULL,  1,        0,    _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_TEMP_S_SENSOR,1,  NULL,    0,      NULL,  1,        0,    _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_PH_S_VALUE,   1,  NULL,    0,      NULL,  1,        3,    _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_TEMP_S_VALUE, 1,  NULL,    0,      NULL,  1,        3,    _ETYPE_U8, _E_BS,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_PH_VALUE,     1,  NULL,    0,      NULL,  2,        4,    _ETYPE_F,  _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_TEMP_VALUE,   1,  NULL,    0,      NULL,  2,        6,    _ETYPE_F,  _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  
-  {_E_DO_S_SENSOR,  1,  NULL,    0,      NULL,   1,       8,    _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_DO_S_VALUE,   1,  NULL,    0,      NULL,   1,       11,   _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_DO_VALUE,     1,  NULL,    0,      NULL,   2,       12,   _ETYPE_F,  _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  
-  {_E_NH4_S_SENSOR, 1,  NULL,    0,      NULL,  1,        16,   _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_NH4_S_VALUE,  1,  NULL,    0,      NULL,  1,        19,   _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_NH4_VALUE,    1,  NULL,    0,      NULL,  2,        20,   _ETYPE_F,  _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  
-  {_E_TSS_S_SENSOR, 1,  NULL,    0,      NULL,  1,        24,   _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_TSS_S_VALUE,  1,  NULL,    0,      NULL,  1,        27,   _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_TSS_VALUE,    1,  NULL,    0,      NULL,  2,        28,   _ETYPE_F,  _E_BE,   1000,     NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  
-  {_E_COD_S_SENSOR, 1,  NULL,    0,      NULL,  1,        32,   _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_COD_S_VALUE,  1,  NULL,    0,      NULL,  1,        35,   _ETYPE_U8, _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-  {_E_COD_VALUE,    1,  NULL,    0,      NULL,  2,        36,   _ETYPE_F,  _E_BE,   1,        NULL,     _PORT_ETH_TCP,       NULL,      NULL},
-#endif
-};
+Struct_RegSensor            *sRegSensor_Port1;
+Struct_RegSensor            *sRegSensor_Port2;
+Struct_RegSensor            *sRegSensor_PortTCP;
 /*========================Function Handle========================*/
 
 
 void       RS485_Para_Init(void)
 {
 #ifdef MODBUS_SENSOR_SAOVIET
-    //PH
-    Config_RegSen_Read(_E_PH_VALUE, &sMeasureMain[0][_SS_PH].ID_Modbus, &sMeasureMain[0][_SS_PH].sUser, 
-                                    &sMeasureMain[0][_SS_PH].Value_f, &sMeasureMain[0][_SS_PH].nConnect_u8);
-    
-    Config_RegSen_Read(_E_PH_S_SENSOR, &sMeasureMain[0][_SS_PH].ID_Modbus, &sMeasureMain[0][_SS_PH].sUser, 
-                                       &sMeasureMain[0][_SS_PH].stateSensor, &sMeasureMain[0][_SS_PH].nConnect_u8);
-
-    Config_RegSen_Read(_E_PH_S_VALUE,  &sMeasureMain[0][_SS_PH].ID_Modbus, &sMeasureMain[0][_SS_PH].sUser, 
-                                       &sMeasureMain[0][_SS_PH].stateValue, &sMeasureMain[0][_SS_PH].nConnect_u8);
-    //CLO
-    Config_RegSen_Write(_E_CLO_SEND_PH,  &sMeasureMain[0][_SS_CLO].ID_Modbus, &sMeasureMain[0][_SS_CLO].sUser, 
-                                        &sModbSubReg.pH, &sMeasureMain[0][_SS_CLO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_CLO_VALUE,  &sMeasureMain[0][_SS_CLO].ID_Modbus, &sMeasureMain[0][_SS_CLO].sUser, 
-                                       &sMeasureMain[0][_SS_CLO].Value_f, &sMeasureMain[0][_SS_CLO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_CLO_S_SENSOR,  &sMeasureMain[0][_SS_CLO].ID_Modbus, &sMeasureMain[0][_SS_CLO].sUser, 
-                                       &sMeasureMain[0][_SS_CLO].stateSensor, &sMeasureMain[0][_SS_CLO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_CLO_S_VALUE,  &sMeasureMain[0][_SS_CLO].ID_Modbus, &sMeasureMain[0][_SS_CLO].sUser, 
-                                       &sMeasureMain[0][_SS_CLO].stateValue, &sMeasureMain[0][_SS_CLO].nConnect_u8);    
-    
-    //EC
-    Config_RegSen_Read(_E_EC_VALUE,  &sMeasureMain[0][_SS_EC].ID_Modbus, &sMeasureMain[0][_SS_EC].sUser, 
-                                       &sMeasureMain[0][_SS_EC].Value_f, &sMeasureMain[0][_SS_EC].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_EC_S_SENSOR,  &sMeasureMain[0][_SS_EC].ID_Modbus, &sMeasureMain[0][_SS_EC].sUser, 
-                                       &sMeasureMain[0][_SS_EC].stateSensor, &sMeasureMain[0][_SS_EC].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_EC_S_VALUE,  &sMeasureMain[0][_SS_EC].ID_Modbus, &sMeasureMain[0][_SS_EC].sUser, 
-                                       &sMeasureMain[0][_SS_EC].stateValue, &sMeasureMain[0][_SS_EC].nConnect_u8); 
-    //TURB
-    Config_RegSen_Read(_E_TURB_VALUE,  &sMeasureMain[0][_SS_TURB].ID_Modbus, &sMeasureMain[0][_SS_TURB].sUser, 
-                                       &sMeasureMain[0][_SS_TURB].Value_f, &sMeasureMain[0][_SS_TURB].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TURB_S_SENSOR,  &sMeasureMain[0][_SS_TURB].ID_Modbus, &sMeasureMain[0][_SS_TURB].sUser, 
-                                       &sMeasureMain[0][_SS_TURB].stateSensor, &sMeasureMain[0][_SS_TURB].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TURB_S_VALUE,  &sMeasureMain[0][_SS_TURB].ID_Modbus, &sMeasureMain[0][_SS_TURB].sUser, 
-                                       &sMeasureMain[0][_SS_TURB].stateValue, &sMeasureMain[0][_SS_TURB].nConnect_u8); 
-    //COD
-    Config_RegSen_Read(_E_COD_VALUE,  &sMeasureMain[0][_SS_COD].ID_Modbus, &sMeasureMain[0][_SS_COD].sUser, 
-                                       &sMeasureMain[0][_SS_COD].Value_f, &sMeasureMain[0][_SS_COD].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_COD_S_SENSOR,  &sMeasureMain[0][_SS_COD].ID_Modbus, &sMeasureMain[0][_SS_COD].sUser, 
-                                       &sMeasureMain[0][_SS_COD].stateSensor, &sMeasureMain[0][_SS_COD].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_COD_S_VALUE,  &sMeasureMain[0][_SS_COD].ID_Modbus, &sMeasureMain[0][_SS_COD].sUser, 
-                                       &sMeasureMain[0][_SS_COD].stateValue, &sMeasureMain[0][_SS_COD].nConnect_u8); 
-    //TSS
-    Config_RegSen_Read(_E_TSS_VALUE,  &sMeasureMain[0][_SS_TSS].ID_Modbus, &sMeasureMain[0][_SS_TSS].sUser, 
-                                       &sMeasureMain[0][_SS_TSS].Value_f, &sMeasureMain[0][_SS_TSS].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TSS_S_SENSOR,  &sMeasureMain[0][_SS_TSS].ID_Modbus, &sMeasureMain[0][_SS_TSS].sUser, 
-                                       &sMeasureMain[0][_SS_TSS].stateSensor, &sMeasureMain[0][_SS_TSS].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TSS_S_VALUE,  &sMeasureMain[0][_SS_TSS].ID_Modbus, &sMeasureMain[0][_SS_TSS].sUser, 
-                                       &sMeasureMain[0][_SS_TSS].stateValue, &sMeasureMain[0][_SS_TSS].nConnect_u8); 
-    //NH4
-    Config_RegSen_Read(_E_NH4_VALUE,  &sMeasureMain[0][_SS_NH4].ID_Modbus, &sMeasureMain[0][_SS_NH4].sUser, 
-                                       &sMeasureMain[0][_SS_NH4].Value_f, &sMeasureMain[0][_SS_NH4].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_NH4_S_SENSOR,  &sMeasureMain[0][_SS_NH4].ID_Modbus, &sMeasureMain[0][_SS_NH4].sUser, 
-                                       &sMeasureMain[0][_SS_NH4].stateSensor, &sMeasureMain[0][_SS_NH4].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_NH4_S_VALUE,  &sMeasureMain[0][_SS_NH4].ID_Modbus, &sMeasureMain[0][_SS_NH4].sUser, 
-                                       &sMeasureMain[0][_SS_NH4].stateValue, &sMeasureMain[0][_SS_NH4].nConnect_u8); 
-    //DO
-    Config_RegSen_Write(_E_DO_SALT,  &sMeasureMain[0][_SS_DO].ID_Modbus, &sMeasureMain[0][_SS_DO].sUser, 
-                                        &sModbSubReg.Salt_PSU, &sMeasureMain[0][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_VALUE,  &sMeasureMain[0][_SS_DO].ID_Modbus, &sMeasureMain[0][_SS_DO].sUser, 
-                                       &sMeasureMain[0][_SS_DO].Value_f, &sMeasureMain[0][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_S_SENSOR,  &sMeasureMain[0][_SS_DO].ID_Modbus, &sMeasureMain[0][_SS_DO].sUser, 
-                                       &sMeasureMain[0][_SS_DO].stateSensor, &sMeasureMain[0][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_S_VALUE,  &sMeasureMain[0][_SS_DO].ID_Modbus, &sMeasureMain[0][_SS_DO].sUser, 
-                                       &sMeasureMain[0][_SS_DO].stateValue, &sMeasureMain[0][_SS_DO].nConnect_u8);    
-    
-    //SALT
-    Config_RegSen_Read(_E_SALT_VALUE,  &sMeasureMain[0][_SS_SALT].ID_Modbus, &sMeasureMain[0][_SS_SALT].sUser, 
-                                       &sMeasureMain[0][_SS_SALT].Value_f, &sMeasureMain[0][_SS_SALT].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_SALT_S_SENSOR,  &sMeasureMain[0][_SS_SALT].ID_Modbus, &sMeasureMain[0][_SS_SALT].sUser, 
-                                       &sMeasureMain[0][_SS_SALT].stateSensor, &sMeasureMain[0][_SS_SALT].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_SALT_S_VALUE,  &sMeasureMain[0][_SS_SALT].ID_Modbus, &sMeasureMain[0][_SS_SALT].sUser, 
-                                       &sMeasureMain[0][_SS_SALT].stateValue, &sMeasureMain[0][_SS_SALT].nConnect_u8); 
-    //TDS
-    Config_RegSen_Read(_E_TDS_VALUE,  &sMeasureMain[0][_SS_TDS].ID_Modbus, &sMeasureMain[0][_SS_TDS].sUser, 
-                                       &sMeasureMain[0][_SS_TDS].Value_f, &sMeasureMain[0][_SS_TDS].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TDS_S_SENSOR,  &sMeasureMain[0][_SS_TDS].ID_Modbus, &sMeasureMain[0][_SS_TDS].sUser, 
-                                       &sMeasureMain[0][_SS_TDS].stateSensor, &sMeasureMain[0][_SS_TDS].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TDS_S_VALUE,  &sMeasureMain[0][_SS_TDS].ID_Modbus, &sMeasureMain[0][_SS_TDS].sUser, 
-                                       &sMeasureMain[0][_SS_TDS].stateValue, &sMeasureMain[0][_SS_TDS].nConnect_u8); 
-    //NO3
-    Config_RegSen_Read(_E_NO3_VALUE,  &sMeasureMain[0][_SS_NO3].ID_Modbus, &sMeasureMain[0][_SS_NO3].sUser, 
-                                       &sMeasureMain[0][_SS_NO3].Value_f, &sMeasureMain[0][_SS_NO3].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_NO3_S_SENSOR,  &sMeasureMain[0][_SS_NO3].ID_Modbus, &sMeasureMain[0][_SS_NO3].sUser, 
-                                       &sMeasureMain[0][_SS_NO3].stateSensor, &sMeasureMain[0][_SS_NO3].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_NO3_S_VALUE,  &sMeasureMain[0][_SS_NO3].ID_Modbus, &sMeasureMain[0][_SS_NO3].sUser, 
-                                       &sMeasureMain[0][_SS_NO3].stateValue, &sMeasureMain[0][_SS_NO3].nConnect_u8); 
-    //TEMP
-    Config_RegSen_Read(_E_TEMP_VALUE,  &sMeasureMain[0][_SS_TEMP].ID_Modbus, &sMeasureMain[0][_SS_TEMP].sUser, 
-                                       &sMeasureMain[0][_SS_TEMP].Value_f, &sMeasureMain[0][_SS_TEMP].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TEMP_S_SENSOR,  &sMeasureMain[0][_SS_TEMP].ID_Modbus, &sMeasureMain[0][_SS_TEMP].sUser, 
-                                       &sMeasureMain[0][_SS_TEMP].stateSensor, &sMeasureMain[0][_SS_TEMP].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TEMP_S_VALUE,  &sMeasureMain[0][_SS_TEMP].ID_Modbus, &sMeasureMain[0][_SS_TEMP].sUser, 
-                                       &sMeasureMain[0][_SS_TEMP].stateValue, &sMeasureMain[0][_SS_TEMP].nConnect_u8); 
-    
-    //PH 2
-    Config_RegSen_Read(_E_PH_VALUE_2, &sMeasureMain[1][_SS_PH].ID_Modbus, &sMeasureMain[1][_SS_PH].sUser, 
-                                    &sMeasureMain[1][_SS_PH].Value_f, &sMeasureMain[1][_SS_PH].nConnect_u8);
-    
-    Config_RegSen_Read(_E_PH_S_SENSOR_2, &sMeasureMain[1][_SS_PH].ID_Modbus, &sMeasureMain[1][_SS_PH].sUser, 
-                                       &sMeasureMain[1][_SS_PH].stateSensor, &sMeasureMain[1][_SS_PH].nConnect_u8);
-
-    Config_RegSen_Read(_E_PH_S_VALUE_2,  &sMeasureMain[1][_SS_PH].ID_Modbus, &sMeasureMain[1][_SS_PH].sUser, 
-                                       &sMeasureMain[1][_SS_PH].stateValue, &sMeasureMain[1][_SS_PH].nConnect_u8);
-    //CLO 2
-    Config_RegSen_Write(_E_CLO_SEND_PH_2,  &sMeasureMain[1][_SS_CLO].ID_Modbus, &sMeasureMain[1][_SS_CLO].sUser, 
-                                        &sModbSubReg.pH, &sMeasureMain[1][_SS_CLO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_CLO_VALUE_2,  &sMeasureMain[1][_SS_CLO].ID_Modbus, &sMeasureMain[1][_SS_CLO].sUser, 
-                                       &sMeasureMain[1][_SS_CLO].Value_f, &sMeasureMain[1][_SS_CLO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_CLO_S_SENSOR_2,  &sMeasureMain[1][_SS_CLO].ID_Modbus, &sMeasureMain[1][_SS_CLO].sUser, 
-                                       &sMeasureMain[1][_SS_CLO].stateSensor, &sMeasureMain[1][_SS_CLO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_CLO_S_VALUE_2,  &sMeasureMain[1][_SS_CLO].ID_Modbus, &sMeasureMain[1][_SS_CLO].sUser, 
-                                       &sMeasureMain[1][_SS_CLO].stateValue, &sMeasureMain[1][_SS_CLO].nConnect_u8);    
-    
-    //EC 2
-    Config_RegSen_Read(_E_EC_VALUE_2,  &sMeasureMain[1][_SS_EC].ID_Modbus, &sMeasureMain[1][_SS_EC].sUser, 
-                                       &sMeasureMain[1][_SS_EC].Value_f, &sMeasureMain[1][_SS_EC].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_EC_S_SENSOR_2,  &sMeasureMain[1][_SS_EC].ID_Modbus, &sMeasureMain[1][_SS_EC].sUser, 
-                                       &sMeasureMain[1][_SS_EC].stateSensor, &sMeasureMain[1][_SS_EC].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_EC_S_VALUE_2,  &sMeasureMain[1][_SS_EC].ID_Modbus, &sMeasureMain[1][_SS_EC].sUser, 
-                                       &sMeasureMain[1][_SS_EC].stateValue, &sMeasureMain[1][_SS_EC].nConnect_u8); 
-    //TURB 2
-    Config_RegSen_Read(_E_TURB_VALUE_2,  &sMeasureMain[1][_SS_TURB].ID_Modbus, &sMeasureMain[1][_SS_TURB].sUser, 
-                                       &sMeasureMain[1][_SS_TURB].Value_f, &sMeasureMain[1][_SS_TURB].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TURB_S_SENSOR_2,  &sMeasureMain[1][_SS_TURB].ID_Modbus, &sMeasureMain[1][_SS_TURB].sUser, 
-                                       &sMeasureMain[1][_SS_TURB].stateSensor, &sMeasureMain[1][_SS_TURB].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TURB_S_VALUE_2,  &sMeasureMain[1][_SS_TURB].ID_Modbus, &sMeasureMain[1][_SS_TURB].sUser, 
-                                       &sMeasureMain[1][_SS_TURB].stateValue, &sMeasureMain[1][_SS_TURB].nConnect_u8); 
-    //COD 2
-    Config_RegSen_Read(_E_COD_VALUE_2,  &sMeasureMain[1][_SS_COD].ID_Modbus, &sMeasureMain[1][_SS_COD].sUser, 
-                                       &sMeasureMain[1][_SS_COD].Value_f, &sMeasureMain[1][_SS_COD].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_COD_S_SENSOR_2,  &sMeasureMain[1][_SS_COD].ID_Modbus, &sMeasureMain[1][_SS_COD].sUser, 
-                                       &sMeasureMain[1][_SS_COD].stateSensor, &sMeasureMain[1][_SS_COD].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_COD_S_VALUE_2,  &sMeasureMain[1][_SS_COD].ID_Modbus, &sMeasureMain[1][_SS_COD].sUser, 
-                                       &sMeasureMain[1][_SS_COD].stateValue, &sMeasureMain[1][_SS_COD].nConnect_u8); 
-    //TSS 2
-    Config_RegSen_Read(_E_TSS_VALUE_2,  &sMeasureMain[1][_SS_TSS].ID_Modbus, &sMeasureMain[1][_SS_TSS].sUser, 
-                                       &sMeasureMain[1][_SS_TSS].Value_f, &sMeasureMain[1][_SS_TSS].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TSS_S_SENSOR_2,  &sMeasureMain[1][_SS_TSS].ID_Modbus, &sMeasureMain[1][_SS_TSS].sUser, 
-                                       &sMeasureMain[1][_SS_TSS].stateSensor, &sMeasureMain[1][_SS_TSS].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TSS_S_VALUE_2,  &sMeasureMain[1][_SS_TSS].ID_Modbus, &sMeasureMain[1][_SS_TSS].sUser, 
-                                       &sMeasureMain[1][_SS_TSS].stateValue, &sMeasureMain[1][_SS_TSS].nConnect_u8); 
-    //NH4 2
-    Config_RegSen_Read(_E_NH4_VALUE_2,  &sMeasureMain[1][_SS_NH4].ID_Modbus, &sMeasureMain[1][_SS_NH4].sUser, 
-                                       &sMeasureMain[1][_SS_NH4].Value_f, &sMeasureMain[1][_SS_NH4].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_NH4_S_SENSOR_2,  &sMeasureMain[1][_SS_NH4].ID_Modbus, &sMeasureMain[1][_SS_NH4].sUser, 
-                                       &sMeasureMain[1][_SS_NH4].stateSensor, &sMeasureMain[1][_SS_NH4].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_NH4_S_VALUE_2,  &sMeasureMain[1][_SS_NH4].ID_Modbus, &sMeasureMain[1][_SS_NH4].sUser, 
-                                       &sMeasureMain[1][_SS_NH4].stateValue, &sMeasureMain[1][_SS_NH4].nConnect_u8); 
-    //DO 2
-    Config_RegSen_Write(_E_DO_SALT_2,  &sMeasureMain[1][_SS_DO].ID_Modbus, &sMeasureMain[1][_SS_DO].sUser, 
-                                        &sModbSubReg.Salt_PSU, &sMeasureMain[1][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_VALUE_2,  &sMeasureMain[1][_SS_DO].ID_Modbus, &sMeasureMain[1][_SS_DO].sUser, 
-                                       &sMeasureMain[1][_SS_DO].Value_f, &sMeasureMain[1][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_S_SENSOR_2,  &sMeasureMain[1][_SS_DO].ID_Modbus, &sMeasureMain[1][_SS_DO].sUser, 
-                                       &sMeasureMain[1][_SS_DO].stateSensor, &sMeasureMain[1][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_S_VALUE_2,  &sMeasureMain[1][_SS_DO].ID_Modbus, &sMeasureMain[1][_SS_DO].sUser, 
-                                       &sMeasureMain[1][_SS_DO].stateValue, &sMeasureMain[1][_SS_DO].nConnect_u8);    
-    
-    //SALT 2
-    Config_RegSen_Read(_E_SALT_VALUE_2,  &sMeasureMain[1][_SS_SALT].ID_Modbus, &sMeasureMain[1][_SS_SALT].sUser, 
-                                       &sMeasureMain[1][_SS_SALT].Value_f, &sMeasureMain[1][_SS_SALT].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_SALT_S_SENSOR_2,  &sMeasureMain[1][_SS_SALT].ID_Modbus, &sMeasureMain[1][_SS_SALT].sUser, 
-                                       &sMeasureMain[1][_SS_SALT].stateSensor, &sMeasureMain[1][_SS_SALT].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_SALT_S_VALUE_2,  &sMeasureMain[1][_SS_SALT].ID_Modbus, &sMeasureMain[1][_SS_SALT].sUser, 
-                                       &sMeasureMain[1][_SS_SALT].stateValue, &sMeasureMain[1][_SS_SALT].nConnect_u8); 
-    //TDS 2
-    Config_RegSen_Read(_E_TDS_VALUE_2,  &sMeasureMain[1][_SS_TDS].ID_Modbus, &sMeasureMain[1][_SS_TDS].sUser, 
-                                       &sMeasureMain[1][_SS_TDS].Value_f, &sMeasureMain[1][_SS_TDS].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TDS_S_SENSOR_2,  &sMeasureMain[1][_SS_TDS].ID_Modbus, &sMeasureMain[1][_SS_TDS].sUser, 
-                                       &sMeasureMain[1][_SS_TDS].stateSensor, &sMeasureMain[1][_SS_TDS].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TDS_S_VALUE_2,  &sMeasureMain[1][_SS_TDS].ID_Modbus, &sMeasureMain[1][_SS_TDS].sUser, 
-                                       &sMeasureMain[1][_SS_TDS].stateValue, &sMeasureMain[1][_SS_TDS].nConnect_u8); 
-    //NO3 2
-    Config_RegSen_Read(_E_NO3_VALUE_2,  &sMeasureMain[1][_SS_NO3].ID_Modbus, &sMeasureMain[1][_SS_NO3].sUser, 
-                                       &sMeasureMain[1][_SS_NO3].Value_f, &sMeasureMain[1][_SS_NO3].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_NO3_S_SENSOR_2,  &sMeasureMain[1][_SS_NO3].ID_Modbus, &sMeasureMain[1][_SS_NO3].sUser, 
-                                       &sMeasureMain[1][_SS_NO3].stateSensor, &sMeasureMain[1][_SS_NO3].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_NO3_S_VALUE_2,  &sMeasureMain[1][_SS_NO3].ID_Modbus, &sMeasureMain[1][_SS_NO3].sUser, 
-                                       &sMeasureMain[1][_SS_NO3].stateValue, &sMeasureMain[1][_SS_NO3].nConnect_u8); 
-    //TEMP 2
-    Config_RegSen_Read(_E_TEMP_VALUE_2,  &sMeasureMain[1][_SS_TEMP].ID_Modbus, &sMeasureMain[1][_SS_TEMP].sUser, 
-                                       &sMeasureMain[1][_SS_TEMP].Value_f, &sMeasureMain[1][_SS_TEMP].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TEMP_S_SENSOR_2,  &sMeasureMain[1][_SS_TEMP].ID_Modbus, &sMeasureMain[1][_SS_TEMP].sUser, 
-                                       &sMeasureMain[1][_SS_TEMP].stateSensor, &sMeasureMain[1][_SS_TEMP].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TEMP_S_VALUE_2,  &sMeasureMain[1][_SS_TEMP].ID_Modbus, &sMeasureMain[1][_SS_TEMP].sUser, 
-                                       &sMeasureMain[1][_SS_TEMP].stateValue, &sMeasureMain[1][_SS_TEMP].nConnect_u8); 
-    
-    //Modbus TCP
-    Config_RegSen_Write(_E_TURB1_WRITE,  &ID_Default, &User_True, 
-                                       &sMeasureMain[0][_SS_TURB].Value_f, &Connect_Test);    
-    
-    Config_RegSen_Write(_E_PH1_WRITE,  &ID_Default, &User_True, 
-                                       &sMeasureMain[0][_SS_PH].Value_f, &Connect_Test);    
-
-    Config_RegSen_Write(_E_TURB2_WRITE,  &ID_Default, &User_True, 
-                                       &sMeasureMain[1][_SS_TURB].Value_f, &Connect_Test); 
-    Config_RegSen_Write(_E_PH2_WRITE,  &ID_Default, &User_True, 
-                                       &sMeasureMain[1][_SS_PH].Value_f, &Connect_Test); 
+    sRegSensor_Port1 = sRegSS_SaoViet_Port1;
+    sRegSensor_Port2 = sRegSS_SaoViet_Port2;
+    RS485_SS_SaoViet_Init(sRegSensor_Port1, 0);
+    RS485_SS_SaoViet_Init(sRegSensor_Port2, 1);
+#elif defined(MODBUS_SENSOR_XYLEM)
+    sRegSensor_PortTCP = sRegSS_Xylem_PortTCP;
+    RS485_SS_XyLem_Init_TCP(sRegSensor_PortTCP, 0);
+#elif defined(MODBUS_SENSOR_DARUIFUNO)
+    sRegSensor_Port1 = sRegSS_Daruifuno_PortRTU;
+    RS485_SS_Daruifuno_Init(sRegSensor_Port1, 0);
 #else
-    //----------------------------Ph------------------------------
-    Config_RegSen_Read(_E_PH_VALUE, &sMeasureMain[0][_SS_PH].ID_Modbus, &sMeasureMain[0][_SS_PH].sUser, 
-                                    &sMeasureMain[0][_SS_PH].Value_f, &sMeasureMain[0][_SS_PH].nConnect_u8);
-    
-    Config_RegSen_Read(_E_PH_S_SENSOR, &sMeasureMain[0][_SS_PH].ID_Modbus, &sMeasureMain[0][_SS_PH].sUser, 
-                                       &sMeasureMain[0][_SS_PH].stateSensor, &sMeasureMain[0][_SS_PH].nConnect_u8);
 
-    Config_RegSen_Read(_E_PH_S_VALUE,  &sMeasureMain[0][_SS_PH].ID_Modbus, &sMeasureMain[0][_SS_PH].sUser, 
-                                       &sMeasureMain[0][_SS_PH].stateValue, &sMeasureMain[0][_SS_PH].nConnect_u8);
-    //----------------------------COD------------------------------
-    Config_RegSen_Read(_E_COD_VALUE,  &sMeasureMain[0][_SS_COD].ID_Modbus, &sMeasureMain[0][_SS_COD].sUser, 
-                                       &sMeasureMain[0][_SS_COD].Value_f, &sMeasureMain[0][_SS_COD].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_COD_S_SENSOR,  &sMeasureMain[0][_SS_COD].ID_Modbus, &sMeasureMain[0][_SS_COD].sUser, 
-                                       &sMeasureMain[0][_SS_COD].stateSensor, &sMeasureMain[0][_SS_COD].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_COD_S_VALUE,  &sMeasureMain[0][_SS_COD].ID_Modbus, &sMeasureMain[0][_SS_COD].sUser, 
-                                       &sMeasureMain[0][_SS_COD].stateValue, &sMeasureMain[0][_SS_COD].nConnect_u8); 
-    //----------------------------TSS-----------------------------
-    Config_RegSen_Read(_E_TSS_VALUE,  &sMeasureMain[0][_SS_TSS].ID_Modbus, &sMeasureMain[0][_SS_TSS].sUser, 
-                                       &sMeasureMain[0][_SS_TSS].Value_f, &sMeasureMain[0][_SS_TSS].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TSS_S_SENSOR,  &sMeasureMain[0][_SS_TSS].ID_Modbus, &sMeasureMain[0][_SS_TSS].sUser, 
-                                       &sMeasureMain[0][_SS_TSS].stateSensor, &sMeasureMain[0][_SS_TSS].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TSS_S_VALUE,  &sMeasureMain[0][_SS_TSS].ID_Modbus, &sMeasureMain[0][_SS_TSS].sUser, 
-                                       &sMeasureMain[0][_SS_TSS].stateValue, &sMeasureMain[0][_SS_TSS].nConnect_u8); 
-    //----------------------------NH4-----------------------------
-    Config_RegSen_Read(_E_NH4_VALUE,  &sMeasureMain[0][_SS_NH4].ID_Modbus, &sMeasureMain[0][_SS_NH4].sUser, 
-                                       &sMeasureMain[0][_SS_NH4].Value_f, &sMeasureMain[0][_SS_NH4].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_NH4_S_SENSOR,  &sMeasureMain[0][_SS_NH4].ID_Modbus, &sMeasureMain[0][_SS_NH4].sUser, 
-                                       &sMeasureMain[0][_SS_NH4].stateSensor, &sMeasureMain[0][_SS_NH4].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_NH4_S_VALUE,  &sMeasureMain[0][_SS_NH4].ID_Modbus, &sMeasureMain[0][_SS_NH4].sUser, 
-                                       &sMeasureMain[0][_SS_NH4].stateValue, &sMeasureMain[0][_SS_NH4].nConnect_u8); 
-    //----------------------------DO------------------------------
-    Config_RegSen_Read(_E_DO_VALUE,  &sMeasureMain[0][_SS_DO].ID_Modbus, &sMeasureMain[0][_SS_DO].sUser, 
-                                       &sMeasureMain[0][_SS_DO].Value_f, &sMeasureMain[0][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_S_SENSOR,  &sMeasureMain[0][_SS_DO].ID_Modbus, &sMeasureMain[0][_SS_DO].sUser, 
-                                       &sMeasureMain[0][_SS_DO].stateSensor, &sMeasureMain[0][_SS_DO].nConnect_u8);
-    
-    Config_RegSen_Read(_E_DO_S_VALUE,  &sMeasureMain[0][_SS_DO].ID_Modbus, &sMeasureMain[0][_SS_DO].sUser, 
-                                       &sMeasureMain[0][_SS_DO].stateValue, &sMeasureMain[0][_SS_DO].nConnect_u8);   
-    //---------------------------TEMP-----------------------------
-    Config_RegSen_Read(_E_TEMP_VALUE,  &sMeasureMain[0][_SS_TEMP].ID_Modbus, &sMeasureMain[0][_SS_TEMP].sUser, 
-                                       &sMeasureMain[0][_SS_TEMP].Value_f, &sMeasureMain[0][_SS_TEMP].nConnect_u8);    
-    
-    Config_RegSen_Read(_E_TEMP_S_SENSOR,  &sMeasureMain[0][_SS_TEMP].ID_Modbus, &sMeasureMain[0][_SS_TEMP].sUser, 
-                                       &sMeasureMain[0][_SS_TEMP].stateSensor, &sMeasureMain[0][_SS_TEMP].nConnect_u8); 
-    
-    Config_RegSen_Read(_E_TEMP_S_VALUE,  &sMeasureMain[0][_SS_TEMP].ID_Modbus, &sMeasureMain[0][_SS_TEMP].sUser, 
-                                       &sMeasureMain[0][_SS_TEMP].stateValue, &sMeasureMain[0][_SS_TEMP].nConnect_u8); 
 #endif
 }
 
@@ -508,14 +75,6 @@ static uint8_t fevent_modb_entry(uint8_t event)
     return 1;
 }
 
-static uint8_t fevent_modb_wait_calib(uint8_t event)
-{
-    if(sHandleModb.State_Wait_Calib != _STATE_CALIB_DONE)
-    {
-        sHandleModb.State_Wait_Calib = _STATE_CALIB_ERROR;
-    }
-    return 1;
-}
 static uint8_t fevent_modb_rs485_1_refresh(uint8_t event)
 {
     Init_UartRs485();
@@ -530,25 +89,6 @@ static uint8_t fevent_modb_rs485_2_refresh(uint8_t event)
     return 1;
 }
 
-static uint8_t fevent_modb_handle_subreg(uint8_t event)
-{
-    //Handle SubReg pH
-    if(sMeasureMain[0][_SS_PH].Value_f == 0)
-      sModbSubReg.pH = 7;
-    else if(sMeasureMain[0][_SS_PH].Value_f < 5)
-      sModbSubReg.pH = 5;
-    else if(sMeasureMain[0][_SS_PH].Value_f > 9)
-      sModbSubReg.pH = 9;
-    else
-      sModbSubReg.pH = sMeasureMain[0][_SS_PH].Value_f;
-    
-    //Handle SubReg PSU
-    sModbSubReg.Salt_PSU = sMeasureMain[0][_SS_SALT].Value_f * 10;
-       
-    fevent_enable(sEventAppModb, event);
-    return 1;
-}
-
 static uint8_t fevent_modb_rs485_1_handle(uint8_t event)
 {
     static uint8_t step = 0;
@@ -559,7 +99,7 @@ static uint8_t fevent_modb_rs485_1_handle(uint8_t event)
     switch(step)
     {
         case 0:
-            if(Handle_Trans_Modb(_PORT_RS485_1, sRegSensor, &sCtrlModbM, &strFrame) == 1)
+            if(Handle_Trans_Modb(sRegSensor_Port1, &sCtrlModbM, &strFrame) == 1)
             {
                 RS485_1_Trans(strFrame.Data_a8, strFrame.Length_u16);
                 sEventAppModb[_EVENT_MODB_RS485_1_HANDLE].e_period = TIMEOUT_MODB_RTU;
@@ -568,7 +108,7 @@ static uint8_t fevent_modb_rs485_1_handle(uint8_t event)
             break;
           
         case 1:
-            if(Handle_Recv_Modb(sRegSensor, &sCtrlModbM, sUart485) == 1)
+            if(Handle_Recv_Modb(_PORT_RS485_1, sRegSensor_Port1, &sCtrlModbM, sUart485) == 1)
                 fevent_enable(sEventAppModb, _EVENT_MODB_RS485_1_REFRESH);
             
             sEventAppModb[_EVENT_MODB_RS485_1_HANDLE].e_period = 100;
@@ -593,7 +133,7 @@ static uint8_t fevent_modb_rs485_2_handle(uint8_t event)
     switch(step)
     {
         case 0:
-            if(Handle_Trans_Modb(_PORT_RS485_2, sRegSensor, &sCtrlModbM, &strFrame) == 1)
+            if(Handle_Trans_Modb(sRegSensor_Port2, &sCtrlModbM, &strFrame) == 1)
             {
                 RS485_2_Trans(strFrame.Data_a8, strFrame.Length_u16);
                 sEventAppModb[_EVENT_MODB_RS485_2_HANDLE].e_period = TIMEOUT_MODB_RTU;
@@ -602,7 +142,7 @@ static uint8_t fevent_modb_rs485_2_handle(uint8_t event)
             break;
           
         case 1:
-            if(Handle_Recv_Modb(sRegSensor, &sCtrlModbM, sUart485_2) == 1)
+            if(Handle_Recv_Modb(_PORT_RS485_2, sRegSensor_Port2, &sCtrlModbM, sUart485_2) == 1)
                 fevent_enable(sEventAppModb, _EVENT_MODB_RS485_2_REFRESH);
             
             sEventAppModb[_EVENT_MODB_RS485_2_HANDLE].e_period = 100;
@@ -627,7 +167,7 @@ static uint8_t fevent_modb_tcp_handle(uint8_t event)
     switch(step)
     {
         case 0:
-            if(Handle_Trans_Modb(_PORT_ETH_TCP, sRegSensor, &sCtrlModbM, &strFrame) == 1)
+            if(Handle_Trans_Modb(sRegSensor_PortTCP, &sCtrlModbM, &strFrame) == 1)
             {
                 memset(sTransModTCP.aData, 0xAA, sizeof(sTransModTCP.aData));
                 sTransModTCP.length = 0;
@@ -651,7 +191,7 @@ static uint8_t fevent_modb_tcp_handle(uint8_t event)
             break;
           
         case 1:
-            Handle_Recv_Modb(sRegSensor, &sCtrlModbM, sDataRecvTCP);
+            Handle_Recv_Modb(_PORT_ETH_TCP, sRegSensor_PortTCP, &sCtrlModbM, sDataRecvTCP);
             
             sEventAppModb[_EVENT_MODB_TCP_HANDLE].e_period = 100;
             step = 0;
@@ -665,29 +205,18 @@ static uint8_t fevent_modb_tcp_handle(uint8_t event)
     return 1;
 }
 
-static uint8_t fevent_ptr_temp(uint8_t event)
+static uint8_t fevent_call_cycle(uint8_t event)
 {
-    for(uint8_t i = _SS_PH; i<_END_SENSOR; i++)
-    {
-        if(sMeasureMain[0][i].sUser != 0)
-        {
-            sRegSensor[_E_TEMP_VALUE].idDev = &sMeasureMain[0][i].ID_Modbus;
-            sRegSensor[_E_TEMP_S_SENSOR].idDev = &sMeasureMain[0][i].ID_Modbus;
-            sRegSensor[_E_TEMP_S_VALUE].idDev = &sMeasureMain[0][i].ID_Modbus;
-            break;
-        }
-    }
+#ifdef MODBUS_SENSOR_SAOVIET
+    Digital_SS_SaoViet_CallCycle();
+#elif defined(MODBUS_SENSOR_XYLEM)
+    Digital_SS_XyLem_CallCycle();
+#elif defined(MODBUS_SENSOR_DARUIFUNO)
+    Digital_SS_Daruifuno_CallCycle();
+#else
     
-    for(uint8_t i = _SS_PH; i<_END_SENSOR; i++)
-    {
-        if(sMeasureMain[1][i].sUser != 0)
-        {
-            sRegSensor[_E_TEMP_VALUE_2].idDev = &sMeasureMain[1][i].ID_Modbus;
-            sRegSensor[_E_TEMP_S_SENSOR_2].idDev = &sMeasureMain[1][i].ID_Modbus;
-            sRegSensor[_E_TEMP_S_VALUE_2].idDev = &sMeasureMain[1][i].ID_Modbus;
-            break;
-        }
-    }
+#endif
+    
 
     fevent_enable(sEventAppModb, event);
     return 1;
@@ -802,23 +331,29 @@ uint8_t Modbus_RTU_Check_Format (uint8_t SlaveID, uint16_t nRegis,
 }
 
 /*==========================Handle Tran and Recv=========================*/
-uint8_t Handle_Trans_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData *sFrame)
+uint8_t Handle_Trans_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData *sFrame)
 {
     uint32_t hex_Data = 0;
+    uint16_t numKind = 0;
     if (!sReg || !sCtrl || !sFrame) return 0;
+
+    while(sReg[numKind].Block != NULL && numKind < 1000)  //Gioi han doc 1000 thanh ghi
+    {
+        numKind++;
+    }
     
-    if(sCtrl->iHandle == _E_MODB_SS_END)
+    if(sCtrl->iHandle == numKind)
       sCtrl->iHandle = 0;
     
     while(1)
     {
-        if(*sRegSensor[sCtrl->iHandle].State == 1 && sRegSensor[sCtrl->iHandle].nPort == Port)
+        if(*sReg[sCtrl->iHandle].State != 0)
             break;
           
-        if(sRegSensor[sCtrl->iHandle].nConnect != NULL && *sRegSensor[sCtrl->iHandle].State != 1)
-            *sRegSensor[sCtrl->iHandle].nConnect = 0;
+        if(sReg[sCtrl->iHandle].nConnect != NULL && *sReg[sCtrl->iHandle].State == 0)
+            *sReg[sCtrl->iHandle].nConnect = 0;
         
-        if(++sCtrl->iHandle == _E_MODB_SS_END) 
+        if(++sCtrl->iHandle == numKind) 
         {
             return 0;
         }
@@ -828,7 +363,7 @@ uint8_t Handle_Trans_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlMod
     sCtrl->iEndBlock   = sCtrl->iHandle;
     sCtrl->iReg        = sReg[sCtrl->iHandle].cmdLen;
     
-    if (sReg[sCtrl->iStartBlock].cmdRW == 1)
+    if (sReg[sCtrl->iStartBlock].cmdFC == 0x06 || sReg[sCtrl->iStartBlock].cmdFC == 0x10)
     {
         uint8_t aData[50] = {0};
         uint8_t Length = 0;
@@ -846,9 +381,8 @@ uint8_t Handle_Trans_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlMod
                 aData[Length++] = (uint8_t)(hex_Data >> (8 * ((sReg[i].cmdLen * 2 - 1) - j)));
             
             i++;
-            if((i < _E_MODB_SS_END) &&
+            if((i < numKind) &&
                (sReg[i].Block == sReg[i-1].Block) && 
-               (sReg[i].nPort == sReg[i-1].nPort) &&
                (sReg[i].cmdAddr == sReg[i-1].cmdAddr + sReg[i-1].cmdLen))
             {
                 sCtrl->iEndBlock = i;
@@ -865,12 +399,13 @@ uint8_t Handle_Trans_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlMod
     else
     {
         uint8_t i = sCtrl->iHandle;
-        while ((i + 1) < _E_MODB_SS_END)
+        while ((i + 1) < numKind)
         {
-            if (sReg[i + 1].Block == sReg[i].Block && 
-                sReg[i + 1].nPort == sReg[i].nPort && 
+            if (*sReg[i + 1].State != 0 &&
+                sReg[i + 1].Block == sReg[i].Block && 
                 sReg[i + 1].cmdAddr >= sReg[i].cmdAddr && 
-                sReg[i + 1].idDev == sReg[i].idDev)
+                sReg[i + 1].idDev == sReg[i].idDev &&
+                sReg[i + 1].cmdFC == sReg[i].cmdFC)
             {
                 sCtrl->iEndBlock = i + 1;
                 sCtrl->iReg = sReg[i + 1].cmdAddr - sReg[sCtrl->iStartBlock].cmdAddr + sReg[i + 1].cmdLen;
@@ -879,12 +414,12 @@ uint8_t Handle_Trans_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlMod
             else 
               break;
         }
-        ModRTU_Master_Read_Frame(sFrame, *sReg[sCtrl->iStartBlock].idDev, 0x03, sReg[sCtrl->iStartBlock].cmdAddr, sCtrl->iReg);
+        ModRTU_Master_Read_Frame(sFrame, *sReg[sCtrl->iStartBlock].idDev, sReg[sCtrl->iStartBlock].cmdFC, sReg[sCtrl->iStartBlock].cmdAddr, sCtrl->iReg);
     }
     return 1;
 }
 
-uint8_t Handle_Recv_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData sRecv)
+uint8_t Handle_Recv_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData sRecv)
 {
     uint8_t Result_Recv = false;
     uint32_t hex_Recv = 0;
@@ -892,15 +427,15 @@ uint8_t Handle_Recv_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sDa
     
     if (!sReg || !sCtrl || !sReg[sCtrl->iHandle].idDev) return 0;
 
-    if (sReg[sCtrl->iHandle].nPort > _PORT_ETH_TCP)
-    {
-        Result_Recv = Modbus_RTU_Check_Format(*sReg[sCtrl->iStartBlock].idDev, sCtrl->iReg, &sRecv, &ModContent);
-    }
-    else
+    if (Port == _PORT_ETH_TCP)
     {
         Result_Recv = ModbusTCP_Check_Format(*sReg[sCtrl->iHandle].idDev, sCtrl->iReg, &sRecv, &ModContent);
         
         sCtrl->Transaction_TCP++;
+    }
+    else
+    {
+        Result_Recv = Modbus_RTU_Check_Format(*sReg[sCtrl->iStartBlock].idDev, sCtrl->iReg, &sRecv, &ModContent);
     }
     
     while(sCtrl->iHandle <= sCtrl->iEndBlock)
@@ -908,7 +443,7 @@ uint8_t Handle_Recv_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sDa
         if(Result_Recv)
         {     
             sCtrl->iAddr = sReg[sCtrl->iHandle].cmdAddr - sReg[sCtrl->iStartBlock].cmdAddr;
-            if(sReg[sCtrl->iHandle].cmdRW == 0)
+            if(sReg[sCtrl->iHandle].cmdFC == 0x03 || sReg[sCtrl->iHandle].cmdFC == 0x04)
             {
                 if(sReg[sCtrl->iHandle].cmdLen == 2)
                 {
@@ -926,38 +461,71 @@ uint8_t Handle_Recv_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sDa
             
             if(sReg[sCtrl->iHandle].vReturn != NULL)
             {
-                switch(sReg[sCtrl->iHandle].vFormat)
+                switch (sReg[sCtrl->iHandle].vFormat)
                 {
-                    case _ETYPE_F:  
-                        *(float*)sReg[sCtrl->iHandle].vReturn = Decode_Data_Type_u32_to_f(hex_Recv, sReg[sCtrl->iHandle].vFormat);
-                        *(float*)sReg[sCtrl->iHandle].vReturn *= sReg[sCtrl->iHandle].vScale;
+                    case _ETYPE_F:
+                    {
+                        float value;
+                        value = Decode_Data_Type_u32_to_f(hex_Recv, sReg[sCtrl->iHandle].vFormat);
+                        value *= sReg[sCtrl->iHandle].vScale;
+                        memcpy(sReg[sCtrl->iHandle].vReturn, &value, sizeof(float));
                         break;
-                        
-                    case _ETYPE_U32:  
-                        *(uint32_t*)sReg[sCtrl->iHandle].vReturn = hex_Recv;
-                        *(uint32_t*)sReg[sCtrl->iHandle].vReturn *= (uint32_t)sReg[sCtrl->iHandle].vScale;
+                    }
+
+                    case _ETYPE_U32:
+                    {
+                        uint32_t value;
+                        value = hex_Recv;
+                        value *= (uint32_t)sReg[sCtrl->iHandle].vScale;
+                        memcpy(sReg[sCtrl->iHandle].vReturn,&value,sizeof(uint32_t));
                         break;
-                    case _ETYPE_I32:  
-                        *(int32_t*)sReg[sCtrl->iHandle].vReturn = hex_Recv;
-                        *(int32_t*)sReg[sCtrl->iHandle].vReturn *= (uint32_t)sReg[sCtrl->iHandle].vScale;
+                    }
+
+                    case _ETYPE_I32:
+                    {
+                        int32_t value;
+                        value = (int32_t)hex_Recv;
+                        value *= (int32_t)sReg[sCtrl->iHandle].vScale;
+                        memcpy(sReg[sCtrl->iHandle].vReturn,&value,sizeof(int32_t));
                         break;
-                    case _ETYPE_U16:   
-                        *(uint16_t*)sReg[sCtrl->iHandle].vReturn = hex_Recv;
-                        *(uint16_t*)sReg[sCtrl->iHandle].vReturn *= (uint32_t)sReg[sCtrl->iHandle].vScale;
+                    }
+
+                    case _ETYPE_U16:
+                    {
+                        uint16_t value;
+                        value = (uint16_t)hex_Recv;
+                        value *= (uint16_t)sReg[sCtrl->iHandle].vScale;
+                        memcpy(sReg[sCtrl->iHandle].vReturn, &value, sizeof(uint16_t));
                         break;
-                    case _ETYPE_I16:  
-                        *(int16_t*)sReg[sCtrl->iHandle].vReturn = hex_Recv;
-                        *(int16_t*)sReg[sCtrl->iHandle].vReturn *= (uint32_t)sReg[sCtrl->iHandle].vScale;
+                    }
+
+                    case _ETYPE_I16:
+                    {
+                        int16_t value;
+                        value = (int16_t)hex_Recv;
+                        value *= (int16_t)sReg[sCtrl->iHandle].vScale;
+                        memcpy(sReg[sCtrl->iHandle].vReturn, &value, sizeof(int16_t));
                         break;
-                    case _ETYPE_U8:  
-                        *(uint8_t*)sReg[sCtrl->iHandle].vReturn = hex_Recv;
-                        *(uint8_t*)sReg[sCtrl->iHandle].vReturn *= (uint32_t)sReg[sCtrl->iHandle].vScale;
+                    }
+
+                    case _ETYPE_U8:
+                    {
+                        uint8_t value;
+                        value = (uint8_t)hex_Recv;
+                        value *= (uint8_t)sReg[sCtrl->iHandle].vScale;
+                        memcpy(sReg[sCtrl->iHandle].vReturn, &value, sizeof(uint8_t));
                         break;
-                    case _ETYPE_I8:    
-                        *(int8_t*)sReg[sCtrl->iHandle].vReturn = hex_Recv;
-                        *(int8_t*)sReg[sCtrl->iHandle].vReturn *= (uint32_t)sReg[sCtrl->iHandle].vScale;
+                    }
+
+                    case _ETYPE_I8:
+                    {
+                        int8_t value;
+                        value = (int8_t)hex_Recv;
+                        value *= (int8_t)sReg[sCtrl->iHandle].vScale;
+                        memcpy(sReg[sCtrl->iHandle].vReturn, &value, sizeof(int8_t));
                         break;
-                      
+                    }
+
                     default:
                         break;
                 }
@@ -980,7 +548,12 @@ uint8_t Handle_Recv_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sDa
         return 0;
 }
 
-void Config_RegSen_Read(uint8_t Kind,uint8_t *ID, uint8_t *User, void *Return, uint8_t *nConnect)
+void Config_RegSen_Read(Struct_RegSensor sRegSensor[],
+                        uint8_t Kind,
+                        uint8_t *ID,
+                        uint8_t *User,
+                        void *Return,
+                        uint8_t *nConnect)
 {
     sRegSensor[Kind].idDev = ID;
     sRegSensor[Kind].State = User;
@@ -988,7 +561,12 @@ void Config_RegSen_Read(uint8_t Kind,uint8_t *ID, uint8_t *User, void *Return, u
     sRegSensor[Kind].nConnect = nConnect;
 }
 
-void Config_RegSen_Write(uint8_t Kind,uint8_t *ID, uint8_t *User, void *subReg, uint8_t *nConnect)
+void Config_RegSen_Write(Struct_RegSensor sRegSensor[],
+                         uint8_t Kind,
+                         uint8_t *ID, 
+                         uint8_t *User, 
+                         void *subReg, 
+                         uint8_t *nConnect)
 {
     sRegSensor[Kind].idDev = ID;
     sRegSensor[Kind].State = User;

@@ -391,6 +391,7 @@
                     <state>$PROJ_DIR$\..\user_component\user_mem\user_sd_card</state>
                     <state>$PROJ_DIR$\..\HAL_Driver_LPTIM_Counter</state>
                     <state>$PROJ_DIR$\..\user_component\user_convert_variable</state>
+                    <state>$PROJ_DIR$\..\user_component\user_sensor_digital</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -690,7 +691,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>SVWM_GSM_ETH_V5_1_1.bin</state>
+                    <state>SVTH_SVM_DLS_V5_0_4.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -1566,6 +1567,27 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\user_component\user_mem\user_mem_comm.h</name>
+            </file>
+        </group>
+        <group>
+            <name>user_sensor_digital</name>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_daruifuno.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_daruifuno.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_saoviet.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_saoviet.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_xylem.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_xylem.h</name>
             </file>
         </group>
         <group>

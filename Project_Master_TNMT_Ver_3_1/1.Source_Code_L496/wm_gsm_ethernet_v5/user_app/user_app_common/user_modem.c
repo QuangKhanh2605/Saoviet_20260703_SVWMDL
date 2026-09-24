@@ -1092,7 +1092,7 @@ void Modem_SER_Get_FTP_Main (sData *strRecei, uint16_t Pos)
 {
     char aData[128] = {0};
     
-    sprintf((char*) aData, "%s:%s,%s,%s,%s\r\n", sModemInfor.sServerTn.sServer.aIP,
+    sprintf((char*) aData, "%s,%s,%s,%s,%s\r\n", sModemInfor.sServerTn.sServer.aIP,
                                         sModemInfor.sServerTn.sServer.aPORT,
                                         sModemInfor.sServerTn.sServer.aUSER,
                                         sModemInfor.sServerTn.sServer.aPASS,

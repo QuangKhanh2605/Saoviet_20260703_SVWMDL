@@ -7,7 +7,9 @@
 #include "user_util.h"
 #include "event_driven.h"
 
-#define MODBUS_SENSOR_SAOVIET
+//#define MODBUS_SENSOR_SAOVIET
+//#define MODBUS_SENSOR_XYLEM
+#define MODBUS_SENSOR_DARUIFUNO
 
 #define ID_DEFAULT_OXY          5
 #define ID_DEFAULT_PH           3
@@ -48,26 +50,23 @@ typedef enum
 {
     _EVENT_MODB_ENTRY,
 
-    _EVENT_MODB_WAIT_CALIB,
     _EVENT_MODB_RS485_1_REFRESH,
     _EVENT_MODB_RS485_2_REFRESH,
-    
-    _EVENT_MODB_HANDLE_SUBREG,
 
     _EVENT_MODB_RS485_1_HANDLE,
     _EVENT_MODB_RS485_2_HANDLE,
     _EVENT_MODB_TCP_HANDLE,
     
-    _EVENT_PTR_TEMP,
+    _EVENT_CALL_CYCLE,
     
     _EVENT_MODB_END,
 }eKindEventModb;
 
 typedef enum
 {
-    _PORT_ETH_TCP,  
-    _PORT_RS485_1,   
+    _PORT_RS485_1 = 0,   
     _PORT_RS485_2,    
+    _PORT_ETH_TCP,  
 }eKindEPortModbus;
 
 typedef enum
@@ -76,159 +75,6 @@ typedef enum
     _SENSOR_CONNECT,
 }eKindStateSensor;
 
-typedef enum
-{
-    _MODB_UNRESPOND = 0,
-    _MODB_RESPOND,
-}eKindStateModbRespond;
-
-typedef enum
-{
-    _STATE_CALIB_FREE = 0,
-    _STATE_CALIB_ENTER,
-    _STATE_CALIB_WAIT,
-    _STATE_CALIB_DONE,
-    _STATE_CALIB_ERROR,
-}eKindStateSendCalib;
-
-typedef enum
-{
-#ifdef MODBUS_SENSOR_SAOVIET
-    /*--------Kênh 1-------*/
-    _E_PH_VALUE=0,
-    _E_PH_S_SENSOR,
-    _E_PH_S_VALUE,
-    
-    _E_CLO_SEND_PH,
-    _E_CLO_VALUE,
-    _E_CLO_S_SENSOR,
-    _E_CLO_S_VALUE,
-    
-    _E_EC_VALUE,
-    _E_EC_S_SENSOR,
-    _E_EC_S_VALUE,
-    
-    _E_TURB_VALUE,
-    _E_TURB_S_SENSOR,
-    _E_TURB_S_VALUE,
-    
-    _E_COD_VALUE,
-    _E_COD_S_SENSOR,
-    _E_COD_S_VALUE,
-    
-    _E_TSS_VALUE,
-    _E_TSS_S_SENSOR,
-    _E_TSS_S_VALUE,
-    
-    _E_NH4_VALUE,
-    _E_NH4_S_SENSOR,
-    _E_NH4_S_VALUE,
-    
-    _E_DO_SALT,
-    _E_DO_VALUE,
-    _E_DO_S_SENSOR,
-    _E_DO_S_VALUE,
-    
-    _E_SALT_VALUE,
-    _E_SALT_S_SENSOR,
-    _E_SALT_S_VALUE,
-    
-    _E_TDS_VALUE,
-    _E_TDS_S_SENSOR,
-    _E_TDS_S_VALUE,
-    
-    _E_NO3_VALUE,
-    _E_NO3_S_SENSOR,
-    _E_NO3_S_VALUE,
-    
-    _E_TEMP_VALUE,
-    _E_TEMP_S_SENSOR,
-    _E_TEMP_S_VALUE,
-    
-    /*------Kênh 2------*/
-    _E_PH_VALUE_2,
-    _E_PH_S_SENSOR_2,
-    _E_PH_S_VALUE_2,
-    
-    _E_CLO_SEND_PH_2,
-    _E_CLO_VALUE_2,
-    _E_CLO_S_SENSOR_2,
-    _E_CLO_S_VALUE_2,
-    
-    _E_EC_VALUE_2,
-    _E_EC_S_SENSOR_2,
-    _E_EC_S_VALUE_2,
-    
-    _E_TURB_VALUE_2,
-    _E_TURB_S_SENSOR_2,
-    _E_TURB_S_VALUE_2,
-    
-    _E_COD_VALUE_2,
-    _E_COD_S_SENSOR_2,
-    _E_COD_S_VALUE_2,
-    
-    _E_TSS_VALUE_2,
-    _E_TSS_S_SENSOR_2,
-    _E_TSS_S_VALUE_2,
-    
-    _E_NH4_VALUE_2,
-    _E_NH4_S_SENSOR_2,
-    _E_NH4_S_VALUE_2,
-    
-    _E_DO_SALT_2,
-    _E_DO_VALUE_2,
-    _E_DO_S_SENSOR_2,
-    _E_DO_S_VALUE_2,
-    
-    _E_SALT_VALUE_2,
-    _E_SALT_S_SENSOR_2,
-    _E_SALT_S_VALUE_2,
-    
-    _E_TDS_VALUE_2,
-    _E_TDS_S_SENSOR_2,
-    _E_TDS_S_VALUE_2,
-    
-    _E_NO3_VALUE_2,
-    _E_NO3_S_SENSOR_2,
-    _E_NO3_S_VALUE_2,
-    
-    _E_TEMP_VALUE_2,
-    _E_TEMP_S_SENSOR_2,
-    _E_TEMP_S_VALUE_2,
-    
-    /*------Kênh Modbus TCP-----*/
-    _E_TURB1_WRITE,
-    _E_PH1_WRITE,
-
-    _E_TURB2_WRITE,
-    _E_PH2_WRITE,
-#else
-    _E_PH_S_SENSOR,
-    _E_TEMP_S_SENSOR,
-    _E_PH_S_VALUE,
-    _E_TEMP_S_VALUE,
-    _E_PH_VALUE,
-    _E_TEMP_VALUE,
-
-    _E_DO_S_SENSOR,
-    _E_DO_S_VALUE,
-    _E_DO_VALUE,
-    
-    _E_NH4_S_SENSOR,
-    _E_NH4_S_VALUE,
-    _E_NH4_VALUE,
-    
-    _E_TSS_S_SENSOR,
-    _E_TSS_S_VALUE,
-    _E_TSS_VALUE,
-    
-    _E_COD_S_SENSOR,
-    _E_COD_S_VALUE,
-    _E_COD_VALUE,
-#endif
-    _E_MODB_SS_END,
-}eKindStateModbReg;
-
 typedef struct
 {   
     uint8_t State_u8;   //Mat ket noi hay khong
@@ -236,20 +82,12 @@ typedef struct
     int32_t Value_i32;
 }Struct_SS_Value;
 
-typedef struct 
-{
-    uint8_t CountDisconnectModb_1;
-    uint8_t CountDisconnectModb_2;
-  
-    uint8_t State_Wait_Calib;
-}Struct_Hanlde_Modb;
-
 typedef struct
 {
     uint8_t  eKind;                  //Name Register
     uint8_t  Block;
     uint8_t  *State;                 //Trang thai su dung (On/Off)
-    uint8_t  cmdRW;                  //0: Read, 1: Write
+    uint8_t  cmdFC;                  //Function Code
     uint8_t  *idDev;                  //ID cua thiet bi
     uint8_t  cmdLen;                 //So thanh ghi can doc
     uint16_t cmdAddr;                //Addr thanh ghi 1234(Dec)
@@ -257,16 +95,9 @@ typedef struct
     uint8_t  vBeLe;                  //Kieu giai ma
     float    vScale;                 //Scale du lieu 0.01, 0.1, 1, 10 (ket qua do nhan voi scale)
     void    *subReg;                //Gia tri viet vao thanh ghi lay tu thiet bi so 1|2|3...
-    uint8_t  nPort;                  //Modbus port: 1
     void    *vReturn;                  
     uint8_t  *nConnect;
 }Struct_RegSensor;
-
-typedef struct
-{
-    float pH;
-    float Salt_PSU;
-}Struct_Modb_SubReg;
 
 typedef struct
 {
@@ -288,15 +119,12 @@ typedef struct
 
 extern sEvent_struct        sEventAppModb[];
 
-extern Struct_Hanlde_Modb          sHandleModb;
 extern sData                       sDataRecvTCP;
 extern Struct_TransModbusTCP       sTransModTCP;
 /*====================Function Handle====================*/
 
 uint8_t    AppModb_Task(void);
 void       Init_AppModb(void);
-
-void       Modb_Para_Init(void);
 
 void       Init_Parameter_Sensor(void);
 
@@ -307,9 +135,19 @@ uint8_t    ModbusTCP_Check_Format(uint8_t SlaveID, uint16_t nRegis,
                                   sData *pSource, sData *Content);
 uint8_t    Modbus_RTU_Check_Format(uint8_t SlaveID, uint16_t nRegis,
                                   sData *pSource, sData *Content);
-uint8_t    Handle_Trans_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData *sFrame);
-uint8_t    Handle_Recv_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData sRecv);
-void       Config_RegSen_Read(uint8_t Kind,uint8_t *ID, uint8_t *User, void *Return, uint8_t *nConnect);
-void       Config_RegSen_Write(uint8_t Kind,uint8_t *ID, uint8_t *User, void *subReg, uint8_t *nConnect);
+uint8_t    Handle_Trans_Modb(Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData *sFrame);
+uint8_t    Handle_Recv_Modb(uint8_t Port, Struct_RegSensor  sReg[], Struct_CtrlModbM  *sCtrl, sData sRecv);
+void       Config_RegSen_Read(Struct_RegSensor sRegSensor[],
+                                    uint8_t Kind,
+                                    uint8_t *ID,
+                                    uint8_t *User,
+                                    void *Return,
+                                    uint8_t *nConnect);
+void       Config_RegSen_Write(Struct_RegSensor sRegSensor[],
+                                 uint8_t Kind,
+                                 uint8_t *ID, 
+                                 uint8_t *User, 
+                                 void *subReg, 
+                                 uint8_t *nConnect);
 #endif
 

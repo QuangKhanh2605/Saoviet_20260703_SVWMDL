@@ -3300,7 +3300,10 @@ void AppWm_SER_Get_TNMT_Infor(sData *pData, uint16_t Pos)
                                                  sWmVar.sChannInfor[i].MA_TRAM, sWmVar.sChannInfor[i].nParam_u8);
         
         for (uint8_t count = 0; count < sWmVar.sChannInfor[i].nParam_u8; count++) {
-            sprintf(aData + strlen(aData), ",%d", sWmVar.sChannInfor[i].aPARAM[count]);
+            if(sWmVar.sChannInfor[i].aPARAM[count] <= MAX_PARAM_TYPE)
+                sprintf(aData + strlen(aData), ",%d", sWmVar.sChannInfor[i].aPARAM[count]);
+            else 
+                sprintf(aData + strlen(aData), ",");
         }
         
         sprintf(aData + strlen(aData), "\r\n");

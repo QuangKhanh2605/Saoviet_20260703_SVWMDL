@@ -109,6 +109,9 @@ build sd_spi.pbi : index sd_spi.xcl
 build user_sd.pbi : index user_sd.xcl
 build user_mem.pbi : index user_mem.xcl
 build user_mem_comm.pbi : index user_mem_comm.xcl
+build user_sensor_daruifuno.pbi : index user_sensor_daruifuno.xcl
+build user_sensor_saoviet.pbi : index user_sensor_saoviet.xcl
+build user_sensor_xylem.pbi : index user_sensor_xylem.xcl
 build user_ec200u.pbi : index user_ec200u.xcl
 build user_l506.pbi : index user_l506.xcl
 build user_l511.pbi : index user_l511.xcl
@@ -161,11 +164,11 @@ build wm_gsm_ethernet_v3_part3.pbi : link stm32l4xx_hal_spi.pbi stm32l4xx_hal_sp
 build wm_gsm_ethernet_v3_part4.pbi : link user_message.pbi user_modem.pbi user_uart.pbi user_app_ethernet.pbi user_app_sim.pbi button.pbi lcd_display.pbi user_app_modb_m.pbi user_app_modb_s.pbi user_app_sensor.pbi user_app_wm.pbi user_rs485.pbi
 build wm_gsm_ethernet_v3_part5.pbi : link user_at_serial.pbi MQTTConnectClient.pbi MQTTConnectServer.pbi MQTTDeserializePublish.pbi MQTTFormat.pbi MQTTPacket.pbi MQTTSerializePublish.pbi MQTTSubscribeClient.pbi MQTTSubscribeServer.pbi MQTTUnsubscribeClient.pbi MQTTUnsubscribeServer.pbi user_convert_variable.pbi
 build wm_gsm_ethernet_v3_part6.pbi : link dhcpv4.pbi dhcpv6.pbi dns.pbi w6100.pbi socket.pbi wizchip_conf.pbi user_lptim.pbi cat24mxx.pbi S25FL216K.pbi user_internal_mem.pbi sd_benchmark.pbi sd_diskio_spi.pbi
-build wm_gsm_ethernet_v3_part7.pbi : link sd_functions.pbi sd_spi.pbi user_sd.pbi user_mem.pbi user_mem_comm.pbi user_ec200u.pbi user_l506.pbi user_l511.pbi user_sim.pbi user_sim_common.pbi level_S_YW_01B.pbi level_SUP_PX261_B.pbi
-build wm_gsm_ethernet_v3_part8.pbi : link level_ultrasonic.pbi siemen_mag6000.pbi siemen_mag8000.pbi user_wm_digital.pbi wm_mong_cai.pbi wm_mt100.pbi wm_sence.pbi woteck_ultrasonic.pbi woteck_wm.pbi stm32l4xx_hal_lptim.pbi NT75451.pbi PCD8544.pbi
-build wm_gsm_ethernet_v3_part9.pbi : link ST7565R.pbi STM32F0xx.pbi STM32F10x.pbi STM32F4.pbi STM32L4.pbi glcd.pbi graphics.pbi graphs.pbi text.pbi text_tiny.pbi unit_tests.pbi user_rtc.pbi
-build wm_gsm_ethernet_v3_part10.pbi : link user_timer.pbi user_adv_trace.pbi event_driven.pbi onchipflash.pbi queue_p.pbi user_adc.pbi user_json.pbi user_lpm.pbi user_modbus_rtu.pbi user_obis_sv.pbi user_string.pbi user_time.pbi
-build wm_gsm_ethernet_v3_part11.pbi : link user_tiny_vsnprintf.pbi user_util.pbi
+build wm_gsm_ethernet_v3_part7.pbi : link sd_functions.pbi sd_spi.pbi user_sd.pbi user_mem.pbi user_mem_comm.pbi user_sensor_daruifuno.pbi user_sensor_saoviet.pbi user_sensor_xylem.pbi user_ec200u.pbi user_l506.pbi user_l511.pbi user_sim.pbi
+build wm_gsm_ethernet_v3_part8.pbi : link user_sim_common.pbi level_S_YW_01B.pbi level_SUP_PX261_B.pbi level_ultrasonic.pbi siemen_mag6000.pbi siemen_mag8000.pbi user_wm_digital.pbi wm_mong_cai.pbi wm_mt100.pbi wm_sence.pbi woteck_ultrasonic.pbi woteck_wm.pbi
+build wm_gsm_ethernet_v3_part9.pbi : link stm32l4xx_hal_lptim.pbi NT75451.pbi PCD8544.pbi ST7565R.pbi STM32F0xx.pbi STM32F10x.pbi STM32F4.pbi STM32L4.pbi glcd.pbi graphics.pbi graphs.pbi text.pbi
+build wm_gsm_ethernet_v3_part10.pbi : link text_tiny.pbi unit_tests.pbi user_rtc.pbi user_timer.pbi user_adv_trace.pbi event_driven.pbi onchipflash.pbi queue_p.pbi user_adc.pbi user_json.pbi user_lpm.pbi user_modbus_rtu.pbi
+build wm_gsm_ethernet_v3_part11.pbi : link user_obis_sv.pbi user_string.pbi user_time.pbi user_tiny_vsnprintf.pbi user_util.pbi
 build wm_gsm_ethernet_v3.pbd : link wm_gsm_ethernet_v3_part0.pbi wm_gsm_ethernet_v3_part1.pbi wm_gsm_ethernet_v3_part2.pbi wm_gsm_ethernet_v3_part3.pbi wm_gsm_ethernet_v3_part4.pbi wm_gsm_ethernet_v3_part5.pbi wm_gsm_ethernet_v3_part6.pbi wm_gsm_ethernet_v3_part7.pbi wm_gsm_ethernet_v3_part8.pbi wm_gsm_ethernet_v3_part9.pbi wm_gsm_ethernet_v3_part10.pbi wm_gsm_ethernet_v3_part11.pbi
 build wm_gsm_ethernet_v3.pbw : browsedata wm_gsm_ethernet_v3.pbd
 

@@ -20,7 +20,7 @@
         <LeaveTargetRunning>_ 0</LeaveTargetRunning>
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>1636305435</Checksum>
+        <Checksum>1369666433</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -64,44 +64,47 @@
         <Fmt4>ST_TIME_FORMAT-month	3	0</Fmt4>
         <Fmt5>ST_TIME_FORMAT-sec	3	0</Fmt5>
         <Fmt6>ST_TIME_FORMAT-year	3	0</Fmt6>
-        <Fmt7>Struct_Pulse-Direct_u8	3	0</Fmt7>
-        <Fmt8>Struct_Pulse-FactorDec_u8	3	0</Fmt8>
-        <Fmt9>Struct_Pulse-IsOver5Pulse_u8	3	0</Fmt9>
-        <Fmt10>Struct_Pulse-Status_u8	3	0</Fmt10>
-        <Fmt11>Struct_Queue_Type-LenQueue_u8	3	0</Fmt11>
-        <Fmt12>Struct_Queue_Type-NumWaiting_u8	3	0</Fmt12>
-        <Fmt13>Struct_Queue_Type-status	3	0</Fmt13>
-        <Fmt14>sAppWmPressureInfor-Mode_u8	3	0</Fmt14>
-        <Fmt15>sAppWmPressureInfor-Val_i32	3	0</Fmt15>
-        <Fmt16>sEthernetVariable-CtrSockConnected_u8	3	0</Fmt16>
-        <Fmt17>sEthernetVariable-DataSockConnected_u8	3	0</Fmt17>
-        <Fmt18>sEthernetVariable-PHYstatus_u8	3	0</Fmt18>
-        <Fmt19>sEthernetVariable-Retry_u8	3	0</Fmt19>
-        <Fmt20>sEthernetVariable-Status_u8	3	0</Fmt20>
-        <Fmt21>sEvent_struct-e_name	3	0</Fmt21>
-        <Fmt22>sEvent_struct-e_status	3	0</Fmt22>
-        <Fmt23>sFrequenceSend-nTSVH_u8	3	0</Fmt23>
-        <Fmt24>sMemQueueWrite-TypeData_u8	3	0</Fmt24>
-        <Fmt25>sMemQueueWrite-Type_u8	3	0</Fmt25>
-        <Fmt26>sMemRecordInfor-AddrStart_u32	4	0</Fmt26>
-        <Fmt27>sMemRecordInfor-AddrStop_u32	4	0</Fmt27>
-        <Fmt28>sMemRecordInfor-cReaded_u8	3	0</Fmt28>
-        <Fmt29>sMemWriteInfor-Addr_u32	4	0</Fmt29>
-        <Fmt30>sModbusDeviceData-Factor	4	0</Fmt30>
-        <Fmt31>sModbusDeviceData-Status_u8	3	0</Fmt31>
-        <Fmt32>sModbusDeviceData-Type_u8	3	0</Fmt32>
-        <Fmt33>sModbusInfor-MType_u8	3	0</Fmt33>
-        <Fmt34>sModbusInfor-SlaveId_u8	3	0</Fmt34>
-        <Fmt35>sPressureLinearInter-InUnit_u8	3	0</Fmt35>
-        <Fmt36>sPressureLinearInter-OutUnit_u8	3	0</Fmt36>
-        <Fmt37>sServerInfor-DomainOrIp_u8	3	0</Fmt37>
-        <Fmt38>sSimUpdateVariable-DataTemp_u8	3	0</Fmt38>
-        <Fmt39>sSimUpdateVariable-FailStatus_u8	3	0</Fmt39>
-        <Fmt40>sSimUpdateVariable-IsFirmSaoViet_u8	3	0</Fmt40>
-        <Fmt41>sSimUpdateVariable-LasCrcCal_u8	3	0</Fmt41>
-        <Fmt42>sSimUpdateVariable-LastCrcFile_u8	3	0</Fmt42>
-        <Fmt43>sSimUpdateVariable-Pending_u8	3	0</Fmt43>
-        <Fmt44>sWoteckUltraData-PosInt_u32	4	0</Fmt44>
+        <Fmt7>Struct_CtrlModbM-iEndBlock	3	0</Fmt7>
+        <Fmt8>Struct_CtrlModbM-iReg	3	0</Fmt8>
+        <Fmt9>Struct_MeasureMain-sUser	3	0</Fmt9>
+        <Fmt10>Struct_Pulse-Direct_u8	3	0</Fmt10>
+        <Fmt11>Struct_Pulse-FactorDec_u8	3	0</Fmt11>
+        <Fmt12>Struct_Pulse-IsOver5Pulse_u8	3	0</Fmt12>
+        <Fmt13>Struct_Pulse-Status_u8	3	0</Fmt13>
+        <Fmt14>Struct_Queue_Type-LenQueue_u8	3	0</Fmt14>
+        <Fmt15>Struct_Queue_Type-NumWaiting_u8	3	0</Fmt15>
+        <Fmt16>Struct_Queue_Type-status	3	0</Fmt16>
+        <Fmt17>sAppWmPressureInfor-Mode_u8	3	0</Fmt17>
+        <Fmt18>sAppWmPressureInfor-Val_i32	3	0</Fmt18>
+        <Fmt19>sEthernetVariable-CtrSockConnected_u8	3	0</Fmt19>
+        <Fmt20>sEthernetVariable-DataSockConnected_u8	3	0</Fmt20>
+        <Fmt21>sEthernetVariable-PHYstatus_u8	3	0</Fmt21>
+        <Fmt22>sEthernetVariable-Retry_u8	3	0</Fmt22>
+        <Fmt23>sEthernetVariable-Status_u8	3	0</Fmt23>
+        <Fmt24>sEvent_struct-e_name	3	0</Fmt24>
+        <Fmt25>sEvent_struct-e_status	3	0</Fmt25>
+        <Fmt26>sFrequenceSend-nTSVH_u8	3	0</Fmt26>
+        <Fmt27>sMemQueueWrite-TypeData_u8	3	0</Fmt27>
+        <Fmt28>sMemQueueWrite-Type_u8	3	0</Fmt28>
+        <Fmt29>sMemRecordInfor-AddrStart_u32	4	0</Fmt29>
+        <Fmt30>sMemRecordInfor-AddrStop_u32	4	0</Fmt30>
+        <Fmt31>sMemRecordInfor-cReaded_u8	3	0</Fmt31>
+        <Fmt32>sMemWriteInfor-Addr_u32	4	0</Fmt32>
+        <Fmt33>sModbusDeviceData-Factor	4	0</Fmt33>
+        <Fmt34>sModbusDeviceData-Status_u8	3	0</Fmt34>
+        <Fmt35>sModbusDeviceData-Type_u8	3	0</Fmt35>
+        <Fmt36>sModbusInfor-MType_u8	3	0</Fmt36>
+        <Fmt37>sModbusInfor-SlaveId_u8	3	0</Fmt37>
+        <Fmt38>sPressureLinearInter-InUnit_u8	3	0</Fmt38>
+        <Fmt39>sPressureLinearInter-OutUnit_u8	3	0</Fmt39>
+        <Fmt40>sServerInfor-DomainOrIp_u8	3	0</Fmt40>
+        <Fmt41>sSimUpdateVariable-DataTemp_u8	3	0</Fmt41>
+        <Fmt42>sSimUpdateVariable-FailStatus_u8	3	0</Fmt42>
+        <Fmt43>sSimUpdateVariable-IsFirmSaoViet_u8	3	0</Fmt43>
+        <Fmt44>sSimUpdateVariable-LasCrcCal_u8	3	0</Fmt44>
+        <Fmt45>sSimUpdateVariable-LastCrcFile_u8	3	0</Fmt45>
+        <Fmt46>sSimUpdateVariable-Pending_u8	3	0</Fmt46>
+        <Fmt47>sWoteckUltraData-PosInt_u32	4	0</Fmt47>
     </struct_types>
     <array_types>
         <Fmt0>uint32_t[6]	3	0</Fmt0>
@@ -238,11 +241,6 @@
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
     </TermIOLog>
-    <LogFile>
-        <LoggingEnabled>_ 0</LoggingEnabled>
-        <LogFile>_ ""</LogFile>
-        <Category>_ 0</Category>
-    </LogFile>
     <DriverProfiling>
         <Enabled>0</Enabled>
         <Mode>3</Mode>
@@ -256,6 +254,11 @@
     <CallStackStripe>
         <ShowTiming>1</ShowTiming>
     </CallStackStripe>
+    <LogFile>
+        <LoggingEnabled>_ 0</LoggingEnabled>
+        <LogFile>_ ""</LogFile>
+        <Category>_ 0</Category>
+    </LogFile>
     <DisassembleMode>
         <mode>0</mode>
     </DisassembleMode>

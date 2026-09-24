@@ -33,6 +33,7 @@ typedef enum
     _EVENT_TX_TIMER,             //4
     _EVENT_SAVE_BOX,             //6
     _EVENT_RST_IWDG,
+    _EVENT_CHARGER_RTC,
 	_EVENT_END_COMM,             //7
 }eKindEventAppCommon;
 

@@ -1657,6 +1657,27 @@
             </file>
         </group>
         <group>
+            <name>user_sensor_digital</name>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_daruifuno.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_daruifuno.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_saoviet.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_saoviet.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_xylem.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\user_component\user_sensor_digital\user_sensor_xylem.h</name>
+            </file>
+        </group>
+        <group>
             <name>user_sim</name>
             <group>
                 <name>module</name>

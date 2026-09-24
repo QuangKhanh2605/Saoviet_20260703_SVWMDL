@@ -148,4 +148,7 @@ user_app_modb_m.pbi: \
   C:\Program\ Files\ (x86)\IAR\ Systems\Embedded\ Workbench\ 8.3\arm\inc\c\stdbool.h \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_util\user_obis_sv.h \
   D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_util\user_string.h \
-  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_convert_variable\user_convert_variable.h
+  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_convert_variable\user_convert_variable.h \
+  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_sensor_digital\user_sensor_saoviet.h \
+  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_sensor_digital\user_sensor_xylem.h \
+  D:\Saoviet_Git\Saoviet_20260703_SVWMDL\Project_Master_TNMT_Ver_3_1\1.Source_Code_L496\wm_gsm_ethernet_v5\EWARM\..\user_component\user_sensor_digital\user_sensor_daruifuno.h
