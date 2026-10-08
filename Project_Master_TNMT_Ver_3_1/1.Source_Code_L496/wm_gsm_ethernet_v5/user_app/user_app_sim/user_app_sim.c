@@ -640,6 +640,44 @@ static void AppSim_Handle_AT (uint8_t step)
             sSimCommVar.pSender.Length_u16 = sMessage.sSubcribe.Length_u16;
             break;
         case _SIM_COMM_MQTT_SUB_2:
+            if (UTIL_var.ModeConnNow_u8 == _CONNECT_FTP_UPLOAD)
+            {
+                if(sWmVar.FTP_Direc_Mode_u8 == 1)
+                {
+                    UTIL_MEM_set(sSimFwUpdate.aPathFTP_LV, 0, sizeof(sSimFwUpdate.aPathFTP_LV));
+                    if(sSimFwUpdate.cPath_u8 == 1)
+                    {
+                        sprintf(sSimFwUpdate.aPathFTP_LV,"20%02d%02d%02d", sSimFwUpdate.Path_Year_u8, sSimFwUpdate.Path_Month_u8, sSimFwUpdate.Path_Date_u8);
+                        Sim_Push_Block_To_Queue(aSIM_BLOCK_STEP_FTP_PATH);
+                        break;
+                    }
+                }
+                else if(sWmVar.FTP_Direc_Mode_u8 == 2)
+                {
+                    UTIL_MEM_set(sSimFwUpdate.aPathFTP_LV, 0, sizeof(sSimFwUpdate.aPathFTP_LV));
+                    if(sSimFwUpdate.cPath_u8 == 1)
+                    {
+                        sprintf(sSimFwUpdate.aPathFTP_LV,"20%02d", sSimFwUpdate.Path_Year_u8);
+                        Sim_Push_Block_To_Queue(aSIM_BLOCK_STEP_FTP_PATH);
+                        break;
+                    }
+                    else if(sSimFwUpdate.cPath_u8 == 2)
+                    {
+                        sprintf(sSimFwUpdate.aPathFTP_LV,"%02d", sSimFwUpdate.Path_Month_u8);
+                        Sim_Push_Block_To_Queue(aSIM_BLOCK_STEP_FTP_PATH);
+                        break;
+                    }
+                    else if(sSimFwUpdate.cPath_u8 == 3)
+                    {
+                        sprintf(sSimFwUpdate.aPathFTP_LV,"%02d", sSimFwUpdate.Path_Date_u8);
+                        Sim_Push_Block_To_Queue(aSIM_BLOCK_STEP_FTP_PATH);
+                        break;
+                    }
+                    else {}
+                }
+                else {}
+            }
+            
             if (sAppEthVar.Status_u8 != _ETH_MQTT_CONNECTED) {
                 mSet_default_MQTT(); 
             }

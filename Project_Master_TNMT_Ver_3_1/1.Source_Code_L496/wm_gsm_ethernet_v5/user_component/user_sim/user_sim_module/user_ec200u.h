@@ -154,6 +154,10 @@ typedef enum
     
     _EC200_FTP_CLOSE,
     
+    _EC200_FTP_DIREC_1,
+    _EC200_FTP_DIREC_2,
+    _EC200_FTP_CWD_1,
+    _EC200_FTP_CWD_2,
     //SSL Config
     _EC200_HTTP_CFG_SSL_VER,
     _EC200_HTTP_CFG_SSL_CIP,
@@ -250,6 +254,7 @@ extern uint8_t aEC200_BLOCK_NETWORK[];
 extern uint8_t aEC200_BLOCK_FTP_CONN[];
 extern uint8_t aEC200_BLOCK_FTP_PUB[];
 extern uint8_t aEC200_BLOCK_FTP_DISCONN[];
+extern uint8_t aEC200_BLOCK_FTP_PATH[];
     
 #endif
 

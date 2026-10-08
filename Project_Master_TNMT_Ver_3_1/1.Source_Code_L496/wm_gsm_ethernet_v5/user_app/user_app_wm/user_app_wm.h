@@ -81,6 +81,7 @@
 #define MAX_PARAM_TNMT          3 
 #define MAX_PARAM_TYPE          2
 #define MAX_PACKET_MODE         2
+#define MAX_FTP_DIREC_MODE      2
 
 #define MAX_DISCONN_RS485       2
 #define MAX_BLOCK               2
@@ -312,6 +313,7 @@ typedef struct
     sStatusAlarm    sAlarm[MAX_CHANNEL];
     uint8_t         iCaculOK[MAX_CHANNEL];
     uint8_t         ModePacket_u8;
+    uint8_t         FTP_Direc_Mode_u8;
     
     sOutputContrlVar    sOutputContrl;
     float               aThreshPress_f[NUMBER_MOTOR][2];   //nguong duoi, nguong tren
@@ -470,6 +472,8 @@ void    AppWm_SER_Set_TNMT_Infor(sData *pData, uint16_t Pos);
 void    AppWm_SER_Get_TNMT_Infor(sData *pData, uint16_t Pos);
 void    AppWm_SER_Set_TNMT_Pack_M(sData *pData, uint16_t Pos);
 void    AppWm_SER_Get_TNMT_Pack_M(sData *pData, uint16_t Pos);
+void    AppWm_SER_Set_TNMT_Direc_M(sData *pData, uint16_t Pos);
+void    AppWm_SER_Get_TNMT_Direc_M(sData *pData, uint16_t Pos);
 
 void    AppWm_RS485_Rx_Done (void);
 int8_t  AppWm_Is_Firt_Chann_TN (void);

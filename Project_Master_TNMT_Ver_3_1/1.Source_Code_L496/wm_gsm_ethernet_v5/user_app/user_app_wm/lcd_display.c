@@ -52,10 +52,12 @@ sOjectInformation   sLCDObject[] =
     {   __SC1_SALINITY,     "Salt : ",         NULL,   _DTYPE_I32,        0,   " %",      2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_COD,          "COD  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_TSS,          "TSS  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
-    {   __SC1_NH4,          "NH4+ : ",          NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC1_NH4,          "NH4+ : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_DO,           "DO   : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_TDS,          "TDS  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
-    {   __SC1_NO3,          "NO3_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC1_NO3,          "NO3- : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC1_NH4_N,        "NH4_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC1_NO3_N,        "NO3_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC1_TEMP,         "Temp : ",         NULL,   _DTYPE_I32,        0,   " ‰C",     2,  0,  0x00,    _LCD_SCREEN_CM44    },
     
     {   __SC2_CLO_DU,       "2CLO  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
@@ -65,14 +67,18 @@ sOjectInformation   sLCDObject[] =
     {   __SC2_SALINITY,     "2Salt : ",         NULL,   _DTYPE_I32,        0,   " %",      2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC2_COD,          "2COD  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC2_TSS,          "2TSS  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
-    {   __SC2_NH4,          "2NH4_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC2_NH4,          "2NH4+ : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC2_DO,           "2DO   : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC2_TDS,          "2TDS  : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
-    {   __SC2_NO3,          "2NO3_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC2_NO3,          "2NO3- : ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC2_NH4_N,        "2NH4_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
+    {   __SC2_NO3_N,        "2NO3_N: ",         NULL,   _DTYPE_I32,        0,   " mg/L",   2,  0,  0x00,    _LCD_SCREEN_CM44    },
     {   __SC2_TEMP,         "2Temp : ",         NULL,   _DTYPE_I32,        0,   " ‰C",     2,  0,  0x00,    _LCD_SCREEN_CM44    },
     
     {   __PARAM_CM44_2,     "Sensor.",         NULL,   _DTYPE_STRING,   0,      NULL,      0,  0,  0x00,    _LCD_SCREEN_CM44_2  },
     {   __PARAM_CM44_3,     "Sensor.",         NULL,   _DTYPE_STRING,   0,      NULL,      0,  0,  0x00,    _LCD_SCREEN_CM44_3  },
+    {   __PARAM_CM44_4,     "Sensor.",         NULL,   _DTYPE_STRING,   0,      NULL,      0,  0,  0x00,    _LCD_SCREEN_CM44_4  },
+    {   __PARAM_CM44_5,     "Sensor.",         NULL,   _DTYPE_STRING,   0,      NULL,      0,  0,  0x00,    _LCD_SCREEN_CM44_5  },
     
     //screen channel 1
 
@@ -143,14 +149,16 @@ sOjectInformation   sLCDObject[] =
 
     {   __SET_OPTION_CH1_TITLE_2,"OPTION CHANNEL 1",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
     {   __SET_OPTION_CH1_TSS,    "6. TSS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
-    {   __SET_OPTION_CH1_NH4,    "7. NH4_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
+    {   __SET_OPTION_CH1_NH4,    "7. NH4+   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
     {   __SET_OPTION_CH1_DO,     "8. DO     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
     {   __SET_OPTION_CH1_SALT,   "9. SALT   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
     {   __SET_OPTION_CH1_TDS,    "10.TDS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        7,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_2 },
     
     {   __SET_OPTION_CH1_TITLE_3,"OPTION CHANNEL 1",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
-    {   __SET_OPTION_CH1_NO3,    "11.NO3_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
-    {   __SET_OPTION_CH1_TEMP,   "12.Temp   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
+    {   __SET_OPTION_CH1_NO3,    "11.NO3-   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
+    {   __SET_OPTION_CH1_NH4_N,  "11.NH4_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
+    {   __SET_OPTION_CH1_NO3_N,  "12.NO3_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
+    {   __SET_OPTION_CH1_TEMP,   "14.Temp   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH1_TAB_3 },
     
     {   __SET_OPTION_CH2_TITLE,  "OPTION CHANNEL 2",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
     {   __SET_OPTION_CH2_PH,     "1. pH     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2  },
@@ -161,14 +169,16 @@ sOjectInformation   sLCDObject[] =
 
     {   __SET_OPTION_CH2_TITLE_2,"OPTION CHANNEL 2",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
     {   __SET_OPTION_CH2_TSS,    "6. TSS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
-    {   __SET_OPTION_CH2_NH4,    "7. NH4_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
+    {   __SET_OPTION_CH2_NH4,    "7. NH4+   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
     {   __SET_OPTION_CH2_DO,     "8. DO     : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
     {   __SET_OPTION_CH2_SALT,   "9. SALT   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
     {   __SET_OPTION_CH2_TDS,    "10.TDS    : ",   NULL,   _DTYPE_U8,       0x00, NULL,        7,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_2 },
     
     {   __SET_OPTION_CH2_TITLE_3,"OPTION CHANNEL 2",  NULL,   _DTYPE_STRING,   0x00, NULL,        2,  18,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
-    {   __SET_OPTION_CH2_NO3,    "11.NO3_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
-    {   __SET_OPTION_CH2_TEMP,   "12.Temp   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
+    {   __SET_OPTION_CH2_NO3,    "11.NO3-   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        3,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
+    {   __SET_OPTION_CH2_NH4_N,  "12.NH4_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        4,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
+    {   __SET_OPTION_CH2_NO3_N,  "13.NO3_N  : ",   NULL,   _DTYPE_U8,       0x00, NULL,        5,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
+    {   __SET_OPTION_CH2_TEMP,   "14.Temp   : ",   NULL,   _DTYPE_U8,       0x00, NULL,        6,  14,  0x00,    _LCD_SCR_SET_OPTION_SS_CH2_TAB_3 },
     
     {   __CHECK_STATE_SETTING,        NULL,             NULL,   _DTYPE_STRING,   0,      NULL,      1,  24, 0x00,     _LCD_SCR_CHECK_SETTING},
     
@@ -257,6 +267,8 @@ static const SENSOR_CFG SensorTable[] =
     { __SC1_DO,         &sMeasureMain[0][_SS_DO].sUser,     &sMeasureMain[0][_SS_DO].sVal.State_u8,     &sMeasureMain[0][_SS_DO].State},
     { __SC1_TDS,        &sMeasureMain[0][_SS_TDS].sUser,    &sMeasureMain[0][_SS_TDS].sVal.State_u8,    &sMeasureMain[0][_SS_TDS].State},
     { __SC1_NO3,        &sMeasureMain[0][_SS_NO3].sUser,    &sMeasureMain[0][_SS_NO3].sVal.State_u8,    &sMeasureMain[0][_SS_NO3].State},
+    { __SC1_NH4_N,      &sMeasureMain[0][_SS_NH4_N].sUser,  &sMeasureMain[0][_SS_NH4_N].sVal.State_u8,  &sMeasureMain[0][_SS_NH4_N].State},
+    { __SC1_NO3_N,      &sMeasureMain[0][_SS_NO3_N].sUser,  &sMeasureMain[0][_SS_NO3_N].sVal.State_u8,  &sMeasureMain[0][_SS_NO3_N].State},
     { __SC1_TEMP,       &sMeasureMain[0][_SS_TEMP].sUser,   &sMeasureMain[0][_SS_TEMP].sVal.State_u8,   &sMeasureMain[0][_SS_TEMP].State},
     
     { __SC2_CLO_DU,     &sMeasureMain[1][_SS_CLO].sUser,    &sMeasureMain[1][_SS_CLO].sVal.State_u8,    &sMeasureMain[1][_SS_CLO].State},
@@ -270,6 +282,8 @@ static const SENSOR_CFG SensorTable[] =
     { __SC2_DO,         &sMeasureMain[1][_SS_DO].sUser,     &sMeasureMain[1][_SS_DO].sVal.State_u8,     &sMeasureMain[1][_SS_DO].State},
     { __SC2_TDS,        &sMeasureMain[1][_SS_TDS].sUser,    &sMeasureMain[1][_SS_TDS].sVal.State_u8,    &sMeasureMain[1][_SS_TDS].State},
     { __SC2_NO3,        &sMeasureMain[1][_SS_NO3].sUser,    &sMeasureMain[1][_SS_NO3].sVal.State_u8,    &sMeasureMain[1][_SS_NO3].State},
+    { __SC2_NH4_N,      &sMeasureMain[1][_SS_NH4_N].sUser,  &sMeasureMain[1][_SS_NH4_N].sVal.State_u8,    &sMeasureMain[1][_SS_NH4_N].State},
+    { __SC2_NO3_N,      &sMeasureMain[1][_SS_NO3_N].sUser,  &sMeasureMain[1][_SS_NO3_N].sVal.State_u8,    &sMeasureMain[1][_SS_NO3_N].State},
     { __SC2_TEMP,       &sMeasureMain[1][_SS_TEMP].sUser,   &sMeasureMain[1][_SS_TEMP].sVal.State_u8,   &sMeasureMain[1][_SS_TEMP].State},
 };
 
@@ -341,6 +355,10 @@ void Display_Init (void)
     sLCDObject[__SC1_TDS].Scale_u8      = sMeasureMain[0][_SS_TDS].sVal.Scale_u8;  
     sLCDObject[__SC1_NO3].pData         = &sMeasureMain[0][_SS_NO3].sVal.Value_i32;  
     sLCDObject[__SC1_NO3].Scale_u8      = sMeasureMain[0][_SS_NO3].sVal.Scale_u8;  
+    sLCDObject[__SC1_NH4_N].pData       = &sMeasureMain[0][_SS_NH4_N].sVal.Value_i32;  
+    sLCDObject[__SC1_NH4_N].Scale_u8    = sMeasureMain[0][_SS_NH4_N].sVal.Scale_u8; 
+    sLCDObject[__SC1_NO3_N].pData       = &sMeasureMain[0][_SS_NO3_N].sVal.Value_i32;  
+    sLCDObject[__SC1_NO3_N].Scale_u8    = sMeasureMain[0][_SS_NO3_N].sVal.Scale_u8; 
     
     //Channel 2
     sLCDObject[__SC2_CLO_DU].pData      = &sMeasureMain[1][_SS_CLO].sVal.Value_i32; 
@@ -368,6 +386,10 @@ void Display_Init (void)
     sLCDObject[__SC2_TDS].Scale_u8      = sMeasureMain[1][_SS_TDS].sVal.Scale_u8;  
     sLCDObject[__SC2_NO3].pData         = &sMeasureMain[1][_SS_NO3].sVal.Value_i32;  
     sLCDObject[__SC2_NO3].Scale_u8      = sMeasureMain[1][_SS_NO3].sVal.Scale_u8;  
+    sLCDObject[__SC2_NH4_N].pData       = &sMeasureMain[1][_SS_NH4_N].sVal.Value_i32;  
+    sLCDObject[__SC2_NH4_N].Scale_u8    = sMeasureMain[1][_SS_NH4_N].sVal.Scale_u8;  
+    sLCDObject[__SC2_NO3_N].pData       = &sMeasureMain[1][_SS_NO3_N].sVal.Value_i32;  
+    sLCDObject[__SC2_NO3_N].Scale_u8    = sMeasureMain[1][_SS_NO3_N].sVal.Scale_u8;  
     
     sLCDObject[__SET_OPTION_CH1_PH].pData      = &sMeasureMain[0][_SS_PH].sUser;
     sLCDObject[__SET_OPTION_CH1_CLO].pData     = &sMeasureMain[0][_SS_CLO].sUser;
@@ -381,7 +403,9 @@ void Display_Init (void)
     sLCDObject[__SET_OPTION_CH1_SALT].pData   = &sMeasureMain[0][_SS_SALT].sUser;
     sLCDObject[__SET_OPTION_CH1_TDS].pData    = &sMeasureMain[0][_SS_TDS].sUser;
     sLCDObject[__SET_OPTION_CH1_NO3].pData    = &sMeasureMain[0][_SS_NO3].sUser;
-    sLCDObject[__SET_OPTION_CH1_TEMP].pData    = &sMeasureMain[0][_SS_TEMP].sUser;
+    sLCDObject[__SET_OPTION_CH1_NH4_N].pData  = &sMeasureMain[0][_SS_NH4_N].sUser;
+    sLCDObject[__SET_OPTION_CH1_NO3_N].pData  = &sMeasureMain[0][_SS_NO3_N].sUser;
+    sLCDObject[__SET_OPTION_CH1_TEMP].pData   = &sMeasureMain[0][_SS_TEMP].sUser;
     
     sLCDObject[__SET_OPTION_CH2_PH].pData      = &sMeasureMain[1][_SS_PH].sUser;
     sLCDObject[__SET_OPTION_CH2_CLO].pData     = &sMeasureMain[1][_SS_CLO].sUser;
@@ -395,6 +419,8 @@ void Display_Init (void)
     sLCDObject[__SET_OPTION_CH2_SALT].pData   = &sMeasureMain[1][_SS_SALT].sUser;
     sLCDObject[__SET_OPTION_CH2_TDS].pData    = &sMeasureMain[1][_SS_TDS].sUser;
     sLCDObject[__SET_OPTION_CH2_NO3].pData    = &sMeasureMain[1][_SS_NO3].sUser;
+    sLCDObject[__SET_OPTION_CH2_NH4_N].pData  = &sMeasureMain[1][_SS_NH4_N].sUser;
+    sLCDObject[__SET_OPTION_CH2_NO3_N].pData  = &sMeasureMain[1][_SS_NO3_N].sUser;
     sLCDObject[__SET_OPTION_CH2_TEMP].pData    = &sMeasureMain[1][_SS_TEMP].sUser;
 
     sLCDObject[__PULSE_1].pData =  &sPulse[0].Total_lf;
@@ -1357,6 +1383,8 @@ void Update_ParaDisplay(void)
     sLCDObject[__SC1_DO].Scale_u8      = sMeasureMain[0][_SS_DO].sVal.Scale_u8;  
     sLCDObject[__SC1_TDS].Scale_u8      = sMeasureMain[0][_SS_TDS].sVal.Scale_u8;  
     sLCDObject[__SC1_NO3].Scale_u8      = sMeasureMain[0][_SS_NO3].sVal.Scale_u8;  
+    sLCDObject[__SC1_NH4_N].Scale_u8      = sMeasureMain[0][_SS_NH4_N].sVal.Scale_u8; 
+    sLCDObject[__SC1_NO3_N].Scale_u8      = sMeasureMain[0][_SS_NO3_N].sVal.Scale_u8; 
     
     sLCDObject[__SC2_CLO_DU].Scale_u8   = sMeasureMain[1][_SS_CLO].sVal.Scale_u8; 
     sLCDObject[__SC2_PH_WATER].Scale_u8 = sMeasureMain[1][_SS_PH].sVal.Scale_u8;  
@@ -1370,6 +1398,8 @@ void Update_ParaDisplay(void)
     sLCDObject[__SC2_DO].Scale_u8      = sMeasureMain[1][_SS_DO].sVal.Scale_u8;  
     sLCDObject[__SC2_TDS].Scale_u8      = sMeasureMain[1][_SS_TDS].sVal.Scale_u8;  
     sLCDObject[__SC2_NO3].Scale_u8      = sMeasureMain[1][_SS_NO3].sVal.Scale_u8;  
+    sLCDObject[__SC2_NH4_N].Scale_u8      = sMeasureMain[1][_SS_NH4_N].sVal.Scale_u8; 
+    sLCDObject[__SC2_NO3_N].Scale_u8      = sMeasureMain[1][_SS_NO3_N].sVal.Scale_u8; 
 }
 
 /*

@@ -79,6 +79,8 @@
 #define OBIS_ENVI_SALT              0x75    //(ppt)
 #define OBIS_ENVI_NH4               0x79
 #define OBIS_ENVI_TDS               0x7A
+#define OBIS_ENVI_NH4_N             0x7B
+#define OBIS_ENVI_NO3_N             0x7C
 #define OBIS_ENVI_EC                0x7F    //(uS/cm)
 #define OBIS_ENVI_COD               0x88
 #define OBIS_ENVI_TSS               0x89    
@@ -89,6 +91,7 @@
 #define OBIS_ENVI_TURB              0x8E
 
 #define OBIS_CONTACT_STATUS         0x90
+#define OBIS_SENSOR_STATUS          0x99
 #define OBIS_MODBUS_RTU             0xA0
 
 

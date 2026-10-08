@@ -816,6 +816,54 @@ void BUTTON_Enter_Process (void)
                     }
                     break;
                     
+                case __SET_OPTION_CH1_NH4_N:
+                    switch(sLCD.sScreenNow.SubIndex_u8)
+                    {
+                        case 0:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH1_TAB_3, (sLCD.sScreenNow.SubIndex_u8+1),
+                                               __SET_OPTION_CH1_NH4_N, __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_TEMP,
+                                               &sButton.Old_value, 0xF2);
+                            sButton.Old_value = sMeasureMain[0][_SS_NH4_N].sUser;
+                            break;
+                            
+                        case 1:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH1_TAB_3, 0,
+                                               __SET_OPTION_CH1_NH4_N, __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_TEMP,
+                                               &sMeasureMain[0][_SS_NH4_N].sUser, 0xF1);
+                            Save_UserSensor(0, _SS_NH4_N, sButton.Old_value);
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                    break;
+                    
+                case __SET_OPTION_CH1_NO3_N:
+                    switch(sLCD.sScreenNow.SubIndex_u8)
+                    {
+                        case 0:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH1_TAB_3, (sLCD.sScreenNow.SubIndex_u8+1),
+                                               __SET_OPTION_CH1_NO3_N, __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_TEMP,
+                                               &sButton.Old_value, 0xF2);
+                            sButton.Old_value = sMeasureMain[0][_SS_NO3_N].sUser;
+                            break;
+                            
+                        case 1:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH1_TAB_3, 0,
+                                               __SET_OPTION_CH1_NO3_N, __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_TEMP,
+                                               &sMeasureMain[0][_SS_NO3_N].sUser, 0xF1);
+                            Save_UserSensor(0, _SS_NO3_N, sButton.Old_value);
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                    break;
+                    
                 case __SET_OPTION_CH1_TEMP:
                     switch(sLCD.sScreenNow.SubIndex_u8)
                     {
@@ -1128,6 +1176,54 @@ void BUTTON_Enter_Process (void)
                     }
                     break;
                     
+                case __SET_OPTION_CH2_NH4_N:
+                    switch(sLCD.sScreenNow.SubIndex_u8)
+                    {
+                        case 0:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH2_TAB_3, (sLCD.sScreenNow.SubIndex_u8+1),
+                                               __SET_OPTION_CH2_NH4_N, __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_TEMP,
+                                               &sButton.Old_value, 0xF2);
+                            sButton.Old_value = sMeasureMain[1][_SS_NH4_N].sUser;
+                            break;
+                            
+                        case 1:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH2_TAB_3, 0,
+                                               __SET_OPTION_CH2_NH4_N, __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_TEMP,
+                                               &sMeasureMain[1][_SS_NH4_N].sUser, 0xF1);
+                            Save_UserSensor(1, _SS_NH4_N, sButton.Old_value);
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                    break;
+                    
+                case __SET_OPTION_CH2_NO3_N:
+                    switch(sLCD.sScreenNow.SubIndex_u8)
+                    {
+                        case 0:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH2_TAB_3, (sLCD.sScreenNow.SubIndex_u8+1),
+                                               __SET_OPTION_CH2_NO3_N, __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_TEMP,
+                                               &sButton.Old_value, 0xF2);
+                            sButton.Old_value = sMeasureMain[1][_SS_NO3_N].sUser;
+                            break;
+                            
+                        case 1:
+                            UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                            Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH2_TAB_3, 0,
+                                               __SET_OPTION_CH2_NO3_N, __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_TEMP,
+                                               &sMeasureMain[1][_SS_NO3_N].sUser, 0xF1);
+                            Save_UserSensor(1, _SS_NO3_N, sButton.Old_value);
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                    break;
+                    
                 case __SET_OPTION_CH2_TEMP:
                     switch(sLCD.sScreenNow.SubIndex_u8)
                     {
@@ -1204,7 +1300,11 @@ void BUTTON_Up_Process (void)
     switch (sLCD.sScreenNow.Index_u8)
     {
         case _LCD_SCREEN_1:
-            if(((sLCDPageSensor.Number + 5) /6) > 2) 
+            if(((sLCDPageSensor.Number + 5) /6) > 4) 
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_5;
+            else if(((sLCDPageSensor.Number + 5) /6) > 3) 
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_4;
+            else if(((sLCDPageSensor.Number + 5) /6) > 2) 
                 sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_3;
             else if(((sLCDPageSensor.Number + 5) /6) > 1) 
                 sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_2;
@@ -1222,6 +1322,14 @@ void BUTTON_Up_Process (void)
             
         case _LCD_SCREEN_CM44_3:
                 sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_2;
+            break;
+            
+        case _LCD_SCREEN_CM44_4:
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_3;
+            break;
+            
+        case _LCD_SCREEN_CM44_5:
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_4;
             break;
       
 //        case _LCD_SCREEN_1:
@@ -1392,6 +1500,8 @@ void BUTTON_Up_Process (void)
                 switch (sLCD.sScreenNow.Para_u8)
                 {
                     case __SET_OPTION_CH1_NO3:
+                    case __SET_OPTION_CH1_NH4_N:
+                    case __SET_OPTION_CH1_NO3_N:
                     case __SET_OPTION_CH1_TEMP:
                         switch(sLCD.sScreenNow.SubIndex_u8)
                         {
@@ -1512,6 +1622,8 @@ void BUTTON_Up_Process (void)
                 switch (sLCD.sScreenNow.Para_u8)
                 {
                     case __SET_OPTION_CH2_NO3:
+                    case __SET_OPTION_CH2_NH4_N:
+                    case __SET_OPTION_CH2_NO3_N:
                     case __SET_OPTION_CH2_TEMP:
                         switch(sLCD.sScreenNow.SubIndex_u8)
                         {
@@ -1627,8 +1739,24 @@ void BUTTON_Down_Process (void)
             break;
             
         case _LCD_SCREEN_CM44_3:
+            if(((sLCDPageSensor.Number + 5) /6) > 2) 
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_4;
+            else
                 sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_1;
-            break;      
+            break;   
+            
+        case _LCD_SCREEN_CM44_4:
+            if(((sLCDPageSensor.Number + 5) /6) > 2) 
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_CM44_5;
+            else
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_1;
+            break;     
+            
+        case _LCD_SCREEN_CM44_5:
+                sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_1;
+            break;   
+            
+            
         case _LCD_SCREEN_2:
         case _LCD_SCREEN_3:
         case _LCD_SCREEN_4:
@@ -1800,6 +1928,8 @@ void BUTTON_Down_Process (void)
                 switch (sLCD.sScreenNow.Para_u8)
                 {
                     case __SET_OPTION_CH1_NO3:
+                    case __SET_OPTION_CH1_NH4_N:
+                    case __SET_OPTION_CH1_NO3_N:
                     case __SET_OPTION_CH1_TEMP:
                         switch(sLCD.sScreenNow.SubIndex_u8)
                         {
@@ -1919,6 +2049,8 @@ void BUTTON_Down_Process (void)
                 switch (sLCD.sScreenNow.Para_u8)
                 {
                     case __SET_OPTION_CH2_NO3:
+                    case __SET_OPTION_CH2_NH4_N:
+                    case __SET_OPTION_CH2_NO3_N:
                     case __SET_OPTION_CH2_TEMP:
                         switch(sLCD.sScreenNow.SubIndex_u8)
                         {
@@ -2019,6 +2151,8 @@ void BUTTON_ESC_Process (void)
         case _LCD_SCREEN_CM44:
         case _LCD_SCREEN_CM44_2:
         case _LCD_SCREEN_CM44_3:
+        case _LCD_SCREEN_CM44_4:
+        case _LCD_SCREEN_CM44_5:
             sLCD.sScreenNow.Index_u8 = _LCD_SCREEN_1;
             break;
       
@@ -2284,6 +2418,50 @@ void BUTTON_ESC_Process (void)
                         Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH1_TAB_3, (sLCD.sScreenNow.SubIndex_u8-1),
                                            __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_TEMP,
                                            &sMeasureMain[0][_SS_NO3].sUser, 0xF1);
+                        break;
+                        
+                    default:
+                        break;
+                }
+                break;
+                
+            case __SET_OPTION_CH1_NH4_N:
+                switch(sLCD.sScreenNow.SubIndex_u8)
+                {
+                    case 0:
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SETTING_2, 0,
+                                           __SET_OPTION_SENSOR, __SET_LEVEL_SETT, __SET_MANUFACTOR,
+                                           NULL, 0xF1);
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        break;        
+                      
+                    case 1:
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH1_TAB_3, (sLCD.sScreenNow.SubIndex_u8-1),
+                                           __SET_OPTION_CH1_NH4_N, __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_TEMP,
+                                           &sMeasureMain[0][_SS_NH4_N].sUser, 0xF1);
+                        break;
+                        
+                    default:
+                        break;
+                }
+                break;
+                
+            case __SET_OPTION_CH1_NO3_N:
+                switch(sLCD.sScreenNow.SubIndex_u8)
+                {
+                    case 0:
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SETTING_2, 0,
+                                           __SET_OPTION_SENSOR, __SET_LEVEL_SETT, __SET_MANUFACTOR,
+                                           NULL, 0xF1);
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        break;        
+                      
+                    case 1:
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH1_TAB_3, (sLCD.sScreenNow.SubIndex_u8-1),
+                                           __SET_OPTION_CH1_NO3_N, __SET_OPTION_CH1_NO3, __SET_OPTION_CH1_TEMP,
+                                           &sMeasureMain[0][_SS_NO3_N].sUser, 0xF1);
                         break;
                         
                     default:
@@ -2572,6 +2750,50 @@ void BUTTON_ESC_Process (void)
                         Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH2_TAB_3, (sLCD.sScreenNow.SubIndex_u8-1),
                                            __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_TEMP,
                                            &sMeasureMain[1][_SS_NO3].sUser, 0xF1);
+                        break;
+                        
+                    default:
+                        break;
+                }
+                break;
+                
+            case __SET_OPTION_CH2_NH4_N:
+                switch(sLCD.sScreenNow.SubIndex_u8)
+                {
+                    case 0:
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SETTING_2, 0,
+                                           __SET_OPTION_SENSOR, __SET_LEVEL_SETT, __SET_MANUFACTOR,
+                                           NULL, 0xF1);
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        break;        
+                      
+                    case 1:
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH2_TAB_3, (sLCD.sScreenNow.SubIndex_u8-1),
+                                           __SET_OPTION_CH2_NH4_N, __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_TEMP,
+                                           &sMeasureMain[1][_SS_NH4_N].sUser, 0xF1);
+                        break;
+                        
+                    default:
+                        break;
+                }
+                break;
+                
+            case __SET_OPTION_CH2_NO3_N:
+                switch(sLCD.sScreenNow.SubIndex_u8)
+                {
+                    case 0:
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SETTING_2, 0,
+                                           __SET_OPTION_SENSOR, __SET_LEVEL_SETT, __SET_MANUFACTOR,
+                                           NULL, 0xF1);
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        break;        
+                      
+                    case 1:
+                        UTIL_MEM_cpy(&sLCD.sScreenBack, &sLCD.sScreenNow, sizeof(sScreenInformation));
+                        Display_Set_Screen(&sLCD.sScreenNow, _LCD_SCR_SET_OPTION_SS_CH2_TAB_3, (sLCD.sScreenNow.SubIndex_u8-1),
+                                           __SET_OPTION_CH2_NO3_N, __SET_OPTION_CH2_NO3, __SET_OPTION_CH2_TEMP,
+                                           &sMeasureMain[1][_SS_NO3_N].sUser, 0xF1);
                         break;
                         
                     default:

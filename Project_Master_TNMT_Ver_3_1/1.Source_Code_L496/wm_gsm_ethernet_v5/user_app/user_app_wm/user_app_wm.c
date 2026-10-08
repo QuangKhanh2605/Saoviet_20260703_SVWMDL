@@ -226,6 +226,9 @@ void AppWm_Init (void)
     
     sATCmdList[_SET_TNMT_PACK_M].CallBack = AppWm_SER_Set_TNMT_Pack_M;
     sATCmdList[_QUERY_TNMT_PACK_M].CallBack = AppWm_SER_Get_TNMT_Pack_M;
+    
+    sATCmdList[_SET_TNMT_DIREC_M].CallBack = AppWm_SER_Set_TNMT_Direc_M;
+    sATCmdList[_QUERY_TNMT_DIREC_M].CallBack = AppWm_SER_Get_TNMT_Direc_M;
      
     sATCmdList[_SET_OUT_BLOCK_T].CallBack = AppWm_SER_Set_Out_Block;  
     sATCmdList[_QUERY_OUT_BLOCK_T].CallBack = AppWm_SER_Get_Out_Block; 
@@ -3337,6 +3340,29 @@ void AppWm_SER_Get_TNMT_Pack_M(sData *pData, uint16_t Pos)
     sWmVar.pRespond_Str(PortConfig, aData, 0);
 }
 
+void AppWm_SER_Set_TNMT_Direc_M(sData *pData, uint16_t Pos)
+{
+    uint8_t mode = (uint8_t ) UTIL_Get_Num_From_Str(pData, &Pos);
+    if (mode != 0xFF) {
+        sWmVar.FTP_Direc_Mode_u8 = MIN(mode, MAX_FTP_DIREC_MODE);
+        sWmVar.pRespond_Str(PortConfig, "OK", 0);
+        AppWm_Save_TNMT_Infor();
+        return;
+    }
+    
+    sWmVar.pRespond_Str(PortConfig, "ERROR", 0);
+}
+  
+
+void AppWm_SER_Get_TNMT_Direc_M(sData *pData, uint16_t Pos)
+{
+    char aData[8] = {0};
+
+    sprintf(aData + strlen(aData), "%d\r\n", sWmVar.FTP_Direc_Mode_u8);
+    
+    sWmVar.pRespond_Str(PortConfig, aData, 0);
+}
+
 static uint8_t AppWm_Read_Hex_Byte(sData *sSource, uint16_t *Pos, uint8_t *value)
 {
     int8_t high = -1;
@@ -3972,19 +3998,20 @@ void AppWm_Save_WM_Dig_Infor (void)
 void AppWm_Init_TNMT_Infor (void)
 {    
     uint8_t temp = 0;
-    uint8_t  aBuff[1664] = {0};
+    uint8_t  aBuff[2048] = {0};
 #if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     temp = *(__IO uint8_t*) (ADDR_TNMT_CONFIG);
     //Check Byte EMPTY
     if (temp != FLASH_BYTE_EMPTY) {
-        OnchipFlashReadData(ADDR_TNMT_CONFIG, &aBuff[0], 1664);
+        OnchipFlashReadData(ADDR_TNMT_CONFIG, &aBuff[0], 2048);
         sWmVar.ModePacket_u8 = aBuff[1];
         UTIL_MEM_cpy(&sWmVar.sChannInfor, &aBuff[2], sizeof(sWmVar.sChannInfor));
+        sWmVar.FTP_Direc_Mode_u8 = aBuff[1700];
     }
 #endif
     
 #ifdef BOARD_LC_V1_1
-    if (CAT24Mxx_Read_Array(CAT_ADDR_TNMT_CONFIG, aBuff, 1664) == true) {
+    if (CAT24Mxx_Read_Array(CAT_ADDR_TNMT_CONFIG, aBuff, 2048) == true) {
         temp = aBuff[0];
         //Check Byte EMPTY
         if (temp == BYTE_WRITEN) {
@@ -4012,25 +4039,29 @@ void AppWm_Init_TNMT_Infor (void)
         }
     }
     
+    sWmVar.FTP_Direc_Mode_u8 = MIN(sWmVar.FTP_Direc_Mode_u8, MAX_FTP_DIREC_MODE);
+    
     //kiem tra tên
 }
 
 void AppWm_Save_TNMT_Infor (void)
 {
-    uint8_t aBuff[1664] = {0};
+    uint8_t aBuff[2048] = {0};
 
     aBuff[0] = BYTE_WRITEN;
     aBuff[1] = sWmVar.ModePacket_u8;
     
-    UTIL_MEM_cpy(&aBuff[2], &sWmVar.sChannInfor, sizeof(sWmVar.sChannInfor)); 
+    UTIL_MEM_cpy(&aBuff[2], &sWmVar.sChannInfor, sizeof(sWmVar.sChannInfor)); // Limit 1664
+    
+    aBuff[1700] = sWmVar.FTP_Direc_Mode_u8;
     
 #if defined (BOARD_QN_V5_0) || defined (BOARD_QN_V5_1)
     OnchipFlashPageErase(ADDR_TNMT_CONFIG);
-    OnchipFlashWriteData(ADDR_TNMT_CONFIG, aBuff, 1664);
+    OnchipFlashWriteData(ADDR_TNMT_CONFIG, aBuff, 2048);                      // Limit 1664
 #endif
     
 #ifdef BOARD_LC_V1_1
-    CAT24Mxx_Write_Buff(CAT_ADDR_TNMT_CONFIG, aBuff, 1664);
+    CAT24Mxx_Write_Buff(CAT_ADDR_TNMT_CONFIG, aBuff, 2048);                   // Limit 1664
 #endif
 }
 

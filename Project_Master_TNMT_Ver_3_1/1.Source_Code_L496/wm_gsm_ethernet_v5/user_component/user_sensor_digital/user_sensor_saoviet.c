@@ -51,6 +51,14 @@ typedef enum
     _E_NO3_S_SENSOR,
     _E_NO3_S_VALUE,
     
+    _E_NH4_N_VALUE,
+    _E_NH4_N_S_SENSOR,
+    _E_NH4_N_S_VALUE,
+    
+    _E_NO3_N_VALUE,
+    _E_NO3_N_S_SENSOR,
+    _E_NO3_N_S_VALUE,
+    
     _E_TEMP_VALUE,
     _E_TEMP_S_SENSOR,
     _E_TEMP_S_VALUE,
@@ -125,6 +133,14 @@ uint8_t User_False = 0;
   {_E_NO3_VALUE,    13, NULL, 0x03, NULL, 2, 0x0002, _ETYPE_F,  _E_WS, 1, NULL, NULL, NULL}, \
   {_E_NO3_S_SENSOR, 13, NULL, 0x03, NULL, 1, 0x000A, _ETYPE_U8, _E_BE, 1, NULL, NULL, NULL}, \
   {_E_NO3_S_VALUE,  13, NULL, 0x03, NULL, 1, 0x000B, _ETYPE_U8, _E_BE, 1, NULL, NULL, NULL}, \
+  \
+  {_E_NH4_N_VALUE,    8, NULL, 0x03, NULL, 2, 0x0008, _ETYPE_F,  _E_WS, 1, NULL, NULL, NULL}, \
+  {_E_NH4_N_S_SENSOR, 8, NULL, 0x03, NULL, 1, 0x000A, _ETYPE_U8, _E_BE, 1, NULL, NULL, NULL}, \
+  {_E_NH4_N_S_VALUE,  8, NULL, 0x03, NULL, 1, 0x000E, _ETYPE_U8, _E_BE, 1, NULL, NULL, NULL}, \
+  \
+  {_E_NO3_N_VALUE,    13, NULL, 0x03, NULL, 2, 0x0008, _ETYPE_F,  _E_WS, 1, NULL, NULL, NULL}, \
+  {_E_NO3_N_S_SENSOR, 13, NULL, 0x03, NULL, 1, 0x000A, _ETYPE_U8, _E_BE, 1, NULL, NULL, NULL}, \
+  {_E_NO3_N_S_VALUE,  13, NULL, 0x03, NULL, 1, 0x000E, _ETYPE_U8, _E_BE, 1, NULL, NULL, NULL}, \
   \
   {_E_TEMP_VALUE,   14, NULL, 0x03, NULL, 2, 0x0004, _ETYPE_F,  _E_WS, 1, NULL, NULL, NULL}, \
   {_E_TEMP_S_SENSOR,14, NULL, 0x03, NULL, 1, 0x000A, _ETYPE_U8, _E_BE, 1, NULL, NULL, NULL}, \
@@ -263,6 +279,26 @@ void       RS485_SS_SaoViet_Init(Struct_RegSensor sReg[], uint8_t Port)
     
     Config_RegSen_Read(sReg, _E_NO3_S_VALUE,  &sMeasureMain[Port][_SS_NO3].ID_Modbus, &sMeasureMain[Port][_SS_NO3].sUser, 
                                        &sMeasureMain[Port][_SS_NO3].stateValue, &sMeasureMain[Port][_SS_NO3].nConnect_u8); 
+    
+    //NH4_N
+    Config_RegSen_Read(sReg, _E_NH4_N_VALUE,  &sMeasureMain[Port][_SS_NH4_N].ID_Modbus, &sMeasureMain[Port][_SS_NH4_N].sUser, 
+                                       &sMeasureMain[Port][_SS_NH4_N].Value_f, &sMeasureMain[Port][_SS_NH4_N].nConnect_u8);    
+    
+    Config_RegSen_Read(sReg, _E_NH4_N_S_SENSOR,  &sMeasureMain[Port][_SS_NH4_N].ID_Modbus, &sMeasureMain[Port][_SS_NH4_N].sUser, 
+                                       &sMeasureMain[Port][_SS_NH4_N].stateSensor, &sMeasureMain[Port][_SS_NH4_N].nConnect_u8); 
+    
+    Config_RegSen_Read(sReg, _E_NH4_N_S_VALUE,  &sMeasureMain[Port][_SS_NH4_N].ID_Modbus, &sMeasureMain[Port][_SS_NH4_N].sUser, 
+                                       &sMeasureMain[Port][_SS_NH4_N].stateValue, &sMeasureMain[Port][_SS_NH4_N].nConnect_u8); 
+    
+    //NO3_N
+    Config_RegSen_Read(sReg, _E_NO3_N_VALUE,  &sMeasureMain[Port][_SS_NO3_N].ID_Modbus, &sMeasureMain[Port][_SS_NO3_N].sUser, 
+                                       &sMeasureMain[Port][_SS_NO3_N].Value_f, &sMeasureMain[Port][_SS_NO3_N].nConnect_u8);    
+    
+    Config_RegSen_Read(sReg, _E_NO3_N_S_SENSOR,  &sMeasureMain[Port][_SS_NO3_N].ID_Modbus, &sMeasureMain[Port][_SS_NO3_N].sUser, 
+                                       &sMeasureMain[Port][_SS_NO3_N].stateSensor, &sMeasureMain[Port][_SS_NO3_N].nConnect_u8); 
+    
+    Config_RegSen_Read(sReg, _E_NO3_N_S_VALUE,  &sMeasureMain[Port][_SS_NO3_N].ID_Modbus, &sMeasureMain[Port][_SS_NO3_N].sUser, 
+                                       &sMeasureMain[Port][_SS_NO3_N].stateValue, &sMeasureMain[Port][_SS_NO3_N].nConnect_u8); 
     //TEMP
     Config_RegSen_Read(sReg, _E_TEMP_VALUE,  &sMeasureMain[Port][_SS_TEMP].ID_Modbus, &sMeasureMain[Port][_SS_TEMP].sUser, 
                                        &sMeasureMain[Port][_SS_TEMP].Value_f, &sMeasureMain[Port][_SS_TEMP].nConnect_u8);    

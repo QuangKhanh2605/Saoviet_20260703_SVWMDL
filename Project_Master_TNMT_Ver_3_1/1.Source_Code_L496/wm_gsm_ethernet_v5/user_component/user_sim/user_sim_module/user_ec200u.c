@@ -40,6 +40,8 @@ static uint8_t _CbSYS_FILE_READ_2(sData *uart_string, uint16_t pos);
 static uint8_t _CbFTP_Enter_Account(sData *uart_string, uint16_t pos);
 static uint8_t _CbFTP_SEND_IP(sData *uart_string, uint16_t pos);
 static uint8_t _CbFTP_SEND_PATH(sData *uart_string, uint16_t pos);
+static uint8_t _CbFTP_DIREC_PATH(sData *uart_string, uint16_t pos);
+static uint8_t _CbFTP_CWD_PATH(sData *uart_string, uint16_t pos);
 
 static uint8_t _CbFTP_GET_FILE_1(sData *uart_string, uint16_t pos);
 static uint8_t _CbFTP_GET_FILE_2(sData *uart_string, uint16_t pos);
@@ -285,6 +287,15 @@ uint8_t aEC200_BLOCK_FTP_CONN[] =
     _EC200_FTP_PATH_2,            //8
     0,
 };
+
+uint8_t aEC200_BLOCK_FTP_PATH[] =
+{
+    _EC200_FTP_DIREC_1,
+    _EC200_FTP_DIREC_2,
+    _EC200_FTP_CWD_1,
+    _EC200_FTP_CWD_2,
+    0,
+}; 
 
 uint8_t aEC200_BLOCK_FTP_PUB[] =
 {
@@ -604,6 +615,11 @@ const sCommand_Sim_Struct aEC200Step[] =
     {   _EC200_FTP_PUT3, 	        _Cb_FTP_PUT_3,              "+QFTPPUT: 0,",	         NULL            	},  // Sim_Common_MQTT_Pub_2
     
     {   _EC200_FTP_CLOSE, 	        at_callback_success,        "OK",	                "AT+QFTPCLOSE\r"   	}, 
+    
+    {   _EC200_FTP_DIREC_1,         _CbFTP_DIREC_PATH,          NULL,                   "AT+QFTPMKDIR=\""    },
+    {   _EC200_FTP_DIREC_2,         at_callback_success,        "+QFTPMKDIR:",          "\"\r"  	        },
+    {   _EC200_FTP_CWD_1,           _CbFTP_CWD_PATH,            NULL,                   "AT+QFTPCWD=\""    },
+    {   _EC200_FTP_CWD_2,           Sim_Common_MQTT_Sub_2,      "+QFTPCWD: 0",          "\"\r"  	        },
     
     //SSL Config
     {   _EC200_HTTP_CFG_SSL_VER,    at_callback_success,        "OK",                   "AT+QSSLCFG=\"sslversion\",1,4\r"     	},
@@ -993,10 +1009,16 @@ static uint8_t _CbFTP_SEND_IP(sData *uart_string, uint16_t pos)
 //FTP Callback
 static uint8_t _CbFTP_SEND_PATH(sData *uart_string, uint16_t pos)
 {
+  
     if (sSimFwUpdate.pPath != NULL)
         Sim_Common_Send_AT_Cmd( (uint8_t *) sSimFwUpdate.pPath, strlen(sSimFwUpdate.pPath) );
     
     sSimCommVar.State_u8   = _SIM_OPENED_TCP;
+    
+    sSimFwUpdate.Path_Year_u8 = sRTC.year;
+    sSimFwUpdate.Path_Month_u8 = sRTC.month;
+    sSimFwUpdate.Path_Date_u8 = sRTC.date;
+    sSimFwUpdate.cPath_u8 = 0;
     
     return 1;
 }
@@ -1165,6 +1187,26 @@ static uint8_t _Cb_FTP_PUT_3(sData *uart_string, uint16_t pos)
     if (retry >= 3 ) {
         return 0;
     }
+    
+    return 1;
+}
+
+static uint8_t _CbFTP_DIREC_PATH(sData *uart_string, uint16_t pos)
+{
+    if (sSimFwUpdate.aPathFTP_LV != NULL)
+        Sim_Common_Send_AT_Cmd( (uint8_t *) sSimFwUpdate.aPathFTP_LV, strlen(sSimFwUpdate.aPathFTP_LV) );
+    
+    sSimCommVar.State_u8   = _SIM_OPENED_TCP;
+    
+    return 1;
+}
+
+static uint8_t _CbFTP_CWD_PATH(sData *uart_string, uint16_t pos)
+{
+    if (sSimFwUpdate.aPathFTP_LV != NULL)
+        Sim_Common_Send_AT_Cmd( (uint8_t *) sSimFwUpdate.aPathFTP_LV, strlen(sSimFwUpdate.aPathFTP_LV) );
+    
+    sSimCommVar.State_u8   = _SIM_OPENED_TCP;
     
     return 1;
 }

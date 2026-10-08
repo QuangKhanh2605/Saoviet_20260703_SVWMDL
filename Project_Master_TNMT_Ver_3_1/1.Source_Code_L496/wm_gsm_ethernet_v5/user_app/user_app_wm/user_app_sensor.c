@@ -71,11 +71,13 @@ Struct_MeasureMain sMeasureMain[MAX_CHANNEL_SS][_END_SENSOR] =
       {_SS_TURB,    OBIS_ENVI_TURB,     ID_SS_TURB,         "TURB",         "NTU",      0xFE,       10,     0xFF},       // 4 Turb        
       {_SS_COD,     OBIS_ENVI_COD,      ID_SS_COD,          "COD",          "mg/l",     0xFE,       0,      0xFE},       // 5 COD         
       {_SS_TSS,     OBIS_ENVI_TSS,      ID_SS_TSS,          "TSS",          "mg/l",     0xFF,       0,      0xFF},       // 6 TSS             
-      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4+",        "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
+      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4+",         "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
       {_SS_DO,      OBIS_ENVI_OXY_MG_L, ID_SS_DO,           "DO",           "mg/l",     0xFE,       0,      0xFE},       // 8 DO          
       {_SS_SALT,    OBIS_ENVI_SALT_UNIT,ID_SS_EC,           "SALT",         "%",        0xFE,       0,      0xFE},       // 9 SALT         
       {_SS_TDS,     OBIS_ENVI_TDS,      ID_SS_EC,           "TDS",          "mg/l",     0x00,       0,      0x00},       //10 TDS
-      {_SS_NO3,     OBIS_ENVI_NO3,      ID_SS_NO3,          "NO3-N",        "mg/l",     0xFE,       0,      0xFE},       //11 NO3        
+      {_SS_NO3,     OBIS_ENVI_NO3,      ID_SS_NO3,          "NO3-",         "mg/l",     0xFE,       0,      0xFE},       //11 NO3        
+      {_SS_NH4_N,   OBIS_ENVI_NH4_N,    ID_SS_NH4,          "NH4_N",        "mg/l",     0xFE,       0,      0xFE},       //12 NH4_N        
+      {_SS_NO3_N,   OBIS_ENVI_NO3_N,    ID_SS_NO3,          "NO3_N",        "mg/l",     0xFE,       0,      0xFE},       //13 NO3_N        
     },
     
     // ==================== KÊNH 2 (CH2) ====================
@@ -87,11 +89,13 @@ Struct_MeasureMain sMeasureMain[MAX_CHANNEL_SS][_END_SENSOR] =
       {_SS_TURB,    OBIS_ENVI_TURB,     ID_SS_TURB,         "TURB",         "NTU",      0xFE,       10,     0xFF},       // 4 Turb        
       {_SS_COD,     OBIS_ENVI_COD,      ID_SS_COD,          "COD",          "mg/l",     0xFE,       0,      0xFE},       // 5 COD         
       {_SS_TSS,     OBIS_ENVI_TSS,      ID_SS_TSS,          "TSS",          "mg/l",     0xFF,       0,      0xFF},       // 6 TSS             
-      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4+",        "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
+      {_SS_NH4,     OBIS_ENVI_NH4,      ID_SS_NH4,          "NH4+",         "mg/l",     0xFE,       0,      0xFE},       // 7 NH4        
       {_SS_DO,      OBIS_ENVI_OXY_MG_L, ID_SS_DO,           "DO",           "mg/l",     0xFE,       0,      0xFE},       // 8 DO          
       {_SS_SALT,    OBIS_ENVI_SALT_UNIT,ID_SS_EC,           "SALT",         "%",        0xFE,       0,      0xFE},       // 9 SALT         
       {_SS_TDS,     OBIS_ENVI_TDS,      ID_SS_EC,           "TDS",          "mg/l",     0x00,       0,      0x00},       //10 TDS
-      {_SS_NO3,     OBIS_ENVI_NO3,      ID_SS_NO3,          "NO3-N",        "mg/l",     0xFE,       0,      0xFE},       //11 NO3        
+      {_SS_NO3,     OBIS_ENVI_NO3,      ID_SS_NO3,          "NO3-",         "mg/l",     0xFE,       0,      0xFE},       //11 NO3        
+      {_SS_NH4_N,   OBIS_ENVI_NH4_N,    ID_SS_NH4,          "NH4_N",        "mg/l",     0xFE,       0,      0xFE},       //12 NH4_N        
+      {_SS_NO3_N,   OBIS_ENVI_NO3_N,    ID_SS_NO3,          "NO3_N",        "mg/l",     0xFE,       0,      0xFE},       //13 NO3_N  
     },
     
     // ==================== KÊNH 3 (CH3) ====================
@@ -1160,6 +1164,7 @@ void AppSensor_Log_Data_TSVH (void)
 uint8_t SensorRS485_Packet_TSVH (sData *pData, uint8_t channel)
 {
     uint8_t Result = 0;
+    uint16_t stamp = 0;
     for(uint8_t i = 0; i < _END_SENSOR; i++)
     {
         if(sMeasureMain[channel][i].sUser != 0)
@@ -1181,7 +1186,7 @@ uint8_t SensorRS485_Packet_TSVH (sData *pData, uint8_t channel)
     
     for(uint8_t i = 0; i < _END_SENSOR; i++)
     {
-        if(sMeasureMain[channel][i].sVal.State_u8 == 1)
+        if(sMeasureMain[channel][i].sUser != 0)
             Sensor_Packet_Data(pData->Data_a8, &pData->Length_u16, sMeasureMain[channel][i].Obis, 
                                &sMeasureMain[channel][i].sVal.Value_i32, sMeasureMain[channel][i].sVal.Scale_u8);
     }
@@ -1189,6 +1194,20 @@ uint8_t SensorRS485_Packet_TSVH (sData *pData, uint8_t channel)
     //----------Tan suat--------------------
 //    SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_RSSI_1, &sSimCommInfor.RSSI_u8, 1, 0x00);
     SV_Protocol_Packet_Data(pData->Data_a8, &pData->Length_u16, OBIS_FREQ_SEND, &sModemInfor.sFrequence.DurOnline_u32 , 2, 0x00);
+    
+    pData->Data_a8[pData->Length_u16++] = OBIS_SENSOR_STATUS;
+    stamp = pData->Length_u16;
+    pData->Data_a8[pData->Length_u16++] = 0;
+    
+    for(uint8_t i = 0; i < _END_SENSOR; i++)
+    {
+        if(sMeasureMain[channel][i].sUser != 0)
+        {
+            Sensor_Packet_Status(pData->Data_a8, &pData->Length_u16, sMeasureMain[channel][i].Obis, 
+                                &sMeasureMain[channel][i].State, 0xAA);
+            pData->Data_a8[stamp] += 2;
+        }
+    }
     
     // caculator crc
     pData->Length_u16++;
@@ -1198,6 +1217,49 @@ uint8_t SensorRS485_Packet_TSVH (sData *pData, uint8_t channel)
     pData->Data_a8[pData->Length_u16-1] = TempCrc;
     
     return  (pData->Length_u16- FistPos);
+}
+
+/*
+    @brief  Sensor Packet Status
+*/
+void Sensor_Packet_Status(uint8_t *pTarget, uint16_t *LenTarget, uint8_t Obis,
+                        void *pData, uint8_t Scale)
+{
+    uint16_t Pos = *LenTarget;
+    uint8_t LenData = 1;
+
+    pTarget[Pos++] = Obis;
+            
+    switch (Obis)
+    {
+        case OBIS_ENVI_OXY_MG_L:
+        case OBIS_ENVI_OXY_PERCENT:
+        case OBIS_ENVI_TEMP:
+        case OBIS_ENVI_EC:
+        case OBIS_ENVI_SALT:
+        case OBIS_ENVI_PH_WATER:
+        case OBIS_ENVI_SALT_UNIT:
+        case OBIS_ENVI_CLO:
+        case OBIS_ENVI_TURB:
+        case OBIS_ENVI_NH4:
+        case OBIS_ENVI_COD:
+        case OBIS_ENVI_TSS:
+        case OBIS_ENVI_TDS:
+        case OBIS_ENVI_NO3:
+        case OBIS_ENVI_NH4_N:
+        case OBIS_ENVI_NO3_N:
+
+            AppComm_Sub_Packet_Integer(pTarget, &Pos, pData, LenData);
+            
+            if (Scale != 0xAA)
+                pTarget[Pos++] = Scale;
+            break;
+            
+        default:
+            break;
+    }
+    
+    *LenTarget = Pos ;
 }
 
 /*
@@ -1238,7 +1300,9 @@ void Sensor_Packet_Data(uint8_t *pTarget, uint16_t *LenTarget, uint8_t Obis,
         case OBIS_ENVI_TSS:
         case OBIS_ENVI_TDS:
         case OBIS_ENVI_NO3:
-
+        case OBIS_ENVI_NH4_N:
+        case OBIS_ENVI_NO3_N:
+          
             AppComm_Sub_Packet_Integer(pTarget, &Pos, pData, LenData);
             
             if (Scale != 0xAA)

@@ -119,6 +119,9 @@ sATCommandList sATCmdList[] =
     {_SET_TNMT_PACK_M, 	    NULL,           {(uint8_t*)"at+mpacket=",11}},   //at+mpacket=1
     {_QUERY_TNMT_PACK_M,    NULL,           {(uint8_t*)"at+mpacket?",11}},
     
+    {_SET_TNMT_DIREC_M, 	NULL,           {(uint8_t*)"at+mdirec=",10}},   //at+mpacket=1
+    {_QUERY_TNMT_DIREC_M,   NULL,           {(uint8_t*)"at+mdirec?",10}},
+    
     {_SET_OUT_BLOCK_T, 	    NULL,           {(uint8_t*)"at+outblock=",12}},
     {_QUERY_OUT_BLOCK_T,    NULL,           {(uint8_t*)"at+outblock?",12}},
     

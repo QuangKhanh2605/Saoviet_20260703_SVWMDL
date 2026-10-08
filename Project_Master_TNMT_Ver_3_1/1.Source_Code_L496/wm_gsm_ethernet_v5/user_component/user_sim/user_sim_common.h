@@ -153,6 +153,12 @@ typedef struct
     uint8_t     IsFirmSaoViet_u8;
     
     uint8_t     FailStatus_u8;
+    
+    uint8_t     cPath_u8;
+    char        aPathFTP_LV[20];
+    uint8_t     Path_Year_u8;
+    uint8_t     Path_Month_u8;
+    uint8_t     Path_Date_u8;
 }sSimUpdateVariable;
 
 

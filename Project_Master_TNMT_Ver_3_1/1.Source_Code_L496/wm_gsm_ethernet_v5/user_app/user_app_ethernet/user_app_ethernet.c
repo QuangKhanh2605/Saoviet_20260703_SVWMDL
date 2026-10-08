@@ -70,6 +70,13 @@ static uint8_t _fSet_CWD (void);
 static uint8_t _fQuery_List (void);
 static uint8_t _fQuery_Size_File (void);
 
+static uint8_t _fSet_Folder_Lv1 (void);
+static uint8_t _fSet_CWD_Lv1 (void);
+static uint8_t _fSet_Folder_Lv2 (void);
+static uint8_t _fSet_CWD_Lv2 (void);
+static uint8_t _fSet_Folder_Lv3 (void);
+static uint8_t _fSet_CWD_Lv3 (void);
+
 static uint8_t _fCreat_File (void);
 static uint8_t _fFTP_Post_Data (void);
 static uint8_t _fFTP_Post_Finish (void);
@@ -81,6 +88,8 @@ static uint8_t _Cb_Creat_File (sData *pData);
 static uint8_t _Cb_Creat_Fail (sData *pData);
 static uint8_t _Cb_Post_Data (sData *pData);
 static uint8_t _Cb_URC_GoodByte (sData *pData);
+
+static uint8_t _Cb_Creat_Lv_Fail (sData *pData);
 
 //cmd recv
 static uint8_t _Cb_URC_Server (sData *pData);
@@ -187,15 +196,31 @@ uint8_t aETH_FTP_CONN[7] =
 }; 
 
 
-uint8_t aETH_FTP_CONN_2[5] = 
+uint8_t aETH_FTP_CONN_2[4] = 
 {
 	_ETH_FTP_SET_USER,
     _ETH_FTP_SET_PASS,
     _ETH_FTP_SET_TYPE_BIN,
     _ETH_FTP_SET_DIR,
-    _ETH_FTP_SET_PASV_PORT,
+//    _ETH_FTP_SET_PASV_PORT,
 //    _ETH_FTP_CREAT_FILE,
 }; 
+
+uint8_t aETH_FTP_DIRECTORY_MODE_1[2] =
+{
+    _ETH_FTP_CREAT_FOLDER_LV1,
+    _ETH_FTP_CWD_FOLDER_LV1,
+};
+
+uint8_t aETH_FTP_DIRECTORY_MODE_2[6] =
+{
+    _ETH_FTP_CREAT_FOLDER_LV1,
+    _ETH_FTP_CWD_FOLDER_LV1,
+    _ETH_FTP_CREAT_FOLDER_LV2,
+    _ETH_FTP_CWD_FOLDER_LV2,
+    _ETH_FTP_CREAT_FOLDER_LV3,
+    _ETH_FTP_CWD_FOLDER_LV3,
+};
 
 
 uint8_t aETH_FTP_POST[2] = 
@@ -239,6 +264,13 @@ sCommandEth     sEthCmd[] =
     {   _ETH_FTP_SET_DIR,           _fSet_CWD,          _Cb_Success_Def,    _Cb_Faillure_Def,    "250"     },
     {   _ETH_FTP_SET_PASV_PORT,     _fSet_Pasv_Port,    _Cb_Pasv_Port_OK,   _Cb_Faillure_Def,    "227"     },
     {   _ETH_FTP_SET_GET_FILE,      _fSet_Get_File,     _Cb_Get_OK,         _Cb_Faillure_Def,    "150"     },  // 150
+    
+    {   _ETH_FTP_CREAT_FOLDER_LV1,  _fSet_Folder_Lv1,   _Cb_Success_Def,    _Cb_Creat_Lv_Fail,   "257"     },
+    {   _ETH_FTP_CWD_FOLDER_LV1,    _fSet_CWD_Lv1,      _Cb_Success_Def,    _Cb_Faillure_Def,    "250"     },
+    {   _ETH_FTP_CREAT_FOLDER_LV2,  _fSet_Folder_Lv2,   _Cb_Success_Def,    _Cb_Creat_Lv_Fail,   "257"     },
+    {   _ETH_FTP_CWD_FOLDER_LV2,    _fSet_CWD_Lv2,      _Cb_Success_Def,    _Cb_Faillure_Def,    "250"     },
+    {   _ETH_FTP_CREAT_FOLDER_LV3,  _fSet_Folder_Lv3,   _Cb_Success_Def,    _Cb_Creat_Lv_Fail,   "257"     },
+    {   _ETH_FTP_CWD_FOLDER_LV3,    _fSet_CWD_Lv3,      _Cb_Success_Def,    _Cb_Faillure_Def,    "250"     },
     
     {   _ETH_FTP_CREAT_FILE,        _fCreat_File,       _Cb_Creat_File,     _Cb_Creat_Fail,      "125"     },
     {   _ETH_FTP_UPDATE_FILE,       _fFTP_Update_File,  _Cb_Success_Def,    _Cb_Creat_Fail,      "125"     },
@@ -575,23 +607,25 @@ static uint8_t _Cb_DNS_Process (uint8_t event)
     if ( (UTIL_var.ModeConnNow_u8 == _CONNECT_DATA_MAIN)
             || (UTIL_var.ModeConnNow_u8  == _CONNECT_DATA_BACKUP) ) {
               
+        //reset retry update
+        sFTPvar.Retry_u8 = 0;
+        sIP = (uint8_t *) sAppEthVar.sServer.sIP;
+        pIP = sAppEthVar.sServer.aIP;
+        
         if (*sAppEthVar.sServer.DomainOrIp_u8 != __SERVER_DOMAIN) {
             fevent_active(sEventAppEth, _EVENT_ETH_SOCK_CTRL);
             step = 0;
             return 1;
         }
-        //reset retry update
-        sFTPvar.Retry_u8 = 0;
-        sIP = (uint8_t *) sAppEthVar.sServer.sIP;
-        pIP = sAppEthVar.sServer.aIP;
-    } else {      
+    } else {     
+        sIP = (uint8_t *) sAppEthVar.sUpdateVar.sServer.sIP;
+        pIP = sAppEthVar.sUpdateVar.sServer.aIP;
+        
         if (*sAppEthVar.sUpdateVar.sServer.DomainOrIp_u8 != __SERVER_DOMAIN) {
             fevent_active(sEventAppEth, _EVENT_ETH_SOCK_CTRL);
             step = 0;
             return 1;
         }
-        sIP = (uint8_t *) sAppEthVar.sUpdateVar.sServer.sIP;
-        pIP = sAppEthVar.sUpdateVar.sServer.aIP;
     }
     
     sAppEthVar.Status_u8 = _ETH_DNS_RUNNING;
@@ -800,6 +834,18 @@ static uint8_t _Cb_Socket_Control (uint8_t event)
                     Pending_u8 = false;
                     setRTR(0x07d0); //dieu chinh rtr
                     AppEth_Push_Block_To_Queue( aETH_FTP_CONN_2, sizeof(aETH_FTP_CONN_2) ); 
+                    
+                    if(sWmVar.FTP_Direc_Mode_u8 == 1)
+                    {
+                        AppEth_Push_Block_To_Queue( aETH_FTP_DIRECTORY_MODE_1, sizeof(aETH_FTP_DIRECTORY_MODE_1) ); 
+                    }
+                    else if(sWmVar.FTP_Direc_Mode_u8 == 2)
+                    {
+                        AppEth_Push_Block_To_Queue( aETH_FTP_DIRECTORY_MODE_2, sizeof(aETH_FTP_DIRECTORY_MODE_2) ); 
+                    }
+                    else
+                    {}
+                    AppEth_Push_Cmd_To_Queue( _ETH_FTP_SET_PASV_PORT);  
                 } 
                 
                 //Polling recv
@@ -2238,6 +2284,20 @@ static uint8_t _Cb_Creat_Fail (sData *pData)
     return 1;
 }
 
+static uint8_t _Cb_Creat_Lv_Fail (sData *pData)
+{
+    int Pos = -1;
+    uint8_t aData[10] = "550";          //Truong hop server phan hoi ve "550"
+    sData sTemp = {aData,3};
+
+    Pos = Find_String_V2(&sTemp, pData);
+    
+    if(Pos >= 0)
+        fevent_active(sEventAppEth, _EVENT_ETH_SEND_OK);
+    
+    return 1;
+}
+
 
 static uint8_t _Cb_Get_Size_OK (sData *pData)
 {
@@ -2518,9 +2578,17 @@ static uint8_t _fQuery_Size_File (void)
     return 1;
 }
 
+uint8_t year_Folder_u8 = 26;
+uint8_t month_Folder_u8 = 01;
+uint8_t date_Folder_u8 = 01;
+
 static uint8_t _fSet_CWD (void)
 {
     char dat[128]={0};
+        
+    year_Folder_u8 = sRTC.year;
+    month_Folder_u8 = sRTC.month;
+    date_Folder_u8 = sRTC.date;
     
     sprintf(dat,"CWD /%s\r\n", (char *) sAppEthVar.sUpdateVar.pPath);
     APP_LOG(TS_OFF, DBLEVEL_M, "> path file: %s\r\n", dat);
@@ -2574,12 +2642,118 @@ static uint8_t _fSet_Get_File (void)
     return 1;
 }
 
+
+
+static uint8_t _fSet_Folder_Lv1 (void)
+{
+    char dat[128]={0};
+    
+    if(sWmVar.FTP_Direc_Mode_u8 == 1)
+    {
+        sprintf(dat,"MKD 20%02d%02d%02d\r\n", year_Folder_u8, month_Folder_u8, date_Folder_u8);
+    }
+    else
+    {
+        sprintf(dat,"MKD 20%02d\r\n", year_Folder_u8);
+    }
+    
+    APP_LOG(TS_OFF, DBLEVEL_M, "u_ftp: \"%s\"", dat);
+    
+    send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
+                            
+    return 1;
+}
+
+static uint8_t _fSet_CWD_Lv1 (void)
+{
+    char dat[128]={0};
+
+    if(sWmVar.FTP_Direc_Mode_u8 == 1)
+    {
+        sprintf(dat,"CWD 20%02d%02d%02d\r\n", year_Folder_u8, month_Folder_u8, date_Folder_u8);
+    }
+    else
+    {
+        sprintf(dat,"CWD 20%02d\r\n", year_Folder_u8);
+    }
+    
+    APP_LOG(TS_OFF, DBLEVEL_M, "> path file: %s\r\n", dat);
+    
+    send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
+    
+    return 1;
+}
+
+static uint8_t _fSet_Folder_Lv2 (void)
+{
+    char dat[128]={0};
+    
+    if(sWmVar.FTP_Direc_Mode_u8 == 2)
+    {
+        sprintf(dat,"MKD %02d\r\n", month_Folder_u8);
+    }
+    
+    APP_LOG(TS_OFF, DBLEVEL_M, "u_ftp: \"%s\"", dat);
+    
+    send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
+                            
+    return 1;
+}
+
+static uint8_t _fSet_CWD_Lv2 (void)
+{
+    char dat[128]={0};
+
+    if(sWmVar.FTP_Direc_Mode_u8 == 2)
+    {
+        sprintf(dat,"CWD %02d\r\n", month_Folder_u8);
+    }
+    
+    APP_LOG(TS_OFF, DBLEVEL_M, "> path file: %s\r\n", dat);
+    
+    send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
+    
+    return 1;
+}
+
+static uint8_t _fSet_Folder_Lv3 (void)
+{
+    char dat[128]={0};
+    
+    if(sWmVar.FTP_Direc_Mode_u8 == 2)
+    {
+        sprintf(dat,"MKD %02d\r\n", date_Folder_u8);
+    }
+    
+    APP_LOG(TS_OFF, DBLEVEL_M, "u_ftp: \"%s\"", dat);
+    
+    send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
+                            
+    return 1;
+}
+
+static uint8_t _fSet_CWD_Lv3 (void)
+{
+    char dat[128]={0};
+
+    if(sWmVar.FTP_Direc_Mode_u8 == 2)
+    {
+        sprintf(dat,"CWD %02d\r\n", date_Folder_u8);
+    }
+    
+    APP_LOG(TS_OFF, DBLEVEL_M, "> path file: %s\r\n", dat);
+    
+    send(CTRL_SOCK, (uint8_t *)dat, strlen(dat));
+    
+    return 1;
+}
+
 static uint8_t _fCreat_File (void)
 {
     char dat[128]={0};
     
-    sprintf(dat,"STOR /%s/%s\r\n", (char *) sAppEthVar.sUpdateVar.pPath,
-                                        (char *) sAppEthVar.sUpdateVar.pFileName);
+    sprintf(dat,"STOR %s\r\n", (char *) sAppEthVar.sUpdateVar.pFileName);
+
     
     APP_LOG(TS_OFF, DBLEVEL_M, "u_ftp: \"%s\"", dat);
     
@@ -2591,9 +2765,9 @@ static uint8_t _fCreat_File (void)
 static uint8_t _fFTP_Update_File (void)
 {
     char dat[128]={0};
-    
-    sprintf(dat,"APPE /%s/%s\r\n", (char *) sAppEthVar.sUpdateVar.pPath,
-                                        (char *) sAppEthVar.sUpdateVar.pFileName);
+
+    sprintf(dat,"APPE %s\r\n", (char *) sAppEthVar.sUpdateVar.pFileName);
+
     
     APP_LOG(TS_OFF, DBLEVEL_M, "u_ftp: \"%s\"", dat);
     

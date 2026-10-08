@@ -343944,7 +343944,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@18049@F@HAL_RCC_OscConfig@tickstart",
+    "ID": "c:stm32l4xx_hal_rcc.c@18053@F@HAL_RCC_OscConfig@tickstart",
     "What": "Variable",
     "defdec": "Def",
     "display": "tickstart",
@@ -343958,7 +343958,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@18072@F@HAL_RCC_OscConfig@status",
+    "ID": "c:stm32l4xx_hal_rcc.c@18076@F@HAL_RCC_OscConfig@status",
     "What": "Variable",
     "defdec": "Def",
     "display": "status",
@@ -343972,7 +343972,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@18101@F@HAL_RCC_OscConfig@sysclk_source",
+    "ID": "c:stm32l4xx_hal_rcc.c@18105@F@HAL_RCC_OscConfig@sysclk_source",
     "What": "Variable",
     "defdec": "Def",
     "display": "sysclk_source",
@@ -343986,7 +343986,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@18101@F@HAL_RCC_OscConfig@pll_config",
+    "ID": "c:stm32l4xx_hal_rcc.c@18105@F@HAL_RCC_OscConfig@pll_config",
     "What": "Variable",
     "defdec": "Dec",
     "display": "pll_config",
@@ -344000,7 +344000,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@29144@F@HAL_RCC_OscConfig@pwrclkchanged",
+    "ID": "c:stm32l4xx_hal_rcc.c@29148@F@HAL_RCC_OscConfig@pwrclkchanged",
     "What": "Variable",
     "defdec": "Def",
     "display": "pwrclkchanged",
@@ -344014,7 +344014,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@29499@F@HAL_RCC_OscConfig@tmpreg",
+    "ID": "c:stm32l4xx_hal_rcc.c@29503@F@HAL_RCC_OscConfig@tmpreg",
     "What": "Variable",
     "defdec": "Def",
     "display": "tmpreg",
@@ -344042,7 +344042,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@42480@F@HAL_RCC_ClockConfig@tickstart",
+    "ID": "c:stm32l4xx_hal_rcc.c@42484@F@HAL_RCC_ClockConfig@tickstart",
     "What": "Variable",
     "defdec": "Def",
     "display": "tickstart",
@@ -344056,7 +344056,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@42748@F@HAL_RCC_ClockConfig@status",
+    "ID": "c:stm32l4xx_hal_rcc.c@42752@F@HAL_RCC_ClockConfig@status",
     "What": "Variable",
     "defdec": "Def",
     "display": "status",
@@ -344084,7 +344084,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@52261@F@HAL_RCC_MCOConfig@GPIO_InitStruct",
+    "ID": "c:stm32l4xx_hal_rcc.c@52265@F@HAL_RCC_MCOConfig@GPIO_InitStruct",
     "What": "Variable",
     "defdec": "Def",
     "display": "GPIO_InitStruct",
@@ -344098,7 +344098,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@52596@F@HAL_RCC_MCOConfig@tmpreg",
+    "ID": "c:stm32l4xx_hal_rcc.c@52600@F@HAL_RCC_MCOConfig@tmpreg",
     "What": "Variable",
     "defdec": "Def",
     "display": "tmpreg",
@@ -344126,7 +344126,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@54952@F@HAL_RCC_GetSysClockFreq@msirange",
+    "ID": "c:stm32l4xx_hal_rcc.c@54956@F@HAL_RCC_GetSysClockFreq@msirange",
     "What": "Variable",
     "defdec": "Def",
     "display": "msirange",
@@ -344140,7 +344140,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@54952@F@HAL_RCC_GetSysClockFreq@sysclockfreq",
+    "ID": "c:stm32l4xx_hal_rcc.c@54956@F@HAL_RCC_GetSysClockFreq@sysclockfreq",
     "What": "Variable",
     "defdec": "Dec",
     "display": "sysclockfreq",
@@ -344154,7 +344154,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@54998@F@HAL_RCC_GetSysClockFreq@pllvco",
+    "ID": "c:stm32l4xx_hal_rcc.c@55002@F@HAL_RCC_GetSysClockFreq@pllvco",
     "What": "Variable",
     "defdec": "Def",
     "display": "pllvco",
@@ -344168,7 +344168,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@54998@F@HAL_RCC_GetSysClockFreq@pllsource",
+    "ID": "c:stm32l4xx_hal_rcc.c@55002@F@HAL_RCC_GetSysClockFreq@pllsource",
     "What": "Variable",
     "defdec": "Dec",
     "display": "pllsource",
@@ -344182,7 +344182,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@54998@F@HAL_RCC_GetSysClockFreq@pllr",
+    "ID": "c:stm32l4xx_hal_rcc.c@55002@F@HAL_RCC_GetSysClockFreq@pllr",
     "What": "Variable",
     "defdec": "Dec",
     "display": "pllr",
@@ -344196,7 +344196,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@54998@F@HAL_RCC_GetSysClockFreq@pllm",
+    "ID": "c:stm32l4xx_hal_rcc.c@55002@F@HAL_RCC_GetSysClockFreq@pllm",
     "What": "Variable",
     "defdec": "Dec",
     "display": "pllm",
@@ -344210,7 +344210,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@55065@F@HAL_RCC_GetSysClockFreq@sysclk_source",
+    "ID": "c:stm32l4xx_hal_rcc.c@55069@F@HAL_RCC_GetSysClockFreq@sysclk_source",
     "What": "Variable",
     "defdec": "Def",
     "display": "sysclk_source",
@@ -344224,7 +344224,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@55065@F@HAL_RCC_GetSysClockFreq@pll_oscsource",
+    "ID": "c:stm32l4xx_hal_rcc.c@55069@F@HAL_RCC_GetSysClockFreq@pll_oscsource",
     "What": "Variable",
     "defdec": "Dec",
     "display": "pll_oscsource",
@@ -344364,7 +344364,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@67218@F@HAL_RCC_GetResetSource@reset",
+    "ID": "c:stm32l4xx_hal_rcc.c@67222@F@HAL_RCC_GetResetSource@reset",
     "What": "Variable",
     "defdec": "Def",
     "display": "reset",
@@ -344392,7 +344392,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@67871@F@RCC_SetFlashLatencyFromMSIRange@vos",
+    "ID": "c:stm32l4xx_hal_rcc.c@67875@F@RCC_SetFlashLatencyFromMSIRange@vos",
     "What": "Variable",
     "defdec": "Def",
     "display": "vos",
@@ -344406,7 +344406,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@67888@F@RCC_SetFlashLatencyFromMSIRange@latency",
+    "ID": "c:stm32l4xx_hal_rcc.c@67892@F@RCC_SetFlashLatencyFromMSIRange@latency",
     "What": "Variable",
     "defdec": "Def",
     "display": "latency",
@@ -344420,7 +344420,7 @@
     "scope": null
   },
   {
-    "ID": "c:stm32l4xx_hal_rcc.c@68057@F@RCC_SetFlashLatencyFromMSIRange@tmpreg",
+    "ID": "c:stm32l4xx_hal_rcc.c@68061@F@RCC_SetFlashLatencyFromMSIRange@tmpreg",
     "What": "Variable",
     "defdec": "Def",
     "display": "tmpreg",

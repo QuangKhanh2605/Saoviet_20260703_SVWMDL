@@ -126,6 +126,9 @@ typedef enum
     _SET_TNMT_PACK_M,
     _QUERY_TNMT_PACK_M,
     
+    _SET_TNMT_DIREC_M,
+    _QUERY_TNMT_DIREC_M,
+    
     _SET_OUT_BLOCK_T,
     _QUERY_OUT_BLOCK_T,
     

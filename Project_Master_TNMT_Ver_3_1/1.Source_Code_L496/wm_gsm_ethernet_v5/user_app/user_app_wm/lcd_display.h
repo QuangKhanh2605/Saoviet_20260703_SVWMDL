@@ -70,6 +70,8 @@ typedef enum
     __SC1_DO,
     __SC1_TDS,
     __SC1_NO3,
+    __SC1_NH4_N, 
+    __SC1_NO3_N,
     __SC1_TEMP,
     
     __SC2_CLO_DU,
@@ -83,10 +85,14 @@ typedef enum
     __SC2_DO,
     __SC2_TDS,
     __SC2_NO3,
+    __SC2_NH4_N,
+    __SC2_NO3_N,
     __SC2_TEMP,
     
     __PARAM_CM44_2,
     __PARAM_CM44_3,
+    __PARAM_CM44_4,
+    __PARAM_CM44_5,
     
     __CHANEL_1,
     __PULSE_1,
@@ -163,6 +169,8 @@ typedef enum
     
     __SET_OPTION_CH1_TITLE_3,
     __SET_OPTION_CH1_NO3,
+    __SET_OPTION_CH1_NH4_N,
+    __SET_OPTION_CH1_NO3_N,
     __SET_OPTION_CH1_TEMP,
     
     __SET_OPTION_CH2_TITLE,
@@ -181,6 +189,8 @@ typedef enum
     
     __SET_OPTION_CH2_TITLE_3,
     __SET_OPTION_CH2_NO3,
+    __SET_OPTION_CH2_NH4_N,
+    __SET_OPTION_CH2_NO3_N,
     __SET_OPTION_CH2_TEMP,
     
     __CHECK_STATE_SETTING,
@@ -260,6 +270,8 @@ typedef enum
     _LCD_SCREEN_CM44,
     _LCD_SCREEN_CM44_2,
     _LCD_SCREEN_CM44_3,
+    _LCD_SCREEN_CM44_4,
+    _LCD_SCREEN_CM44_5,
     
     _LCD_SCREEN_2,
     _LCD_SCREEN_3,

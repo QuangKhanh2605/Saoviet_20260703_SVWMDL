@@ -363,6 +363,7 @@ uint8_t Sim_Common_MQTT_Sub_1 (sData *strRecv, uint16_t pos)
 
 uint8_t Sim_Common_MQTT_Sub_2 (sData *strRecv, uint16_t pos)
 {
+    sSimFwUpdate.cPath_u8++;
     sSimCommVar.State_u8 = _SIM_CONN_MQTT;
     
     if (sCbSimComm.pHandle_AT != NULL)

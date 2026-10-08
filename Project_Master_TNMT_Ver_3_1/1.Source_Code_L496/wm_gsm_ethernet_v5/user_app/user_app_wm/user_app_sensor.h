@@ -68,6 +68,8 @@ typedef enum
     _SS_SALT,               // 9  SS SALT
     _SS_TDS,                // 10 SS TDS
     _SS_NO3,                // 11 SS NO3
+    _SS_NH4_N,              // 12 SS NH4-N
+    _SS_NO3_N,              // 13 SS NO3-N
     
     _END_SENSOR,
 }eKind_Sensor;
@@ -158,6 +160,8 @@ void Average_One_Hour(void);
 uint32_t ConvertToHours(uint8_t year, uint8_t month, uint8_t day, uint8_t hour);
 
 void    AppSensor_Log_Data_TSVH (void);
+void    Sensor_Packet_Status(uint8_t *pTarget, uint16_t *LenTarget, uint8_t Obis,
+                            void *pData, uint8_t Scale);
 void    Sensor_Packet_Data(uint8_t *pTarget, uint16_t *LenTarget, uint8_t Obis,
                              void *pData, uint8_t Scale);
 uint8_t SensorRS485_Packet_TSVH (sData *pData, uint8_t channel);

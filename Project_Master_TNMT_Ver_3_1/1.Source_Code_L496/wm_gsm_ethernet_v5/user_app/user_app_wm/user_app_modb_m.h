@@ -7,9 +7,9 @@
 #include "user_util.h"
 #include "event_driven.h"
 
-//#define MODBUS_SENSOR_SAOVIET
+#define MODBUS_SENSOR_SAOVIET
 //#define MODBUS_SENSOR_XYLEM
-#define MODBUS_SENSOR_DARUIFUNO
+//#define MODBUS_SENSOR_DARUIFUNO
 
 #define ID_DEFAULT_OXY          5
 #define ID_DEFAULT_PH           3

@@ -104,6 +104,7 @@
 
     #define aSIM_BLOCK_STEP_FTP_CONN                    aEC200_BLOCK_FTP_CONN
     #define aSIM_BLOCK_STEP_FTP_PUB                     aEC200_BLOCK_FTP_PUB
+    #define aSIM_BLOCK_STEP_FTP_PATH                    aEC200_BLOCK_FTP_PATH
     #define aSIM_BLOCK_STEP_FTP_DISCONN                 aEC200_BLOCK_FTP_DISCONN
    
     #define aSIM_BLOCK_STEP_CSQ                         aEC200_BLOCK_CSQ
