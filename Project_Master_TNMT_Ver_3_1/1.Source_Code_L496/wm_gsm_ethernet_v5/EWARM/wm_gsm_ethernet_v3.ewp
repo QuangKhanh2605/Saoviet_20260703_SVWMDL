@@ -378,13 +378,7 @@
                     <state>$PROJ_DIR$\..\user_glcd\controllers</state>
                     <state>$PROJ_DIR$\..\user_glcd\fonts</state>
                     <state>$PROJ_DIR$\..\user_glcd\devices</state>
-                    <state>$PROJ_DIR$\..\user_component\user_w6100</state>
-                    <state>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DHCP4</state>
-                    <state>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DNS</state>
-                    <state>$PROJ_DIR$\..\user_component\user_w6100\W6100</state>
-                    <state>$PROJ_DIR$\..\user_component\user_w6100\user_internet\FTPClient</state>
                     <state>$PROJ_DIR$\..\user_app\user_app_ethernet</state>
-                    <state>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DHCP6</state>
                     <state>$PROJ_DIR$/../FATFS/Target</state>
                     <state>$PROJ_DIR$/../FATFS/App</state>
                     <state>$PROJ_DIR$/../Middlewares/Third_Party/FatFs/src</state>
@@ -392,6 +386,14 @@
                     <state>$PROJ_DIR$\..\HAL_Driver_LPTIM_Counter</state>
                     <state>$PROJ_DIR$\..\user_component\user_convert_variable</state>
                     <state>$PROJ_DIR$\..\user_component\user_sensor_digital</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Application</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\W5500</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\W6100</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DHCP</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DHCP6</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DNS</state>
+                    <state>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\FTPClient</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1432,58 +1434,76 @@
             </file>
         </group>
         <group>
-            <name>user_ethernet</name>
+            <name>user_ethernet_io</name>
             <group>
-                <name>user_internet</name>
+                <name>Application</name>
+                <file>
+                    <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Application\Application.h</name>
+                </file>
+            </group>
+            <group>
+                <name>Ethernet</name>
                 <group>
-                    <name>DHCP4</name>
+                    <name>W5500</name>
                     <file>
-                        <name>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DHCP4\dhcpv4.c</name>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\W5500\w5500.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DHCP4\dhcpv4.h</name>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\W5500\w5500.h</name>
+                    </file>
+                </group>
+                <group>
+                    <name>W6100</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\W6100\w6100.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\W6100\w6100.h</name>
+                    </file>
+                </group>
+                <file>
+                    <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\socket.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\socket.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\wizchip_conf.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Ethernet\wizchip_conf.h</name>
+                </file>
+            </group>
+            <group>
+                <name>Internet</name>
+                <group>
+                    <name>DHCP</name>
+                    <file>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DHCP\dhcp.c</name>
+                    </file>
+                    <file>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DHCP\dhcp.h</name>
                     </file>
                 </group>
                 <group>
                     <name>DHCP6</name>
                     <file>
-                        <name>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DHCP6\dhcpv6.c</name>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DHCP6\dhcpv6.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DHCP6\dhcpv6.h</name>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DHCP6\dhcpv6.h</name>
                     </file>
                 </group>
                 <group>
                     <name>DNS</name>
                     <file>
-                        <name>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DNS\dns.c</name>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DNS\dns.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\user_component\user_w6100\user_internet\DNS\dns.h</name>
+                        <name>$PROJ_DIR$\..\user_component\user_ethernet_io\Internet\DNS\dns.h</name>
                     </file>
                 </group>
             </group>
-            <group>
-                <name>w5500</name>
-                <file>
-                    <name>$PROJ_DIR$\..\user_component\user_w6100\W6100\w6100.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\user_component\user_w6100\W6100\w6100.h</name>
-                </file>
-            </group>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_w6100\socket.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_w6100\socket.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_w6100\wizchip_conf.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\user_component\user_w6100\wizchip_conf.h</name>
-            </file>
         </group>
         <group>
             <name>user_lptim</name>

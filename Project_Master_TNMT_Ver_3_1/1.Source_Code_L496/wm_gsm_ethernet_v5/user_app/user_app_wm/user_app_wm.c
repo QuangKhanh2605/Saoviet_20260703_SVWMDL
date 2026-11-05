@@ -53,7 +53,7 @@ sEvent_struct sEventAppWM [] =
     { _EVENT_DIR_CHANGE,		0, 0, 0, 	    _Cb_Dir_Change },            //Chong nhieu 100ms -> Ton PIN    
     
     { _EVENT_CHECK_MODE,		1, 0, 1000,     _Cb_Check_Mode },           
-    { _EVENT_MEAS_PRESSURE,		1, 0, 3000,     _Cb_Meas_Pressure }, 
+    { _EVENT_MEAS_PRESSURE,		0, 0, 3000,     _Cb_Meas_Pressure }, 
     { _EVENT_SCAN_ALARM,	    1, 0, 50,       _Cb_Scan_Alarm }, 
     { _EVENT_CONTROL_LED1,		1, 0, 200,      _Cb_Control_Led1 }, 
     
@@ -250,8 +250,8 @@ void AppWm_Init (void)
 //    UTIL_TIMER_SetPeriod(&TimerAlarm, sModemInfor.sFrequence.DurAlarm_u32 * 1000);
 //    UTIL_TIMER_Start(&TimerAlarm);
 //    
-    UTIL_TIMER_Create(&TimerPress, 0xFFFFFFFFU, UTIL_TIMER_ONESHOT, OnTimerPressure, NULL);
-    UTIL_TIMER_SetPeriod(&TimerPress, 1000);
+//    UTIL_TIMER_Create(&TimerPress, 0xFFFFFFFFU, UTIL_TIMER_ONESHOT, OnTimerPressure, NULL);
+//    UTIL_TIMER_SetPeriod(&TimerPress, 1000);
     
     RS485_Init_Uart();
     RS485_Init_RX_Mode();
@@ -293,9 +293,9 @@ uint8_t AppWm_Task(void)
 
 static uint8_t _Cb_Entry_Wm (uint8_t event)
 {
-    fevent_active(sEventAppWM, _EVENT_MEAS_PRESSURE); 
-    fevent_active(sEventAppWM, _EVENT_RS485_MODBUS);
-    fevent_active(sEventAppWM, _EVENT_RS485_2_MODBUS);
+//    fevent_active(sEventAppWM, _EVENT_MEAS_PRESSURE); 
+//    fevent_active(sEventAppWM, _EVENT_RS485_MODBUS);
+//    fevent_active(sEventAppWM, _EVENT_RS485_2_MODBUS);
     fevent_active(sEventAppWM, _EVENT_GET_CONTACT_IN); 
     fevent_active(sEventAppWM, _EVENT_SCAN_ALARM); 
     

@@ -1135,8 +1135,13 @@ void AppSensor_Log_Data_TSVH (void)
         
         length = SensorRS485_Packet_TSVH(&pData, i);
         
-        *(pData.Data_a8 + posindex) = count + 1;
-        *(pData.Data_a8 + posindex + 1) = length;
+        if(length > 0)
+        {
+            *(pData.Data_a8 + posindex) = count + 1;
+            *(pData.Data_a8 + posindex + 1) = length;
+        }
+        else 
+            pData.Length_u16 -= 2;
     
         if (count == 0) {
             size_pack = pData.Length_u16;

@@ -9,7 +9,7 @@
 #include "user_define.h"
 
 #include "dns.h"
-#include "dhcpv4.h"
+#include "dhcp.h"
 #include "dhcpv6.h"
 #include "socket.h"
 

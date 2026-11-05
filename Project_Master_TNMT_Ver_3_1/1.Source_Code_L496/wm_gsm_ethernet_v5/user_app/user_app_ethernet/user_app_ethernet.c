@@ -11,8 +11,11 @@
 /*================== Static func ===================*/
 static uint8_t wizchip_read(void);
 static void wizchip_write(uint8_t wb);
-static void wizchip_read_buff(uint8_t* buf, datasize_t len);
-static void wizchip_write_buff(uint8_t* buf, datasize_t len);
+
+#if _WIZCHIP_ == W6100
+static void wizchip_read_buff(uint8_t* buf, uint16_t len);
+static void wizchip_write_buff(uint8_t* buf, uint16_t len);
+#endif
 
 static void wizchip_deselect(void);
 static void wizchip_select(void);
@@ -103,11 +106,12 @@ uint8_t aRECEIVE_MODBUS[DATA_BUF_SIZE];
 
 /* Network Configuration default */
 wiz_NetInfo gWIZNETINFO = { .mac = {0x00,0x08,0xdc,0x12,0x34,0x56},
-							.ip = {192,168,0,100},
+							.ip = {192,168,0,150},
 							.sn = {255, 255, 255, 0},
 							.gw = {192, 168, 0, 1},
 							.dns = {8, 8, 8, 8},
-							
+				
+#if _WIZCHIP_ == W6100
 							.lla={0xfe,0x80,0x00,0x00,
 									0x00,0x00, 0x00,0x00,
 									0x02,0x08, 0xdc,0xff,
@@ -126,8 +130,10 @@ wiz_NetInfo gWIZNETINFO = { .mac = {0x00,0x08,0xdc,0x12,0x34,0x56},
 									0xfe,0x08, 0x4c,0x81},   ///< Gateway IPv6 Address
 
                             .ipmode = NETINFO_DHCP_V4,
+#else
+                            .dhcp = NETINFO_DHCP,  ///< 1 - Static, 2 - DHCP
+#endif  
 };
-
 uint8_t DHCPipver = AS_IPV4;
 uint8_t ip_ver = AS_IPV4;
 //uint8_t ip_ver = AS_IPV6;
@@ -360,38 +366,74 @@ static uint8_t _Cb_Hard_Reset (uint8_t event)
 }
 
 
-static uint8_t _Cb_Check_Bus (uint8_t event)
+static uint8_t _Cb_Check_Bus(uint8_t event)
 {
     static uint8_t RetryBus = 0;
-    
-    UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: test bus spi\r\n" );
-    APP_LOG(TS_OFF, DBLEVEL_H, "u_app_eth: version w5500: %d\r\n", getVER()); 
-    
+    uint8_t BusOK = 0;
+
+    UTIL_Printf_Str(DBLEVEL_H, "u_app_eth: test bus spi\r\n");
+
+#if (_WIZCHIP_ == 5500)
+
+    /* =====================================================
+     * W5500
+     * VERSIONR = 0x04
+     * ===================================================== */
+    uint8_t version = getVERSIONR();
+    APP_LOG(TS_OFF, DBLEVEL_H,"u_app_eth: version W5500: 0x%02X\r\n", version);
+    if (version == 0x04)
+    {
+        BusOK = 1;
+    }
+
+#elif (_WIZCHIP_ == 6100)
+    /* =====================================================
+     * W6100
+     * VER = 0x4661
+     * ===================================================== */
+    uint16_t version = getVER();
+    APP_LOG(TS_OFF, DBLEVEL_H, "u_app_eth: version W6100: 0x%04X\r\n", version);
+    if (version == 0x4661)
+    {
+        BusOK = 1;
+    }
+
+#else
+    #error "Unsupported WIZCHIP. Select W5500 or W6100."
+#endif
     sAppEthVar.Status_u8 = _ETH_CHECK_SPI;
-    
-    if ( (getVER() == 0x4661) && (getVER() == 0x4661) && (getVER() == 0x4661) ) { 
+    if (BusOK)
+    {
+        /* SPI communication is OK */
         AppEth_W5500_Init();
         sAppEthVar.PHYstatus_u8 = false;
-        fevent_active(sEventAppEth, _EVENT_ETH_PHY_LINK);
+        fevent_active(sEventAppEth, _EVENT_ETH_PHY_LINK );
         RetryBus = 0;
-        gWIZNETINFO.mac[3] = sModemInfor.aID[strlen(sModemInfor.aID)-1]
-                           + sModemInfor.aID[strlen(sModemInfor.aID)-2]; 
-        gWIZNETINFO.mac[4] = sModemInfor.aID[strlen(sModemInfor.aID)-3]
-                           + sModemInfor.aID[strlen(sModemInfor.aID)-4]; 
-        gWIZNETINFO.mac[5] = sModemInfor.aID[strlen(sModemInfor.aID)-5 - 2]
-                           + sModemInfor.aID[strlen(sModemInfor.aID)-6 - 2];  
-        
+        /* Generate MAC address */
+
+        gWIZNETINFO.mac[3] = sModemInfor.aID[strlen(sModemInfor.aID) - 1] + sModemInfor.aID[strlen(sModemInfor.aID) - 2];
+        gWIZNETINFO.mac[4] = sModemInfor.aID[strlen(sModemInfor.aID) - 3] + sModemInfor.aID[strlen(sModemInfor.aID) - 4];
+        gWIZNETINFO.mac[5] = sModemInfor.aID[strlen(sModemInfor.aID) - 7] +  sModemInfor.aID[strlen(sModemInfor.aID) - 8];
         setSHAR(gWIZNETINFO.mac);
-    } else {
-        if (RetryBus++ >= ETH_MAX_RETRY_BUS) {
+        APP_LOG(TS_OFF, DBLEVEL_H, "u_app_eth: SPI communication OK\r\n");
+    }
+    else
+    {
+        /* SPI communication failed */
+        APP_LOG(TS_OFF, DBLEVEL_H, "u_app_eth: SPI communication ERROR\r\n");
+
+        if (RetryBus++ >= ETH_MAX_RETRY_BUS)
+        {
             RetryBus = 0;
-            fevent_active(sEventAppEth, _EVENT_ETH_HARD_RESET);
-        } else {
+            fevent_active(sEventAppEth, _EVENT_ETH_HARD_RESET );
+        }
+        else
+        {
             fevent_enable(sEventAppEth, event);
         }
     }
-    
-	return 1;
+
+    return 1;
 }
 
 /*
@@ -447,7 +489,7 @@ static uint8_t _Cb_Check_PHY_LINK (uint8_t event)
             Modem_Set_Server_Infor_To_App();
             
             if (DHCPipver == AS_IPV4) {
-                DHCPv4_stop();  
+                DHCP_stop();  
             } else {
                 DHCP_stop();
             }
@@ -479,12 +521,18 @@ static uint8_t _Cb_Running_DHCP (uint8_t event)
     
     if(sAppEthVar.isDHCP == true)
     {
+#if (_WIZCHIP_ == W6100)
         if (gWIZNETINFO.ipmode >= NETINFO_DHCP_V4) {
             if (DHCPipver == AS_IPV4)
-                DHCPv4_run();
+                DHCP_run();
             else 
-                DHCP_run(&gWIZNETINFO); 
+                DHCP6_run(&gWIZNETINFO); 
         }
+#else
+        if (gWIZNETINFO.dhcp >= NETINFO_DHCP) {
+                DHCP_run();
+        }
+#endif
     
         step = 0;
         fevent_enable(sEventAppEth, event);
@@ -519,10 +567,11 @@ static uint8_t _Cb_Running_DHCP (uint8_t event)
                 }
             }
 			/* DHCP client Initialization */
+#if (_WIZCHIP_ == W6100)
 			if (gWIZNETINFO.ipmode >= NETINFO_DHCP_V4) {
                 if (DHCPipver == AS_IPV4) {
-                    DHCPv4_init(SOCKET_DHCP, gDATABUF);
-                    reg_dhcpv4_cbfunc (NULL, NULL, AppEth_Cb_IP_Conflict);
+                    DHCP_init(SOCKET_DHCP, gDATABUF);
+                    reg_dhcp_cbfunc (NULL, NULL, AppEth_Cb_IP_Conflict);
                     step = 1;
                 } else {
                     DHCP_init (SOCKET_DHCP, gDATABUF);
@@ -531,28 +580,19 @@ static uint8_t _Cb_Running_DHCP (uint8_t event)
 			} else {
                 step = 3;
             }
+#else
+			if (gWIZNETINFO.dhcp >= NETINFO_DHCP) {
+                DHCP_init(SOCKET_DHCP, gDATABUF);
+                reg_dhcp_cbfunc (NULL, NULL, AppEth_Cb_IP_Conflict);
+                step = 1;
+			} else {
+                step = 3;
+            }
+#endif
             LandMarkRunDhcp_u32 = RtCountSystick_u32;
 			break;
         case 1:   //dhcp v4
-            result = DHCPv4_run();
-            switch (result)
-            {
-                case DHCP_IPV4_LEASED:
-                    step = 3;
-                    break;
-                case DHCPV4_FAILED:
-                case DHCPV4_STOPPED:
-                    break;
-            }
-            if (Check_Time_Out(LandMarkRunDhcp_u32, 2000) == true) {
-                DHCPv4_stop();  
-                DHCP_stop();
-                step = 0;
-                UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: DHCP failed\r\n" );
-            }
-            break;
-		case 2:  //dhcp v6
-            result = DHCP_run(&gWIZNETINFO); 
+            result = DHCP_run();
             switch (result)
             {
                 case DHCP_IP_LEASED:
@@ -563,11 +603,35 @@ static uint8_t _Cb_Running_DHCP (uint8_t event)
                     break;
             }
             if (Check_Time_Out(LandMarkRunDhcp_u32, 2000) == true) {
-                DHCPv4_stop();  
-                DHCP_stop();
+#if (_WIZCHIP_ == W6100)
+                DHCP6_stop();
+                DHCP_stop();  
+#else
+                DHCP_stop();  
+#endif
                 step = 0;
                 UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: DHCP failed\r\n" );
             }
+            break;
+		case 2:  //dhcp v6
+#if _WIZCHIP_ == W6100
+            result = DHCP6_run(&gWIZNETINFO); 
+            switch (result)
+            {
+                case DHCP_IP_LEASED:
+                    step = 3;
+                    break;
+                case DHCP_FAILED:
+                case DHCP_STOPPED:
+                    break;
+            }
+            if (Check_Time_Out(LandMarkRunDhcp_u32, 2000) == true) {
+                DHCP6_stop();
+                DHCP_stop();  
+                step = 0;
+                UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: DHCP failed\r\n" );
+            }
+#endif
             break;
 		default:    //success    
             step = 0; cIP = 0;
@@ -634,15 +698,15 @@ static uint8_t _Cb_DNS_Process (uint8_t event)
 	switch (step)
 	{
 		case 0:
-			DNS_init(gDATABUF);  // SOCK_DNS
+			DNS_init(SOCK_DNS, gDATABUF);  // SOCK_DNS
             LandMark_u32 = RtCountSystick_u32;
             step++;
 			break;
 		default:
             if (ip_ver == AS_IPV4) {
-                ret = DNS_ETH_run (SOCK_DNS, dns_server, sIP, pIP, AS_IPV4);
+                ret = DNS_run (dns_server, sIP, pIP);
             } else {
-                ret = DNS_ETH_run(SOCK_DNS, dns_server_ip6, sIP, pIP, AS_IPV6);
+                ret = DNS_run(dns_server_ip6, sIP, pIP);
             }
             
             if (ret == 1) {
@@ -704,6 +768,9 @@ static uint8_t _Cb_Socket_Control (uint8_t event)
                     sprintf(dat,"Sock state: %d AnyPortCtrl: %d IP: %s Port: %d\r\n", getSn_SR(SOCKET_MQTT), sAppEthVar.AnyPortCtrl, sAppEthVar.sServer.sIP, *sAppEthVar.sServer.Port_u16);
                     UTIL_Printf_Str (DBLEVEL_M,  dat);
                 }
+                if (getSn_RX_RSR(SOCKET_MQTT) > 0) { 
+                    fevent_active(sEventAppEth, _EVENT_ETH_RECV_DATA);
+                } 
             } else if (SockCtrlState == SOCK_CLOSED) {
                 if (Check_Time_Out(sAppEthVar.LandMarkSockConnect_u32, ETH_MAX_TIME_CTRL_SOCK) == true) { 
                     sAppEthVar.LandMarkSockConnect_u32 = RtCountSystick_u32;
@@ -1044,7 +1111,7 @@ static uint8_t _Cb_Send_Timeout (uint8_t event)
 //        default:
 //            break;
 //    }
-    
+    AppEth_IRQ_Handler();
     disconnect (CTRL_SOCK);
     close (CTRL_SOCK);
     qQueue_Clear(&qEthStep);
@@ -1070,16 +1137,30 @@ static uint8_t _Cb_Recv_Data (uint8_t event)
     {
         if ((size = getSn_RX_RSR(SOCKET_MQTT)) > 0)
         {
-            if (size > DATA_BUF_SIZE) 
-                size = DATA_BUF_SIZE - 1;
+//            if (size > DATA_BUF_SIZE) 
+//                size = DATA_BUF_SIZE - 1;
+//            
+//            LengthRecv = recv (SOCKET_MQTT, aRECEIVE_DATA, size);
+//            strSource.Length_u16 = LengthRecv;
+//            
+//            if (LengthRecv != size)
+//            {
+//                return 0;
+//            }
+            memset(aRECEIVE_DATA, 0, sizeof(aRECEIVE_DATA));
             
-            LengthRecv = recv (SOCKET_MQTT, aRECEIVE_DATA, size);
-            strSource.Length_u16 = LengthRecv;
+            if (size > sizeof(aRECEIVE_DATA)) 
+                size = sizeof(aRECEIVE_DATA) - 1;
             
+            LengthRecv = recv(SOCKET_MQTT, aRECEIVE_DATA, size);
+
             if (LengthRecv != size)
             {
                 return 0;
             }
+            
+            aRECEIVE_DATA[LengthRecv] = '\0';
+            strSource.Length_u16 = LengthRecv + 1;
         }
     } else
     {
@@ -1323,7 +1404,11 @@ static uint8_t _Cb_ModbTCP_Server (uint8_t event)
         case SOCK_ESTABLISHED:   
             if(getSn_IR(SOCKET_MODSERVER) & Sn_IR_CON)
             {
+#if (_WIZCHIP_ == W6100)
                 setSn_IRCLR(SOCKET_MODSERVER, Sn_IR_CON);
+#else
+                setSn_IR(SOCKET_MODSERVER, Sn_IR_CON);
+#endif
                 uint8_t keepalive = 12; // 60s
                 setsockopt(SOCKET_MODSERVER, SO_KEEPALIVEAUTO, &keepalive);            //Keepalive 60s;
             }
@@ -1423,15 +1508,15 @@ static uint8_t _Cb_Get_Time_NTP (uint8_t event)
         switch (step)
         {
             case 0:
-                DNS_init(gDATABUF);  // SOCK_DNS
+                DNS_init(SOCK_DNS, gDATABUF);  // SOCK_DNS
                 LandMark_u32 = RtCountSystick_u32;
                 step++;
                 break;
             case 1:
                 if (ip_ver == AS_IPV4) {
-                    ret = DNS_ETH_run (SOCK_DNS, dns_server, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP, AS_IPV4);
+                    ret = DNS_run (dns_server, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP);
                 } else {
-                    ret = DNS_ETH_run(SOCK_DNS, dns_server_ip6, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP, AS_IPV6);
+                    ret = DNS_run(dns_server_ip6, (uint8_t*)ntp_server_list[ptr_ntp_sv], pIP);
                 }
                 
                 if (ret == 1) {
@@ -1746,18 +1831,19 @@ static void wizchip_write(uint8_t wb)
 	HAL_SPI_TransmitReceive(&hspi3, &wb, &retVal, 1, 1000); 
 }
 
-
-static void wizchip_read_buff(uint8_t* buf, datasize_t len)
+#if _WIZCHIP_ == W6100
+static void wizchip_read_buff(uint8_t* buf, uint16_t len)
 {
     for (uint16_t i = 0; i < len; i++)
         buf[i] = wizchip_read(); 
 }
 
-static void wizchip_write_buff(uint8_t* buf, datasize_t len)
+static void wizchip_write_buff(uint8_t* buf, uint16_t len)
 {
     for (uint16_t i = 0; i < len; i++)
     	wizchip_write(buf[i]);
 }
+#endif
 
 static void wizchip_network_infor(void)
 {
@@ -1822,8 +1908,14 @@ void AppEth_Init(void)
 {
     //Set callback handler SPI: select, deselect, read, write: 
 	reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);   
-	reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write, wizchip_read_buff, wizchip_write_buff);   
-    
+	
+
+    #if _WIZCHIP_ == W6100
+        reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write, wizchip_read_buff, wizchip_write_buff);   
+    #else
+        reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);   
+    #endif  
+
     sMessage.aMESS_PENDING[SEND_SERVER_TIME_PENDING] = TRUE;
     
     //creat queue cmd
@@ -1860,37 +1952,109 @@ uint8_t AppEth_Task(void)
 
 
 
+//void AppEth_W5500_Init(void)
+//{
+//	uint8_t memsize[2][8] = 
+//    { 
+//        { 2, 2, 2, 2, 2, 2, 2, 2 }, 
+//        { 2, 2, 2, 2, 2, 2, 2, 2 }, 
+//    };
+////    uint8_t temp = IK_DEST_UNREACH;
+//    uint8_t syslock = SYS_NET_LOCK;
+//    
+//	/* wizchip initialize*/
+//	if (ctlwizchip(CW_INIT_WIZCHIP, (void*) memsize) == -1) {   
+//		UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: error Set Tx/RX size\r\n" );
+//	}
+//    //New add other example
+//	UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: set RTR, RCR\r\n" );
+//    
+//    setRTR(1000);  // setRTR(0x07d0);    //setRTR(1000);
+//	setRCR(3);
+//    
+////    setSIMR (0x0F);         //IRQ 4 sock 0 -> 3
+////	setSn_IMR (0, 0x1F);  //Mark All IRQ Sn
+//    
+//    setSIMR((1 << SOCKET_MQTT) | (1 << SOCKET_MQTT) | (1 << SOCKET_MQTT));    // = 0x0E
+//    setSn_IMR (SOCKET_MQTT, 0x1F);  //Mark All IRQ Sn
+//    
+////    if (ctlwizchip(CW_SET_INTRMASK, &temp) == -1) {
+////		UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: interrupt mark\r\n" );
+////	}
+//    
+//    ctlwizchip(CW_SYS_UNLOCK,& syslock);
+//}
+
+
 void AppEth_W5500_Init(void)
 {
-	uint8_t memsize[2][8] = 
-    { 
-        { 2, 2, 2, 2, 2, 2, 2, 2 }, 
-        { 2, 2, 2, 2, 2, 2, 2, 2 }, 
+    uint8_t memsize[2][8] =
+    {
+        { 2, 2, 2, 2, 2, 2, 2, 2 },
+        { 2, 2, 2, 2, 2, 2, 2, 2 },
     };
-//    uint8_t temp = IK_DEST_UNREACH;
+
+#if _WIZCHIP_ == W6100
     uint8_t syslock = SYS_NET_LOCK;
+#endif
+
+    /* ========================================================
+     * WIZCHIP INITIALIZE
+     * ======================================================== */
+
+    if (ctlwizchip(CW_INIT_WIZCHIP, (void*)memsize) == -1)
+    {
+        UTIL_Printf_Str(DBLEVEL_H, "u_app_eth: error initialize WIZCHIP\r\n");
+        return;
+    }
+
+    /* ========================================================
+     * RETRANSMISSION CONFIGURATION
+     * ======================================================== */
+
+    UTIL_Printf_Str(DBLEVEL_H, "u_app_eth: set RTR, RCR\r\n");
+
+    setRTR(1000);
+    setRCR(3);
+
+    /* ========================================================
+     * SOCKET INTERRUPT CONFIGURATION
+     * ======================================================== */
+
+//    /* Clear pending socket interrupt */
+//    setSn_IR(SOCKET_MQTT, 0x1F);
+//
+//    /* Enable socket interrupt sources */
+//    setSn_IMR(SOCKET_MQTT, 0x1F);
+//
+//    /* Enable global socket interrupt */
+//    setSIMR(1 << SOCKET_MQTT);
     
-	/* wizchip initialize*/
-	if (ctlwizchip(CW_INIT_WIZCHIP, (void*) memsize) == -1) {   
-		UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: error Set Tx/RX size\r\n" );
-	}
-    //New add other example
-	UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: set RTR, RCR\r\n" );
-    
-    setRTR(1000);  // setRTR(0x07d0);    //setRTR(1000);
-	setRCR(3);
-    
-//    setSIMR (0x0F);         //IRQ 4 sock 0 -> 3
-//	setSn_IMR (0, 0x1F);  //Mark All IRQ Sn
-    
-    setSIMR((1 << SOCKET_MQTT) | (1 << SOCKET_MQTT) | (1 << SOCKET_MQTT));    // = 0x0E
-    setSn_IMR (SOCKET_MQTT, 0x1F);  //Mark All IRQ Sn
-    
-//    if (ctlwizchip(CW_SET_INTRMASK, &temp) == -1) {
-//		UTIL_Printf_Str ( DBLEVEL_H, "u_app_eth: interrupt mark\r\n" );
-//	}
-    
-    ctlwizchip(CW_SYS_UNLOCK,& syslock);
+    /* Clear all pending socket interrupts */
+//    setSn_IR(SOCKET_MQTT, 0x1F);
+//
+//    /* Enable RECV interrupt */
+//    setSn_IMR(SOCKET_MQTT, Sn_IR_RECV);
+//
+//    /* Enable global socket interrupt */
+//    setSIMR(1 << SOCKET_MQTT);
+
+    /* ========================================================
+     * W6100 SYSTEM UNLOCK
+     * ======================================================== */
+
+
+#if _WIZCHIP_ == W6100
+
+    if (ctlwizchip(CW_SYS_UNLOCK, &syslock) == -1)
+    {
+        UTIL_Printf_Str(DBLEVEL_H, "u_app_eth: error system unlock\r\n");
+        return;
+    }
+
+#endif
+
+    UTIL_Printf_Str(DBLEVEL_H, "u_app_eth: WIZCHIP initialization complete\r\n");
 }
 
 
@@ -1960,7 +2124,8 @@ int32_t AppEth_Socket_Control (uint8_t sn, uint8_t* destip, uint16_t destport)
             break;      
       default:
             if (getSn_MR(sn) != Sn_MR_TCP) {
-                close(sn);  
+                if(close(sn) == false)
+                    fevent_active(sEventAppEth, _EVENT_ETH_HARD_RESET );
                 setSn_MR(sn, Sn_MR_TCP); 
                 StepConn_u8[sn] = 0;
             }
@@ -3098,7 +3263,11 @@ uint16_t AllocatePort(void)
     {
         if(getSn_SR(sn) != SOCK_CLOSED)
         {
+        #if (_WIZCHIP_ == W6100)
             used_ports[active_socket_count++] = getSn_PORTR(sn);
+        #else
+            used_ports[active_socket_count++] = getSn_PORT(sn);
+        #endif
         }
     }
 

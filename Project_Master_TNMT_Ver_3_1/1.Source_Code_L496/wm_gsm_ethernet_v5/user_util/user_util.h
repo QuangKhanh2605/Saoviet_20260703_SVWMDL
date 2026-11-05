@@ -75,7 +75,7 @@
 
 #define DEBUG_ENABLED   1       //Cho phep DEBUG printf
 
-#define DBLEVEL_MESS    1       /*!< functional traces */
+#define DBLEVEL_MESS    3       /*!< functional traces */
 #define DBLEVEL_L       2       /*!< just essential traces */
 #define DBLEVEL_M       3       /*!< functional traces */
 #define DBLEVEL_H       4       /*!< all traces */

@@ -20,7 +20,6 @@ extern "C" {
 
 /* If you need this header, use it. */
 #define LINELEN		100
-#define _MAX_SS		1024
 
 #define CTRL_SOCK	2
 #define DATA_SOCK	3

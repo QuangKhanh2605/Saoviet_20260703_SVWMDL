@@ -206,7 +206,10 @@ void SysTick_Handler(void)
 
         DNS_time_handler();
         DHCP_time_handler();
-        DHCPv4_time_handler();
+        #if (_WIZCHIP_ == W6100)
+        DHCP6_time_handler();
+        #endif
+//        DHCPv4_time_handler();
     }
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
