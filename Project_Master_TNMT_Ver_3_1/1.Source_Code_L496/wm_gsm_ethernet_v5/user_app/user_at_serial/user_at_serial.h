@@ -35,6 +35,9 @@ typedef enum
     _SET_FREQ_ONLINE,
     _QUERY_FREQ_ONLINE,
     
+    _SET_ETH_MODEM,
+    _GET_ETH_MODEM,
+    
     _SET_DEFAULT_PULSE,
     _SET_SAVE_BOX,
     _SET_NUM_WAKEUP,

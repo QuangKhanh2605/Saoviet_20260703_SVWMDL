@@ -28,6 +28,9 @@ sATCommandList sATCmdList[] =
     {_SET_FREQ_ONLINE,	    NULL,	        {(uint8_t*)"at+freqmin=",11}},      // at+freqmin=5
     {_QUERY_FREQ_ONLINE,	NULL,	        {(uint8_t*)"at+freqmin?",11}},
     
+    {_SET_ETH_MODEM,        NULL,           {(uint8_t*)"at+ethmode=",11}},
+    {_GET_ETH_MODEM,        NULL,           {(uint8_t*)"at+ethmode?",11}},
+    
     {_SET_DEFAULT_PULSE, 	NULL,	        {(uint8_t*)"at+resetpulse?",14}},
     {_SET_SAVE_BOX, 	    NULL,	        {(uint8_t*)"at+savebox?",11}},      //ex:at+savebox
     {_SET_NUM_WAKEUP, 	    NULL,	        {(uint8_t*)"at+numwake=",11}},     //ex: at+numwake=05

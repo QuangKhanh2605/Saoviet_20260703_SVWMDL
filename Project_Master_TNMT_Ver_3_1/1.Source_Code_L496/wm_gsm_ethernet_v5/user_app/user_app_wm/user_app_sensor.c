@@ -513,8 +513,14 @@ void AppSensor_Packet_TNMT(void)
         
         if(c_pack > 0)
         {
-            Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_GPS, 0, 
-            (uint8_t *) aPAY_LOAD, strlen(aPAY_LOAD), sRecGPS.Size_u16);
+            if(strlen(aPAY_LOAD) < sRecGPS.Size_u16)
+            {
+                Mem_Write_Data(sMemVar.Type_u8, _MEM_DATA_GPS, 0, 
+                    (uint8_t *) aPAY_LOAD, strlen(aPAY_LOAD), sRecGPS.Size_u16);
+            }
+            else{
+                Modem_Packet_Alarm_String("u_ftp_upload: Over Size!!!");
+            }
             
             chann = AppWm_Is_Firt_Chann_TN();
             if (chann >= 0) {

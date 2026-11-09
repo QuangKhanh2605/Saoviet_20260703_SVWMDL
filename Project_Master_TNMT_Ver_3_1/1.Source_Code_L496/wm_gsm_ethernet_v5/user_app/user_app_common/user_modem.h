@@ -98,7 +98,14 @@ typedef struct
     char    aFILE_URL[MAX_LENGTH_FILE_URL];
 }sUpdateInfor;
 
-
+typedef struct
+{
+	char    aIP[MAX_LENGTH_IP];
+    
+    uint8_t IPnum[6];
+    
+    uint8_t IP_Mode;  // 0 - DHCP, 1 - Static
+}sModemEthernet;
 
 typedef struct
 {
@@ -115,6 +122,8 @@ typedef struct
     ST_TIME_FORMAT  sTimeReset;
     uint8_t         RSResource_u8;
     char            aRS_RESOURCE[20];
+    
+    sModemEthernet  sEth;
 }sModemInformation;
 
 
@@ -188,6 +197,9 @@ void    Modem_SER_Set_Duty_Cycle (sData *strRecei, uint16_t Pos);
 void    Modem_SER_Get_Duty_Cycle (sData *strRecei, uint16_t Pos);
 void    Modem_SER_Set_Dura_Online (sData *strRecei, uint16_t Pos);
 void    Modem_SER_Get_Dura_Online (sData *strRecei, uint16_t Pos);
+
+void    Modem_SER_Set_Eth_Infor (sData *strRecei, uint16_t Pos);
+void    Modem_SER_Get_Eth_Infor (sData *strRecei, uint16_t Pos);
 
 void    Modem_SER_Set_Numwakeup (sData *strRecei, uint16_t Pos);
 void    Modem_SER_Set_sTime (sData *strRecei, uint16_t Pos);

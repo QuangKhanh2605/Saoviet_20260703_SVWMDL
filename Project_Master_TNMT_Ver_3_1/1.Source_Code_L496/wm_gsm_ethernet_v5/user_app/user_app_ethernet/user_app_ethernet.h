@@ -270,6 +270,8 @@ extern uint8_t aETH_FTP_CONN[7];
 void    AppEth_Init(void);
 uint8_t AppEth_Task(void);
 
+void    Init_ModemEth(void);
+
 uint8_t AppEth_W5500_Hard_Reset(void);
 void    AppEth_W5500_Init(void);
 uint8_t AppEth_Get_PHYStatus(void);

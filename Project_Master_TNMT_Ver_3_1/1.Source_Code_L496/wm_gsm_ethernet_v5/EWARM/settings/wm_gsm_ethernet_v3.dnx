@@ -14,13 +14,13 @@
     <StLinkDriver>
         <stlinkserialNo>31531457</stlinkserialNo>
         <stlinkfoundProbes />
-        <CStepIntDis>_ 0</CStepIntDis>
-        <LeaveTargetRunning>_ 0</LeaveTargetRunning>
         <stlinkResetStyle>0</stlinkResetStyle>
         <stlinkResetStrategy>2</stlinkResetStrategy>
+        <CStepIntDis>_ 0</CStepIntDis>
+        <LeaveTargetRunning>_ 0</LeaveTargetRunning>
     </StLinkDriver>
     <DebugChecksum>
-        <Checksum>3565935326</Checksum>
+        <Checksum>640262174</Checksum>
     </DebugChecksum>
     <Exceptions>
         <StopOnUncaught>_ 0</StopOnUncaught>
@@ -97,16 +97,17 @@
         <Fmt37>sModbusDeviceData-Type_u8	3	0</Fmt37>
         <Fmt38>sModbusInfor-MType_u8	3	0</Fmt38>
         <Fmt39>sModbusInfor-SlaveId_u8	3	0</Fmt39>
-        <Fmt40>sPressureLinearInter-InUnit_u8	3	0</Fmt40>
-        <Fmt41>sPressureLinearInter-OutUnit_u8	3	0</Fmt41>
-        <Fmt42>sServerInfor-DomainOrIp_u8	3	0</Fmt42>
-        <Fmt43>sSimUpdateVariable-DataTemp_u8	3	0</Fmt43>
-        <Fmt44>sSimUpdateVariable-FailStatus_u8	3	0</Fmt44>
-        <Fmt45>sSimUpdateVariable-IsFirmSaoViet_u8	3	0</Fmt45>
-        <Fmt46>sSimUpdateVariable-LasCrcCal_u8	3	0</Fmt46>
-        <Fmt47>sSimUpdateVariable-LastCrcFile_u8	3	0</Fmt47>
-        <Fmt48>sSimUpdateVariable-Pending_u8	3	0</Fmt48>
-        <Fmt49>sWoteckUltraData-PosInt_u32	4	0</Fmt49>
+        <Fmt40>sModemEthernet-IP_Mode	3	0</Fmt40>
+        <Fmt41>sPressureLinearInter-InUnit_u8	3	0</Fmt41>
+        <Fmt42>sPressureLinearInter-OutUnit_u8	3	0</Fmt42>
+        <Fmt43>sServerInfor-DomainOrIp_u8	3	0</Fmt43>
+        <Fmt44>sSimUpdateVariable-DataTemp_u8	3	0</Fmt44>
+        <Fmt45>sSimUpdateVariable-FailStatus_u8	3	0</Fmt45>
+        <Fmt46>sSimUpdateVariable-IsFirmSaoViet_u8	3	0</Fmt46>
+        <Fmt47>sSimUpdateVariable-LasCrcCal_u8	3	0</Fmt47>
+        <Fmt48>sSimUpdateVariable-LastCrcFile_u8	3	0</Fmt48>
+        <Fmt49>sSimUpdateVariable-Pending_u8	3	0</Fmt49>
+        <Fmt50>sWoteckUltraData-PosInt_u32	4	0</Fmt50>
     </struct_types>
     <array_types>
         <Fmt0>uint32_t[6]	3	0</Fmt0>
@@ -242,14 +243,6 @@
         <ShowTimeSum>1</ShowTimeSum>
         <SumSortOrder>0</SumSortOrder>
     </EventLog>
-    <DisassembleMode>
-        <mode>0</mode>
-    </DisassembleMode>
-    <Breakpoints2>
-        <Bp0>_ 0 "EMUL_CODE" "{$PROJ_DIR$\wm_gsm_ethernet_v3\List\wm_gsm_ethernet_v3.map}.1.1" 0 0 1 "" 0 "" 0</Bp0>
-        <Bp1>_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\user_app\user_app_ethernet\user_app_ethernet.c}.2582.5" 0 0 1 "" 0 "" 0</Bp1>
-        <Count>2</Count>
-    </Breakpoints2>
     <TermIOLog>
         <LoggingEnabled>_ 0</LoggingEnabled>
         <LogFile>_ ""</LogFile>
@@ -259,11 +252,6 @@
         <LogFile>_ ""</LogFile>
         <Category>_ 0</Category>
     </LogFile>
-    <Aliases>
-        <A0>_ "D:\2026\1.Data_Logger_V5_1\wm_gsm_ethernet_v5\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_hal_lptim.c" ""</A0>
-        <Count>1</Count>
-        <SuppressDialog>0</SuppressDialog>
-    </Aliases>
     <DriverProfiling>
         <Enabled>0</Enabled>
         <Mode>3</Mode>
@@ -277,4 +265,16 @@
     <CallStackStripe>
         <ShowTiming>1</ShowTiming>
     </CallStackStripe>
+    <DisassembleMode>
+        <mode>0</mode>
+    </DisassembleMode>
+    <Breakpoints2>
+        <Bp0>_ 0 "EMUL_CODE" "{$PROJ_DIR$\wm_gsm_ethernet_v3\List\wm_gsm_ethernet_v3.map}.1.1" 0 0 1 "" 0 "" 0</Bp0>
+        <Count>1</Count>
+    </Breakpoints2>
+    <Aliases>
+        <A0>_ "D:\2026\1.Data_Logger_V5_1\wm_gsm_ethernet_v5\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_hal_lptim.c" ""</A0>
+        <Count>1</Count>
+        <SuppressDialog>0</SuppressDialog>
+    </Aliases>
 </settings>

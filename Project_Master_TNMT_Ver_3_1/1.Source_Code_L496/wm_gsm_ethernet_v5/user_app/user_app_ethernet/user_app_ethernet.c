@@ -1903,9 +1903,29 @@ uint8_t AppEth_W5500_Hard_Reset(void)
 	return Result;
 }
 
+void Init_ModemEth(void)
+{
+    UTIL_MEM_cpy(&gWIZNETINFO.ip, &sModemInfor.sEth.IPnum, sizeof(gWIZNETINFO.ip));   
+				
+#if _WIZCHIP_ == W6100
+    if(sModemInfor.sEth.IP_Mode == 0 || sModemInfor.sEth.IP_Mode == 0xFF)    //Tranh truong hop default mem la 0xFF
+        gWIZNETINFO.ipmode = NETINFO_DHCP_V4;
+    else 
+        gWIZNETINFO.ipmode = NETINFO_STATIC_V4;
+#else
+    if(sModemInfor.sEth.IP_Mode == 0|| sModemInfor.sEth.IP_Mode == 0xFF)
+        gWIZNETINFO.ipmode = NETINFO_DHCP;
+    else 
+        gWIZNETINFO.ipmode = NETINFO_STATIC;
+#endif  
+          
+    fevent_active(sEventAppEth, _EVENT_ETH_HARD_RESET);
+}
+
 
 void AppEth_Init(void)
 {
+    Init_ModemEth();
     //Set callback handler SPI: select, deselect, read, write: 
 	reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);   
 	
@@ -1920,8 +1940,8 @@ void AppEth_Init(void)
     
     //creat queue cmd
     qQueue_Create (&qEthStep, ETH_MAX_CMD_QUEUE, sizeof (uint8_t), (uint8_t *) &aQEthStepControl);
-}
     
+}
 
 
 uint8_t AppEth_Task(void)

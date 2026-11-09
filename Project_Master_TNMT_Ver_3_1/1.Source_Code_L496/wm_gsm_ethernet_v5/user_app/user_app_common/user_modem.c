@@ -61,8 +61,11 @@ sModemInformation sModemInfor =
     
     .sServerModTCP.IPnum = {0, 0, 0, 0},
     .sServerModTCP.Port_u16 = 502,
+    
+    .sEth.aIP              = {"192.168.0.100"},
+    .sEth.IPnum            = {192,168,0,100},
+    .sEth.IP_Mode          = 0,
 };
-
 
 StructpFuncLPM sModemLPMHandle = 
 {
@@ -106,6 +109,9 @@ void Modem_Init(void)
     
     sATCmdList[_SET_FREQ_ONLINE].CallBack = Modem_SER_Set_Dura_Online;
     sATCmdList[_QUERY_FREQ_ONLINE].CallBack = Modem_SER_Get_Dura_Online;
+    
+    sATCmdList[_SET_ETH_MODEM].CallBack = Modem_SER_Set_Eth_Infor;
+    sATCmdList[_GET_ETH_MODEM].CallBack = Modem_SER_Get_Eth_Infor;
     
     sATCmdList[_SET_NUM_WAKEUP].CallBack = Modem_SER_Set_Numwakeup;
     
@@ -227,7 +233,7 @@ void Modem_Init(void)
 #endif
 }
 
-
+uint32_t size_Modem = 0; 
 
 void Modem_Init_Var (void)
 {
@@ -254,6 +260,7 @@ void Modem_Save_Var (void)
 
     aBuff[0] = BYTE_WRITEN;
     UTIL_MEM_cpy(&aBuff[1], &sModemInfor, sizeof(sModemInfor));   
+    size_Modem = sizeof(sModemInfor);
     
     Erase_Firmware(ADDR_MODEM_INFOR, 1);
     OnchipFlashWriteData(ADDR_MODEM_INFOR, &aBuff[0], 2048);
@@ -635,6 +642,53 @@ void Modem_SER_Get_Dura_Online (sData *strRecei, uint16_t Pos)
     char aData[32] = {0};
 
     sprintf(aData, "duration online = %d\r\n", sModemInfor.sFrequence.DurOnline_u32);
+    
+    Modem_Respond_Str(PortConfig, aData, 0);
+}
+
+void Modem_SER_Set_Eth_Infor (sData *strRecei, uint16_t Pos)
+{
+    int16_t length = 0, mCut = false;
+    char *pSrc = (char *) (strRecei->Data_a8 + Pos);
+    sModemEthernet pTemp = {0};
+
+	char    aMode[MAX_LENGTH_PORT];
+      
+    length = UTIL_Cut_String(pSrc, aMode,  ',', MAX_LENGTH_PORT);
+    if (length >= 0) {
+        pSrc += length + 1;
+        pTemp.IP_Mode = (uint16_t) UtilStringToInt(aMode);
+        length = UTIL_Cut_String(pSrc, pTemp.aIP, ',', MAX_LENGTH_IP);
+        if (length >= 0 || pTemp.IP_Mode == 0) {
+            mCut = true;
+        }
+    }
+    
+    if (mCut == true) {
+        //Convert lai IP       
+        if (UTIL_Convert_IP_To_Buff(pTemp.aIP, pTemp.IPnum) == true) {
+            UTIL_MEM_set(&sModemInfor.sEth, 0, sizeof(sModemInfor.sEth));
+            UTIL_MEM_cpy(&sModemInfor.sEth, &pTemp, sizeof(pTemp));
+        } else 
+        {
+            sModemInfor.sEth.IP_Mode = pTemp.IP_Mode;
+        }
+        
+        Modem_Save_Var();
+        Modem_Respond_Str(PortConfig, "OK", 0);
+        Init_ModemEth();
+        return;
+    }
+    
+    Modem_Respond_Str(PortConfig, "ERROR", 0);
+}
+
+
+void Modem_SER_Get_Eth_Infor (sData *strRecei, uint16_t Pos)
+{
+    char aData[128] = {0};
+    
+    sprintf((char*) aData, "%d,%s\r\n", sModemInfor.sEth.IP_Mode, sModemInfor.sEth.aIP);  
     
     Modem_Respond_Str(PortConfig, aData, 0);
 }
